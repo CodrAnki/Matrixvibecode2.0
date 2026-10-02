@@ -163,7 +163,7 @@ export function createApp() {
   app.use(helmet());
   app.use(
     cors({
-      origin: "https://vibe-coding2-0.netlify.app",
+      origin: "https://matrixvibecode2-0.vercel.app",
       credentials: true,
     }),
   );
@@ -175,14 +175,12 @@ export function createApp() {
 
   app.get("/api/health", (_req, res) => {
     const db = isDbReady();
-    res
-      .status(db ? 200 : 503)
-      .json({
-        success: db,
-        service: "matrix-vibe-coding-2-api",
-        db: db ? "up" : "down",
-        time: new Date().toISOString(),
-      });
+    res.status(db ? 200 : 503).json({
+      success: db,
+      service: "matrix-vibe-coding-2-api",
+      db: db ? "up" : "down",
+      time: new Date().toISOString(),
+    });
   });
 
   app.use("/api", apiLimiter);
