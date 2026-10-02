@@ -88,54 +88,6 @@ const loginAccountLimiter = limiter({
   skipSuccessfulRequests: true,
 });
 
-// OTP: the OTP record's own 5-attempt cap is the primary guard; these are backstops keyed per verification session and per IP.
-const otpIpLimiter = limiter({
-  max: 300,
-  message: "Too many requests. Please try again later.",
-});
-const otpVerifyLimiter = limiter({
-  max: 15,
-  message: "Too many verification attempts. Please request a new code.",
-  key: (req) => `otp:${bodyString(req, "verificationId", 100) || ip(req)}`,
-  skipSuccessfulRequests: true,
-});
-const otpResendLimiter = limiter({
-  max: 6,
-  message: "Too many resend requests. Please try again later.",
-  key: (req) => `resend:${bodyString(req, "verificationId", 100) || ip(req)}`,
-});
-
-// Forgot password: tight per-email / per-session caps (each accepted request sends an email or guesses a code), plus a generous per-IP backstop.
-const resetIpLimiter = limiter({
-  max: 300,
-  message: "Too many requests. Please try again later.",
-});
-const forgotEmailLimiter = limiter({
-  max: 5,
-  message:
-    "Too many password reset requests for this email. Please try again later.",
-  key: (req) => `forgot:${bodyString(req, "email") || ip(req)}`,
-});
-const forgotVerifyLimiter = limiter({
-  max: 15,
-  message: "Too many verification attempts. Please request a new code.",
-  key: (req) =>
-    `forgot-otp:${bodyString(req, "verificationId", 100) || ip(req)}`,
-  skipSuccessfulRequests: true,
-});
-const forgotResendLimiter = limiter({
-  max: 6,
-  message: "Too many resend requests. Please try again later.",
-  key: (req) =>
-    `forgot-resend:${bodyString(req, "verificationId", 100) || ip(req)}`,
-});
-const resetPasswordLimiter = limiter({
-  max: 20,
-  message: "Too many attempts. Please start the password reset again later.",
-  key: (req) => `reset-pw:${ip(req)}`,
-  skipSuccessfulRequests: true,
-});
-
 // Contact form: each accepted submission triggers a WhatsApp message, so keep this tight.
 const contactLimiter = limiter({
   max: 5,
@@ -188,21 +140,6 @@ export function createApp() {
   app.use("/api/auth/register", registerIpLimiter, registerEmailLimiter);
   app.use("/api/auth/login", loginIpLimiter, loginAccountLimiter);
   app.use("/api/admin/login", loginIpLimiter, loginAccountLimiter);
-  app.use("/api/auth/verify-otp", otpIpLimiter, otpVerifyLimiter);
-  app.use("/api/auth/resend-otp", otpIpLimiter, otpResendLimiter);
-  // Exact-path mounts (app.post), so the per-email key is never applied to the verify/resend sub-routes.
-  app.post("/api/auth/forgot-password", resetIpLimiter, forgotEmailLimiter);
-  app.post(
-    "/api/auth/forgot-password/verify-otp",
-    resetIpLimiter,
-    forgotVerifyLimiter,
-  );
-  app.post(
-    "/api/auth/forgot-password/resend-otp",
-    resetIpLimiter,
-    forgotResendLimiter,
-  );
-  app.post("/api/auth/reset-password", resetIpLimiter, resetPasswordLimiter);
   app.use("/api/contact", contactLimiter);
 
   app.use("/api", requireDb);

@@ -1,4 +1,5 @@
 import { apiFetch, setAuthToken } from '../lib/api'
+import type { Team } from '../lib/types'
 
 export interface RegisterInput {
   teamName: string; leaderName: string; email: string; phone: string; college: string
@@ -6,17 +7,21 @@ export interface RegisterInput {
   members: { name: string; email: string; phone?: string; college?: string; branch?: string; year?: string }[]
 }
 
-export interface LoginOtpEnvelope { requiresOtp?: true; requiresEmailVerification?: true; message: string; verificationId: string; maskedEmail: string; expiresInSeconds: number }
+export interface LoginUser { id: string; name: string; email: string; role: string }
+export interface LoginResult { user: LoginUser; team: Team }
 
-export async function registerTeam(input: RegisterInput): Promise<LoginOtpEnvelope> {
-  // Step 1 of 2: validates and stages the team as pending. No token is issued (or stored) until
-  // the Gmail OTP is verified via /verify-otp.
-  return apiFetch<LoginOtpEnvelope>('/auth/register', { method: 'POST', body: input })
+// No email step anywhere in this app (no verified sending domain) — registration and login both
+// issue a session immediately on success.
+export async function registerTeam(input: RegisterInput): Promise<LoginResult> {
+  const res = await apiFetch<{ token: string; user: LoginUser; team: Team }>('/auth/register', { method: 'POST', body: input })
+  setAuthToken(res.token)
+  return { user: res.user, team: res.team }
 }
 
-export async function loginTeam(email: string, password: string): Promise<LoginOtpEnvelope> {
-  // Step 1 of 2: password check only. No token is issued (or stored) until /verify-otp succeeds.
-  return apiFetch<LoginOtpEnvelope>('/auth/login', { method: 'POST', body: { email, password } })
+export async function loginTeam(email: string, password: string): Promise<LoginResult> {
+  const res = await apiFetch<{ token: string; user: LoginUser; team: Team }>('/auth/login', { method: 'POST', body: { email, password } })
+  setAuthToken(res.token)
+  return { user: res.user, team: res.team }
 }
 
 export async function logoutTeam(): Promise<void> {

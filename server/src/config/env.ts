@@ -43,7 +43,7 @@ export function collectEnvProblems(env: Record<string, string | undefined>): { p
 
   if (env.PORT && !(isPositiveInt(env.PORT) && Number(env.PORT) < 65536)) problems.push('PORT must be a valid port number')
 
-  for (const name of ['OTP_EXPIRES_MINUTES', 'OTP_RESEND_SECONDS', 'OTP_MAX_ATTEMPTS', 'MONGO_MAX_POOL_SIZE', 'MONGO_MIN_POOL_SIZE']) {
+  for (const name of ['MONGO_MAX_POOL_SIZE', 'MONGO_MIN_POOL_SIZE']) {
     const v = env[name]
     if (v !== undefined && v !== '' && !(name === 'MONGO_MIN_POOL_SIZE' ? /^\d+$/.test(v) : isPositiveInt(v))) {
       problems.push(`${name} must be a positive integer when set`)
@@ -53,22 +53,12 @@ export function collectEnvProblems(env: Record<string, string | undefined>): { p
   if (isProd) {
     need('CLIENT_URL')
     need('PUBLIC_APP_URL')
-    // OTP is the only login path, so a production server without working SMTP cannot log anyone in.
-    need('SMTP_HOST')
-    need('SMTP_USER')
-    need('SMTP_PASSWORD')
     if (env.CLIENT_URL && LOCALHOST_RE.test(env.CLIENT_URL)) problems.push('CLIENT_URL points at localhost while NODE_ENV=production')
     if (env.PUBLIC_APP_URL && LOCALHOST_RE.test(env.PUBLIC_APP_URL)) problems.push('PUBLIC_APP_URL points at localhost while NODE_ENV=production')
     if (!env.TRUST_PROXY) warnings.push('TRUST_PROXY is not set — behind a reverse proxy every visitor will share ONE rate-limit bucket (set it to the number of proxy hops, e.g. 1)')
-  } else {
-    const missing = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASSWORD'].filter((n) => !env[n]?.trim())
-    if (missing.length) warnings.push(`${missing.join(', ')} not set — OTP emails will not be sent (the dev-only console fallback is used instead)`)
-  }
-  if (env.SMTP_FROM?.trim() && env.SMTP_USER?.trim() && !env.SMTP_FROM.toLowerCase().includes(env.SMTP_USER.trim().toLowerCase())) {
-    warnings.push('SMTP_FROM differs from SMTP_USER — the sender will be forced to SMTP_USER (Gmail rejects/rewrites other From addresses)')
   }
   if (!isProd && !env.NODE_ENV) {
-    warnings.push('NODE_ENV is not set — set NODE_ENV=production on deployed servers (secure cookies and the OTP console fallback depend on it)')
+    warnings.push('NODE_ENV is not set — set NODE_ENV=production on deployed servers (secure cookies depend on it)')
   }
 
   return { problems, warnings }

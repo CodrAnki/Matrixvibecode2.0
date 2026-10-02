@@ -22,7 +22,7 @@ export default function Register() {
   const [errs, setErrs] = useState<Errors>({})
   const [top, setTop] = useState('')
   const [busy, setBusy] = useState(false)
-  const inFlight = useRef(false) // sync guard against double submit (would send two OTP emails)
+  const inFlight = useRef(false) // sync guard against double submit (would fire two register requests)
   if (team) return <Navigate to="/dashboard" replace />
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value })
 
@@ -42,8 +42,8 @@ export default function Register() {
     if (Object.keys(er).length) return
     inFlight.current = true; setBusy(true); setTop('')
     try {
-      const res = await register({ ...f, teamYear: f.teamYear || null, members })
-      nav('/verify-otp', { state: { verificationId: res.verificationId, maskedEmail: res.maskedEmail, expiresInSeconds: res.expiresInSeconds, flow: 'team', from: '/dashboard' } })
+      await register({ ...f, teamYear: f.teamYear || null, members })
+      nav('/dashboard', { replace: true })
     }
     catch (x) { setTop(x instanceof Error ? x.message : 'Registration failed.') }
     finally { inFlight.current = false; setBusy(false) }
