@@ -4,7 +4,7 @@ import { collectEnvProblems, parseTrustProxy, parseClientOrigins } from './env.j
 const good = { MONGODB_URI: 'mongodb://localhost:27017/x', JWT_SECRET: 'a'.repeat(40) }
 const prod = {
   ...good, NODE_ENV: 'production', CLIENT_URL: 'https://app.example.org', PUBLIC_APP_URL: 'https://app.example.org',
-  SMTP_HOST: 'smtp.example.org', SMTP_USER: 'u', SMTP_PASSWORD: 'p', TRUST_PROXY: '1',
+  TRUST_PROXY: '1',
 }
 
 describe('collectEnvProblems', () => {
@@ -19,9 +19,6 @@ describe('collectEnvProblems', () => {
     const { problems } = collectEnvProblems({ ...prod, JWT_SECRET: 'change-this-to-a-long-random-string', CLIENT_URL: 'http://localhost:5173' })
     expect(problems.length).toBeGreaterThanOrEqual(2)
     expect(collectEnvProblems({ ...prod, JWT_SECRET: 'short' }).problems.join()).toContain('32')
-  })
-  it('requires SMTP in production', () => {
-    expect(collectEnvProblems({ ...prod, SMTP_PASSWORD: '' }).problems.join()).toContain('SMTP_PASSWORD')
   })
   it('never echoes secret values', () => {
     const { problems } = collectEnvProblems({ ...prod, JWT_SECRET: 'tooShortSecretValue' })

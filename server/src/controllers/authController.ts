@@ -2,9 +2,9 @@ import asyncHandler from "express-async-handler";
 import type { Request, Response } from "express";
 import crypto from "node:crypto";
 import bcrypt from "bcrypt";
-import { Types, type ClientSession } from "mongoose";
+import { Types, type ClientSession, type HydratedDocument } from "mongoose";
 import { User, type UserDoc } from "../models/User.js";
-import { Team, TEAM_YEARS, type TeamYear } from "../models/Team.js";
+import { Team, TEAM_YEARS, type TeamDoc, type TeamYear } from "../models/Team.js";
 import { ApiError } from "../middleware/errorHandler.js";
 import { generateTeamId, generateMemberId } from "../utils/generateId.js";
 import { signToken, authCookieOptions } from "../utils/generateToken.js";
@@ -14,11 +14,6 @@ import {
   assertTeamNameFree,
   assertMembersAvailable,
 } from "../services/teamService.js";
-import {
-  issueOtp,
-  verifyOtp as verifyOtpService,
-  resendOtp as resendOtpService,
-} from "../services/otpService.js";
 import {
   EMAIL_RE,
   PHONE_RE,
@@ -195,8 +190,7 @@ async function createTeamWithLeader(
         teamYear: f.teamYear,
         phone: f.phone,
         members: memberDocs(members, f),
-        verificationStatus: "PENDING",
-        registrationStatus: "PENDING",
+        verificationStatus: "PENDING", // admin's own review of the team — unrelated to the (removed) email step
         eventStatus: "TEAM_FORMED",
         verificationHistory: [
           { status: "PENDING", note: "Registration submitted", at: new Date() },
@@ -215,13 +209,12 @@ async function createTeamWithLeader(
           phone: f.phone,
           passwordHash,
           role: "TEAM_LEADER",
-          emailVerified: false,
           team: team._id,
         },
       ],
       opts,
     );
-    return leader;
+    return { leader, team };
   } catch (err) {
     if (!session)
       await Team.deleteOne({ _id: team._id }).catch((e) =>
@@ -252,11 +245,9 @@ async function withFreshTeamId<T>(
 }
 
 /**
- * POST /api/auth/register — step 1 of 2: validates and stages the team as a PENDING
- * registration (emailVerified:false, registrationStatus:'PENDING'), then dispatches a Gmail OTP.
- * The team/leader account exists in the database at this point, but is NOT considered a
- * completed registration and CANNOT be used to log in until the OTP is verified (see verifyOtp
- * below, which is the only place emailVerified/registrationStatus flip and a session is issued).
+ * POST /api/auth/register — validates, creates the team + leader account, and signs the leader
+ * in immediately. There is no email step: no app in this project can send email (no verified
+ * sending domain), so a correct submission is trusted outright.
  */
 export const registerTeam = asyncHandler(
   async (req: Request, res: Response) => {
@@ -270,16 +261,15 @@ export const registerTeam = asyncHandler(
 
     // Cheap checks first; only a request that passes all of them pays for a bcrypt hash.
     const existingUser = await User.findOne({ email: f.email });
-    let leader: Pick<UserDoc, "email"> & { _id: unknown };
+    let leader: HydratedDocument<UserDoc> & { _id: unknown };
+    let team: (HydratedDocument<TeamDoc> & { _id: unknown }) | null;
 
     if (existingUser) {
       if (existingUser.emailVerified)
         throw new ApiError(409, "This email is already registered.");
-      // A pending, never-verified registration already exists for this email — per spec, continue
-      // it (refreshed with whatever was just submitted) rather than creating a second team.
-      const team = existingUser.team
-        ? await Team.findById(existingUser.team)
-        : null;
+      // A leftover row from before email verification was removed from this app (or an
+      // interrupted registration) — complete it now instead of creating a second team.
+      team = existingUser.team ? await Team.findById(existingUser.team) : null;
       await assertTeamNameFree(f.teamName, team?._id);
       await assertMembersAvailable(members, {
         teamId: team?._id,
@@ -290,6 +280,7 @@ export const registerTeam = asyncHandler(
       existingUser.name = f.leaderName;
       existingUser.phone = f.phone;
       existingUser.passwordHash = passwordHash;
+      existingUser.emailVerified = true;
 
       if (team) {
         await existingUser.save();
@@ -298,10 +289,11 @@ export const registerTeam = asyncHandler(
         team.teamYear = f.teamYear;
         team.phone = f.phone;
         team.members = memberDocs(members, f) as never;
+        team.registrationStatus = "VERIFIED";
         await team.save();
       } else {
         // Repair: an earlier registration was interrupted and left a pending user with no team.
-        await withFreshTeamId(async (teamId) => {
+        team = await withFreshTeamId(async (teamId) => {
           const created = await Team.create({
             teamId,
             teamName: f.teamName,
@@ -311,7 +303,6 @@ export const registerTeam = asyncHandler(
             phone: f.phone,
             members: memberDocs(members, f),
             verificationStatus: "PENDING",
-            registrationStatus: "PENDING",
             eventStatus: "TEAM_FORMED",
             verificationHistory: [
               {
@@ -328,6 +319,7 @@ export const registerTeam = asyncHandler(
             await Team.deleteOne({ _id: created._id }).catch(() => undefined);
             throw err;
           }
+          return created;
         });
       }
       leader = existingUser;
@@ -337,31 +329,36 @@ export const registerTeam = asyncHandler(
       const passwordHash = await bcrypt.hash(f.password, SALT_ROUNDS);
       // A duplicate email/team name from a simultaneous request surfaces as E11000 and is mapped to a
       // clean 409 by the error handler; either way no half-created registration is left behind.
-      leader = await withFreshTeamId((teamId) =>
+      ({ leader, team } = await withFreshTeamId((teamId) =>
         runInTransaction((session) =>
           createTeamWithLeader(f, members, passwordHash, teamId, session),
         ),
-      );
+      ));
     }
 
-    // Password/data staged — do NOT issue a JWT and do NOT consider registration complete yet.
-    // If this throws (rate-limited or the email fails to send), the pending User/Team rows are
-    // simply left as-is: nothing was marked verified, no session exists, and a retry re-enters the
-    // "pending registration exists" branch above rather than creating a duplicate.
-    const { verificationId, maskedEmail, expiresInSeconds } =
-      await issueOtp(leader);
+    if (!team) throw new ApiError(404, "No team linked to this account");
+
+    const token = signToken({
+      id: String(leader._id),
+      role: "TEAM_LEADER",
+      teamId: team.teamId,
+    });
+    res.cookie("token", token, authCookieOptions);
     res.json({
       success: true,
-      requiresEmailVerification: true,
-      message: "OTP sent to your email",
-      verificationId,
-      maskedEmail,
-      expiresInSeconds,
+      token,
+      user: {
+        id: leader._id,
+        name: leader.name,
+        email: leader.email,
+        role: leader.role,
+      },
+      team: serializeTeam(team),
     });
   },
 );
 
-/** POST /api/auth/login — team leader/member login, step 1: password check + OTP dispatch. */
+/** POST /api/auth/login — team leader/member login. No email step: a correct password issues a session immediately. */
 export const loginTeam = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = readCredentials(req.body);
 
@@ -382,16 +379,22 @@ export const loginTeam = asyncHandler(async (req: Request, res: Response) => {
       "TEAM_DELETED",
     );
 
-  // Password verified — do NOT issue a JWT yet. An OTP must be verified first.
-  const { verificationId, maskedEmail, expiresInSeconds } =
-    await issueOtp(user);
+  const token = signToken({
+    id: String(user._id),
+    role: user.role as "TEAM_LEADER" | "TEAM_MEMBER",
+    teamId: team.teamId,
+  });
+  res.cookie("token", token, authCookieOptions);
   res.json({
     success: true,
-    requiresOtp: true,
-    message: "OTP sent to your registered email.",
-    verificationId,
-    maskedEmail,
-    expiresInSeconds,
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+    team: serializeTeam(team),
   });
 });
 
@@ -408,7 +411,7 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-/** POST /api/admin/login — separate login surface for ADMIN / SUPER_ADMIN, step 1: password check + OTP dispatch. */
+/** POST /api/admin/login — separate login surface for ADMIN / SUPER_ADMIN. No email OTP: a correct password issues a session immediately. */
 export const loginAdmin = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = readCredentials(req.body);
 
@@ -420,69 +423,6 @@ export const loginAdmin = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, "Invalid email or password");
   if (!user.active) throw new ApiError(403, "This account has been disabled");
 
-  // Password verified — do NOT issue a JWT yet. An OTP must be verified first.
-  const { verificationId, maskedEmail, expiresInSeconds } =
-    await issueOtp(user);
-  res.json({
-    success: true,
-    requiresOtp: true,
-    message: "OTP sent to your registered email.",
-    verificationId,
-    maskedEmail,
-    expiresInSeconds,
-  });
-});
-
-/**
- * POST /api/auth/verify-otp — shared by BOTH login surfaces AND team registration (a
- * verificationId is self-contained and role-agnostic). Only here is the final JWT/session
- * actually created. For a team account whose registration OTP was never completed
- * (emailVerified:false), this is also the ONLY place that flips emailVerified/registrationStatus
- * to VERIFIED — never trust a frontend flag for this.
- */
-export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
-  const b = (
-    req.body && typeof req.body === "object" ? req.body : {}
-  ) as Record<string, unknown>;
-  const user = await verifyOtpService(
-    typeof b.verificationId === "string" ? b.verificationId : "",
-    typeof b.otp === "string" ? b.otp : "",
-  );
-
-  if (user.role === "TEAM_LEADER" || user.role === "TEAM_MEMBER") {
-    const team = await Team.findById(user.team);
-    if (!team) throw new ApiError(404, "No team linked to this account");
-
-    if (!user.emailVerified) {
-      // First successful OTP for this account — this is what completes registration.
-      // Team first, then user: if the second write fails the account still reads as "unverified",
-      // so the next OTP login simply repeats this step (self-healing, never half-verified).
-      team.registrationStatus = "VERIFIED";
-      await team.save();
-      user.emailVerified = true;
-      await user.save();
-    }
-
-    const token = signToken({
-      id: String(user._id),
-      role: user.role as "TEAM_LEADER" | "TEAM_MEMBER",
-      teamId: team.teamId,
-    });
-    res.cookie("token", token, authCookieOptions);
-    res.json({
-      success: true,
-      message: "OTP verified successfully",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-      team: serializeTeam(team),
-    });
-  }
-
   const token = signToken({
     id: String(user._id),
     role: user.role as "ADMIN" | "SUPER_ADMIN",
@@ -490,26 +430,8 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
   res.cookie("token", token, authCookieOptions);
   res.json({
     success: true,
-    message: "OTP verified successfully",
     token,
     user: { id: user._id, name: user.name, email: user.email, role: user.role },
-  });
-});
-
-/** POST /api/auth/resend-otp — shared by both login surfaces. */
-export const resendOtp = asyncHandler(async (req: Request, res: Response) => {
-  const b = (
-    req.body && typeof req.body === "object" ? req.body : {}
-  ) as Record<string, unknown>;
-  const result = await resendOtpService(
-    typeof b.verificationId === "string" ? b.verificationId : "",
-  );
-  res.json({
-    success: true,
-    message: "A new OTP has been sent to your registered email.",
-    verificationId: result.verificationId,
-    maskedEmail: result.maskedEmail,
-    expiresInSeconds: result.expiresInSeconds,
   });
 });
 

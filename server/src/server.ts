@@ -2,14 +2,12 @@ import 'dotenv/config'
 import { createApp } from './app.js'
 import { connectDB, ensureIndexes, verifyTtlIndexes, disconnectDB } from './config/db.js'
 import { validateEnv } from './config/env.js'
-import { verifyEmailTransport } from './services/emailService.js'
 import { migrateLegacyAnnouncements } from './models/Announcement.js'
 
 const PORT = Number(process.env.PORT ?? 5000)
 
 async function main() {
   validateEnv() // clear startup error for any missing/invalid configuration — before anything connects
-  await verifyEmailTransport() // reports SMTP reachability/credentials once at boot; never throws, never logs secrets
   await connectDB() // throws (and we exit) if MongoDB is unreachable: no silent half-working server
   await ensureIndexes() // unique + TTL indexes exist BEFORE the first request is served
   await verifyTtlIndexes()

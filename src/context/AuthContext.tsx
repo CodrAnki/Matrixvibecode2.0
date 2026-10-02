@@ -9,11 +9,8 @@ interface AuthCtx {
   team: Team | null
   user: LeaderUser | null
   loading: boolean
-  /** Step 1 of 2: password check only. Resolves to the OTP envelope — no session yet. */
-  login: (email: string, password: string) => Promise<authApi.LoginOtpEnvelope>
-  /** Step 2 of 2: called by the shared /verify-otp page once OTP verification succeeds. */
-  hydrate: (user: LeaderUser, team: Team) => void
-  register: (input: authApi.RegisterInput) => Promise<authApi.LoginOtpEnvelope>
+  login: (email: string, password: string) => Promise<authApi.LoginResult>
+  register: (input: authApi.RegisterInput) => Promise<authApi.LoginResult>
   logout: () => void
   refresh: () => Promise<void>
 }
@@ -40,20 +37,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refresh().finally(() => setLoading(false))
   }, [refresh])
 
-  const login = useCallback(async (e: string, p: string) => authApi.loginTeam(e, p), [])
-
-  const hydrate = useCallback((u: LeaderUser, t: Team) => {
-    setUser(u)
-    setTeam(t)
+  const login = useCallback(async (e: string, p: string) => {
+    const res = await authApi.loginTeam(e, p)
+    setUser(res.user)
+    setTeam(res.team)
+    return res
   }, [])
 
-  const register = useCallback(async (i: authApi.RegisterInput) => authApi.registerTeam(i), [])
+  const register = useCallback(async (i: authApi.RegisterInput) => {
+    const res = await authApi.registerTeam(i)
+    setUser(res.user)
+    setTeam(res.team)
+    return res
+  }, [])
 
   const logout = useCallback(() => {
     authApi.logoutTeam().finally(() => { setTeam(null); setUser(null) })
   }, [])
 
-  const value = useMemo(() => ({ team, user, loading, login, hydrate, register, logout, refresh }), [team, user, loading, login, hydrate, register, logout, refresh])
+  const value = useMemo(() => ({ team, user, loading, login, register, logout, refresh }), [team, user, loading, login, register, logout, refresh])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

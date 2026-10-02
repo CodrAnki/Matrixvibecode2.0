@@ -8,8 +8,6 @@ import ErrorBoundary from './components/ErrorBoundary'
 
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
-const VerifyOtp = lazy(() => import('./pages/VerifyOtp'))
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const Register = lazy(() => import('./pages/Register'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const MyTeam = lazy(() => import('./pages/MyTeam'))
@@ -72,8 +70,6 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/verify-otp" element={<VerifyOtp />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/register" element={<Register />} />
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />

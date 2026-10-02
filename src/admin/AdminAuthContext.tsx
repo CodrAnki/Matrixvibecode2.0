@@ -5,10 +5,7 @@ import type { AdminUser } from '../api/adminAuthApi'
 interface AdminAuthCtx {
   admin: AdminUser | null
   loading: boolean
-  /** Step 1 of 2: password check only. Resolves to the OTP envelope — no session yet. */
-  login: (email: string, password: string) => Promise<adminAuthApi.LoginOtpEnvelope>
-  /** Step 2 of 2: called by the shared /verify-otp page once OTP verification succeeds. */
-  hydrate: (user: AdminUser) => void
+  login: (email: string, password: string) => Promise<adminAuthApi.AdminLoginResult>
   logout: () => void
 }
 const Ctx = createContext<AdminAuthCtx | null>(null)
@@ -21,15 +18,17 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     adminAuthApi.fetchAdminMe().then(setAdmin).finally(() => setLoading(false))
   }, [])
 
-  const login = useCallback(async (email: string, password: string) => adminAuthApi.loginAdmin(email, password), [])
-
-  const hydrate = useCallback((user: AdminUser) => setAdmin(user), [])
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await adminAuthApi.loginAdmin(email, password)
+    setAdmin(res.user)
+    return res
+  }, [])
 
   const logout = useCallback(() => {
     adminAuthApi.logoutAdmin().finally(() => setAdmin(null))
   }, [])
 
-  const value = useMemo(() => ({ admin, loading, login, hydrate, logout }), [admin, loading, login, hydrate, logout])
+  const value = useMemo(() => ({ admin, loading, login, logout }), [admin, loading, login, logout])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

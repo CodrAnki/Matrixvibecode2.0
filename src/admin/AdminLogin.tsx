@@ -12,7 +12,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
-  const inFlight = useRef(false) // sync guard against double submit (would send two OTP emails)
+  const inFlight = useRef(false) // sync guard against double submit (would fire two login requests)
 
   if (!loading && admin) return <Navigate to="/admin" replace />
 
@@ -22,8 +22,8 @@ export default function AdminLogin() {
     inFlight.current = true
     setErr(''); setBusy(true)
     try {
-      const res = await login(email, password)
-      nav('/verify-otp', { state: { verificationId: res.verificationId, maskedEmail: res.maskedEmail, expiresInSeconds: res.expiresInSeconds, flow: 'admin' } })
+      await login(email, password)
+      nav('/admin', { replace: true })
     } catch (x) { setErr(x instanceof ApiError ? x.message : 'Login failed.') }
     finally { inFlight.current = false; setBusy(false) }
   }
