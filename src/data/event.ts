@@ -126,7 +126,7 @@ export const WHATSAPP_CONTACTS = [
   },
   {
     name: "Mohit Patel",
-    phone: "+91 8103046547",
+    phone: "+91 81030 46547",
     wa: "https://wa.me/918103046547",
   },
   {
@@ -136,12 +136,12 @@ export const WHATSAPP_CONTACTS = [
   },
   {
     name: "Dhruv Kolare",
-    phone: "+91 8989061904",
+    phone: "+91 89890 61904",
     wa: "https://wa.me/918989061904",
   },
   {
     name: "Ankit Dubey",
-    phone: "+91 9343410747",
+    phone: "+91 93434 10747",
     wa: "https://wa.me/919343410747",
   },
 ];
