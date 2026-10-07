@@ -16,12 +16,13 @@ interface Props {
   strength?: number
 }
 
-export default function MagneticButton({ children, to, href, onClick, variant = 'ghost', size = 'md', type = 'button', disabled, className = '', strength = 0.3 }: Props) {
+/** Button with a subtle pointer pull (mouse only). Visuals live in the .btn classes. */
+export default function MagneticButton({ children, to, href, onClick, variant = 'ghost', size = 'md', type = 'button', disabled, className = '', strength = 0.18 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const sx = useSpring(x, { stiffness: 220, damping: 18, mass: 0.4 })
-  const sy = useSpring(y, { stiffness: 220, damping: 18, mass: 0.4 })
+  const sx = useSpring(x, { stiffness: 220, damping: 20, mass: 0.4 })
+  const sy = useSpring(y, { stiffness: 220, damping: 20, mass: 0.4 })
   const move = (e: React.PointerEvent) => {
     if (e.pointerType === 'touch' || disabled || !ref.current) return
     const r = ref.current.getBoundingClientRect()

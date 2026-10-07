@@ -71,6 +71,6 @@ export const verifyQrScan = (teamId: string, token: string) => apiFetch<{ team: 
 export const confirmCheckIn = (teamId: string, extra: { location?: string; deviceInfo?: string } = {}) => apiFetch<{ checkIn: unknown; team: Team }>(`/admin/teams/${teamId}/checkin`, { method: 'POST', body: extra })
 export const listCheckIns = (params: { page?: number; limit?: number } = {}) => apiFetch<{ checkIns: unknown[]; total: number; page: number; pages: number }>(`/admin/checkins?page=${params.page ?? 1}&limit=${params.limit ?? 50}`)
 
-export const getSettings = () => apiFetch<{ settings: { name: string; maxTeamSize: number; registrationOpen: boolean; checkInOpen: boolean } }>('/admin/settings').then((r) => r.settings)
-export const updateSettings = (input: { name?: string; maxTeamSize?: number; registrationOpen?: boolean; checkInOpen?: boolean }) =>
+export const getSettings = () => apiFetch<{ settings: { name: string; registrationOpen: boolean; checkInOpen: boolean } }>('/admin/settings').then((r) => r.settings)
+export const updateSettings = (input: { name?: string; registrationOpen?: boolean; checkInOpen?: boolean }) =>
   apiFetch<{ settings: unknown }>('/admin/settings', { method: 'PATCH', body: input })

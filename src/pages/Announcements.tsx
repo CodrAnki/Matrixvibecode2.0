@@ -31,7 +31,7 @@ export default function Announcements() {
             <article key={a._id} className={`glass p-6 transition-opacity ${isRead ? 'opacity-60' : ''}`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  {!isRead && <span className="blink h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_10px_#00FF66]" />}
+                  {!isRead && <span className="blink h-2 w-2 rounded-full bg-cyan-300" />}
                   <span className="rounded border border-cyan-400/30 px-2 py-0.5 font-mono text-[0.58rem] tracking-widest text-cyan-200">{a.type}</span>
                   {a.priority === 'URGENT' && <span className="rounded-full border border-rose-400/40 bg-rose-500/10 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-rose-300">Urgent</span>}
                 </div>

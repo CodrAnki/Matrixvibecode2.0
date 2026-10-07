@@ -120,7 +120,7 @@ export default function AdminCheckins() {
               <p className="font-mono text-xs uppercase tracking-widest text-cyan-300">MATRIX Vibe Coding 2.0</p>
               <h2 className="mt-2 text-2xl font-bold text-white">{result.team.teamName}</h2>
               <dl className="mt-4 grid gap-2 text-sm">
-                {[['Team ID', result.team.teamId], ['College', result.team.college], ['Members', String((result.team.members ?? []).length + 1)], ['Verification', `✓ ${result.team.verificationStatus}`]].map(([k, v]) => (
+                {[['Team ID', result.team.teamId], ['College', result.team.college], ['Members', String((result.team.members ?? []).length + 1)], ['Verification', result.team.verificationStatus]].map(([k, v]) => (
                   <div key={k} className="flex justify-between border-b border-white/5 pb-2"><dt className="text-slate-400">{k}</dt><dd className="text-white">{v}</dd></div>
                 ))}
               </dl>

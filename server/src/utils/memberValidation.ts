@@ -2,19 +2,13 @@ import { ApiError } from '../middleware/errorHandler.js'
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 export const PHONE_RE = /^[+]?[\d\s-]{10,15}$/
-export const DEFAULT_MAX_TEAM_SIZE = 4
-/** Absolute ceiling (matches the admin Settings validation). Also bounds the Team.members array. */
+/** Vibe Coding 2.0 teams are solo or duo. Team size is fixed here on purpose; it is NOT an admin setting. Leader included. */
+export const MAX_TEAM_SIZE = 2
+/** Schema-level backstop for Team.members (kept generous so legacy rows stay valid). */
 export const HARD_MAX_TEAM_SIZE = 20
 
 export interface CleanMember { name: string; email?: string; phone?: string; college?: string; branch?: string; year?: string }
 export interface PersonKeys { email?: string | null; phone?: string | null }
-
-/** EventSettings.maxTeamSize (leader INCLUDED) -> a sane integer; anything missing/invalid falls back to 4. */
-export function resolveMaxTeamSize(raw: unknown): number {
-  const n = typeof raw === 'number' ? raw : Number(raw)
-  if (!Number.isInteger(n) || n < 1) return DEFAULT_MAX_TEAM_SIZE
-  return Math.min(n, HARD_MAX_TEAM_SIZE)
-}
 
 /** Last 10 digits, so "+91 98765-43210" and "9876543210" compare equal. */
 export const phoneKey = (v: string): string => v.replace(/\D/g, '').slice(-10)

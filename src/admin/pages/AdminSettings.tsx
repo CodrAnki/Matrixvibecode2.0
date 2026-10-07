@@ -24,7 +24,6 @@ export default function AdminSettings() {
     try {
       await adminApi.updateSettings({
         name: settings.name,
-        maxTeamSize: settings.maxTeamSize,
         registrationOpen: settings.registrationOpen,
         checkInOpen: settings.checkInOpen,
       })
@@ -57,19 +56,14 @@ export default function AdminSettings() {
             <input disabled={!canEdit} className="field" value={settings.name} onChange={(e) => setSettings({ ...settings, name: e.target.value })} />
           </div>
 
-          <div>
-            <label className="mb-1.5 block font-mono text-[0.62rem] uppercase tracking-[0.2em] text-cyan-200/70">Max team size</label>
-            <input disabled={!canEdit} type="number" min={1} max={20} className="field" value={settings.maxTeamSize} onChange={(e) => setSettings({ ...settings, maxTeamSize: Number(e.target.value) })} />
-          </div>
-
           <label className="flex items-center justify-between rounded-lg border border-white/10 px-4 py-3">
             <span className="text-sm text-slate-200">Registration open</span>
-            <input disabled={!canEdit} type="checkbox" checked={settings.registrationOpen} onChange={(e) => setSettings({ ...settings, registrationOpen: e.target.checked })} className="h-5 w-5 accent-[#00D9FF]" />
+            <input disabled={!canEdit} type="checkbox" checked={settings.registrationOpen} onChange={(e) => setSettings({ ...settings, registrationOpen: e.target.checked })} className="h-5 w-5 accent-[#B9BCB3]" />
           </label>
 
           <label className="flex items-center justify-between rounded-lg border border-white/10 px-4 py-3">
             <span className="text-sm text-slate-200">Check-in open</span>
-            <input disabled={!canEdit} type="checkbox" checked={settings.checkInOpen} onChange={(e) => setSettings({ ...settings, checkInOpen: e.target.checked })} className="h-5 w-5 accent-[#00D9FF]" />
+            <input disabled={!canEdit} type="checkbox" checked={settings.checkInOpen} onChange={(e) => setSettings({ ...settings, checkInOpen: e.target.checked })} className="h-5 w-5 accent-[#B9BCB3]" />
           </label>
 
           {canEdit && (

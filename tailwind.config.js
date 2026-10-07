@@ -4,32 +4,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        // MATRIX Vibe Coding 2.0 — Obsidian Cinematic 3D, Green identity + Blue/Cyan futuristic accent
-        void: '#020611',
-        deep: '#030914',
-        surface: '#06111F',
-        'surface-2': '#0A1626',
-        'surface-3': '#0F1E30',
-        electric: '#00D9FF',
-        ice: '#e0f2fe',
-        primary: '#00FF66',
-        secondary: '#00D9FF',
-        'secondary-deep': '#008CFF',
-        'secondary-royal': '#2563FF',
-        highlight: '#6DFFFF',
-        paper: '#F5FAFF',
-        accent: '#FF3045',
-        muted: '#8B9691',
+        // MATRIX design system: ink base, warm paper text, silver neutrals, ONE accent (green for 2.0, red for the 1.0 section), amber used sparingly.
+        ink: { DEFAULT: '#0A0B0A', 2: '#101211', 3: '#171917' },
+        paper: '#ECE8DF',
+        silver: '#9A9E98',
+        // accent is a CSS variable so a section can re-theme itself (Vibe Coding 1.0 is red, 2.0 is green).
+        accent: { DEFAULT: 'rgb(var(--accent-rgb) / <alpha-value>)', dim: '#2BB868', strong: 'rgb(var(--accent-rgb) / <alpha-value>)' },
+        amber: { DEFAULT: '#E3A93B', 400: '#E3A93B', 300: '#EBC067', 200: '#F2D697' },
+        // Legacy token names (dashboard / admin / auth pages) remapped to the new system.
+        void: '#0A0B0A',
+        deep: '#0A0B0A',
+        surface: '#101211',
+        'surface-2': '#171917',
+        'surface-3': '#1D201D',
+        primary: '#35E884',
+        secondary: '#B4B7AE',
+        muted: '#9A9E98',
+        // The old cyan / sky / slate ramps become warm silver neutrals + the accent, so every existing page shifts with the system.
+        cyan: { 50: '#F6F4EE', 100: '#ECE8DF', 200: '#DAD7CD', 300: '#B9BCB3', 400: '#35E884', 500: '#2BB868', 600: '#238F52', 700: '#1B6B3E', 800: '#144B2C', 900: '#0E321E' },
+        sky: { 50: '#F6F4EE', 100: '#ECE8DF', 200: '#D2CFC5', 300: '#B0B3AA', 400: '#8D918A', 500: '#6F736D', 600: '#555955', 700: '#3D403D', 800: '#272927', 900: '#171917' },
+        slate: { 50: '#F6F4EE', 100: '#ECE8DF', 200: '#D6D3C9', 300: '#BDBFB6', 400: '#9A9E98', 500: '#767B75', 600: '#555A55', 700: '#3A3E3A', 800: '#242724', 900: '#151716' },
       },
       fontFamily: {
-        sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        display: ['"Bricolage Grotesque"', '"Instrument Sans"', 'system-ui', 'sans-serif'],
+        sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
-      boxShadow: {
-        card: '0 20px 50px rgba(0,0,0,0.45)',
-        'card-hover': '0 30px 70px rgba(0,0,0,0.6), 0 0 60px -18px rgba(0,255,102,0.35), 0 0 40px -20px rgba(0,217,255,0.3)',
-        'admin-glow': '0 20px 60px rgba(0,0,0,0.55), 0 0 50px -16px rgba(0,140,255,0.45), 0 0 30px -18px rgba(37,99,255,0.4)',
-      },
+      letterSpacing: { label: '0.14em' },
+      transitionTimingFunction: { out: 'cubic-bezier(0.22, 1, 0.36, 1)' },
     },
   },
   plugins: [],

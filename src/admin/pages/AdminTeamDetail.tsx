@@ -133,8 +133,8 @@ export default function AdminTeamDetail() {
         <div className="grid gap-6">
           <section className="admin-glass p-6 text-center">
             <p className="hud-label mb-4">QR / check-in</p>
-            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-slate-400">{team.checkedIn ? '✓ Checked in' : 'Not checked in'}</p>
-            {qrUrl ? <div className="mx-auto w-fit rounded-xl border border-white/10 bg-white p-2 text-center"><img src={qrUrl} alt="Regenerated QR" className="mx-auto" />{team.teamYear === '1st Year' && <p className="mt-1 text-base font-bold text-[#020611]">1st Year</p>}</div> : <p className="text-xs text-slate-500">Regenerate to view the current QR image here.</p>}
+            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-slate-400">{team.checkedIn ? 'Checked in' : 'Not checked in'}</p>
+            {qrUrl ? <div className="mx-auto w-fit rounded-xl border border-white/10 bg-white p-2 text-center"><img src={qrUrl} alt="Regenerated QR" className="mx-auto" />{team.teamYear === '1st Year' && <p className="mt-1 text-base font-bold text-[#0A0B0A]">1st Year</p>}</div> : <p className="text-xs text-slate-500">Regenerate to view the current QR image here.</p>}
             <button disabled={busy || team.verificationStatus !== 'VERIFIED'} onClick={regenQr} className="mt-4 w-full rounded-lg border border-cyan-400/30 px-3 py-2 font-mono text-xs uppercase text-cyan-200 hover:bg-cyan-400/10 disabled:opacity-40">Regenerate QR</button>
           </section>
         </div>

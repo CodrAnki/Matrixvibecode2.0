@@ -1,10 +1,12 @@
 import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { MotionConfig } from 'framer-motion'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { AdminAuthProvider } from './admin/AdminAuthContext'
 import DashboardLayout from './components/DashboardLayout'
 import AdminLayout from './admin/AdminLayout'
 import ErrorBoundary from './components/ErrorBoundary'
+import { scrollToTarget } from './lib/smoothScroll'
 
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
@@ -28,17 +30,17 @@ const AdminAccounts = lazy(() => import('./admin/pages/AdminAccounts'))
 const AdminSettings = lazy(() => import('./admin/pages/AdminSettings'))
 
 function ScrollManager() {
-  const { pathname, hash } = useLocation()
+  const { pathname, hash, key } = useLocation()
   useEffect(() => {
     if (!hash) { window.scrollTo(0, 0); return }
     let tries = 0
     const t = window.setInterval(() => {
       const el = document.querySelector(hash)
-      if (el) { el.scrollIntoView({ behavior: 'smooth' }); window.clearInterval(t) }
+      if (el) { scrollToTarget(el); window.clearInterval(t) }
       else if (++tries > 20) window.clearInterval(t)
     }, 100)
     return () => window.clearInterval(t)
-  }, [pathname, hash])
+  }, [pathname, hash, key])
   return null
 }
 
@@ -52,7 +54,7 @@ function Loader() {
   return (
     <div className="grid min-h-[100svh] place-items-center bg-void">
       <div className="w-56 text-center">
-        <p className="hud-label mb-4">Initializing Matrix</p>
+        <p className="hud-label mb-4">Loading</p>
         <div className="loader-bar h-px w-full" />
       </div>
     </div>
@@ -61,6 +63,7 @@ function Loader() {
 
 export default function App() {
   return (
+    <MotionConfig reducedMotion="user">
     <BrowserRouter>
       <AuthProvider>
         <AdminAuthProvider>
@@ -101,5 +104,6 @@ export default function App() {
         </AdminAuthProvider>
       </AuthProvider>
     </BrowserRouter>
+    </MotionConfig>
   )
 }

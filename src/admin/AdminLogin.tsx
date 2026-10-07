@@ -32,7 +32,7 @@ export default function AdminLogin() {
     <div className="grid min-h-[100svh] place-items-center bg-void px-4">
       <div className="admin-glass w-full max-w-sm p-8">
         <div className="mb-6 flex items-center gap-3">
-          <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#00D9FF]" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#B9BCB3]" fill="none" stroke="currentColor" strokeWidth="1.6">
             <path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" strokeLinejoin="round" />
           </svg>
           <div>
@@ -52,7 +52,7 @@ export default function AdminLogin() {
           {err && <p role="alert" className="text-sm text-rose-300">{err}</p>}
           <MagneticButton type="submit" variant="solid" className="w-full justify-center" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</MagneticButton>
         </form>
-        <p className="mt-6 text-center text-xs text-slate-500">Not an organizer? <Link to="/login" className="text-cyan-300 hover:text-cyan-100">Team login →</Link></p>
+        <p className="mt-6 text-center text-xs text-slate-500">Not an organizer? <Link to="/login" className="text-cyan-300 hover:text-cyan-100">Team login</Link></p>
       </div>
     </div>
   )

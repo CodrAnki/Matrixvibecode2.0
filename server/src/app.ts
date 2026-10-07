@@ -106,6 +106,13 @@ function requireDb(_req: Request, _res: Response, next: NextFunction) {
   );
 }
 
+const PRODUCTION_ORIGIN = "https://matrixvibecode2-0.vercel.app";
+
+/** Allowed browser origins: whatever CLIENT_URL lists (local dev by default) plus the deployed frontend. */
+function corsOrigins(): string[] {
+  return Array.from(new Set([...parseClientOrigins(process.env.CLIENT_URL), PRODUCTION_ORIGIN]));
+}
+
 export function createApp() {
   const app = express();
 
@@ -115,7 +122,8 @@ export function createApp() {
   app.use(helmet());
   app.use(
     cors({
-      origin: "https://matrixvibecode2-0.vercel.app",
+      // CLIENT_URL (comma-separated; defaults to the Vite dev server) plus the production site.
+      origin: corsOrigins(),
       credentials: true,
     }),
   );

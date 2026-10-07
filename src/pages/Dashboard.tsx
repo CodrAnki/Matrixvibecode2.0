@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
 import Pipeline, { STAGES } from '../components/Pipeline'
-import TiltCard from '../components/TiltCard'
 import MagneticButton from '../components/MagneticButton'
 import { useAuth } from '../context/AuthContext'
 import * as announcementApi from '../api/announcementApi'
@@ -41,7 +40,7 @@ export default function Dashboard() {
         <dl className="grid gap-4 text-sm sm:grid-cols-2">
           <div><dt className="text-slate-400">Team Name</dt><dd className="mt-1 text-lg font-bold text-white">{team.teamName}</dd></div>
           {team.teamYear && (
-            <div><dt className="text-slate-400">Team Year</dt><dd className="mt-1"><span className="inline-block rounded border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-cyan-200">{team.teamYear}</span></dd></div>
+            <div><dt className="text-slate-400">Team Year</dt><dd className="mt-1"><span className="inline-block rounded border border-[#B9BCB3]/40 bg-[#B9BCB3]/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-cyan-200">{team.teamYear}</span></dd></div>
           )}
         </dl>
       </section>
@@ -51,11 +50,11 @@ export default function Dashboard() {
           { k: 'Team status', v: statusText, s: `${1 + team.members.length} member${team.members.length ? 's' : ''} · ${team.college ?? '—'}` },
           { k: 'Current stage', v: stage, s: `${Math.min(completed, STAGES.length)} of ${STAGES.length} stages complete` },
         ].map((c) => (
-          <TiltCard key={c.k} className="p-6">
+          <div key={c.k} className="glass p-6">
             <p className="hud-label">{c.k}</p>
-            <p className="mt-4 text-xl font-bold tracking-wide text-white [text-shadow:0_0_20px_rgba(0,255,102,0.35)]">{c.v}</p>
+            <p className="mt-4 text-xl font-bold tracking-wide text-white">{c.v}</p>
             <p className="mt-2 truncate text-sm text-sky-100/55">{c.s}</p>
-          </TiltCard>
+          </div>
         ))}
       </div>
 
@@ -63,7 +62,7 @@ export default function Dashboard() {
         <section className="glass p-6">
           <div className="mb-4 flex items-center justify-between">
             <p className="hud-label">Recent announcements</p>
-            <Link to="/dashboard/announcements" className="font-mono text-[0.65rem] uppercase tracking-widest text-cyan-300 hover:text-cyan-100">View all →</Link>
+            <Link to="/dashboard/announcements" className="font-mono text-[0.65rem] uppercase tracking-widest text-cyan-300 hover:text-cyan-100">View all</Link>
           </div>
           {loading ? (
             <p className="text-sm text-slate-500">Loading…</p>

@@ -1,442 +1,341 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight, ArrowUpRight, Award, CalendarDays, MapPin, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import SceneBackdrop from "../components/SceneBackdrop";
-import MagneticButton from "../components/MagneticButton";
-import TiltCard from "../components/TiltCard";
+import HeroScene from "../components/SceneBackdrop";
+import SiteBackground from "../components/SiteBackground";
+import SmoothScroll from "../components/SmoothScroll";
+import SectionHead from "../components/SectionHead";
 import Reveal from "../components/Reveal";
-import CountUp from "../components/CountUp";
-import SectionTitle from "../components/SectionTitle";
-import Timeline from "../components/Timeline";
-import Trophy from "../components/Trophy";
+import Countdown from "../components/Countdown";
 import AnnouncementsSection from "../components/AnnouncementsSection";
 import ProblemsSection from "../components/ProblemsSection";
-import SpecialPrize from "../components/SpecialPrize";
-import WhatsAppContacts from "../components/WhatsAppContacts";
+import OrganizerContacts from "../components/OrganizerContacts";
 import { LOGO_SRC } from "../components/Logo";
-import Countdown from "../components/Countdown";
+import { scrollToTarget } from "../lib/smoothScroll";
 import {
-  ABOUT,
+  ARCHIVE,
+  DETAILS,
   EVENT,
   EVENTS,
+  FIRST_FORMAT,
+  IMPACT,
   PRIZES,
-  STATS,
+  REASONS,
   TOTAL_PRIZE_POOL,
+  WORKFLOW,
 } from "../data/event";
 
 const ease = [0.22, 1, 0.36, 1] as const;
+const section = "relative px-5 py-24 md:px-10 md:py-32";
+
+/** One line of the headline, revealed from behind a mask. */
+function Line({ children, i, accent = false }: { children: string; i: number; accent?: boolean }) {
+  return (
+    <span className="block overflow-hidden pb-[0.06em]">
+      <motion.span
+        className={`block ${accent ? "text-accent" : "text-paper"}`}
+        initial={{ y: "105%" }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.9, delay: 0.15 + i * 0.12, ease }}
+      >
+        {children}
+      </motion.span>
+    </span>
+  );
+}
+
+const goTo = (id: string) => (e: React.MouseEvent) => {
+  e.preventDefault();
+  const el = document.getElementById(id);
+  if (el) scrollToTarget(el);
+};
 
 function Hero() {
   return (
-    <section
-      id="home"
-      className="relative flex min-h-[100svh] flex-col justify-center overflow-hidden px-5 pb-10 pt-32 md:px-10"
-    >
-      {/* Ambient glow orbs for cinematic depth */}
-      <div className="orb-drift pointer-events-none absolute -left-24 top-24 h-[38vmax] w-[38vmax] rounded-full bg-[radial-gradient(circle,rgba(0,255,102,0.14),transparent_65%)] blur-2xl" />
-      <div
-        className="orb-drift pointer-events-none absolute -right-24 bottom-10 h-[34vmax] w-[34vmax] rounded-full bg-[radial-gradient(circle,rgba(0,217,255,0.12),transparent_65%)] blur-2xl"
-        style={{ animationDelay: "-4s" }}
-      />
+    <section id="home" className="relative flex min-h-[100svh] flex-col overflow-hidden bg-ink">
+      {/* The only 3D on the site. Above the headline on mobile, behind it on desktop. */}
+      <HeroScene className="absolute inset-x-0 top-0 h-[44svh] lg:inset-0 lg:h-auto" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#0A0B0A_0%,rgba(10,11,10,0.55)_45%,transparent_75%)] max-lg:hidden" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink via-ink/80 to-transparent" />
 
-      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-        <div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease }}
-            className="hud-label mb-6 flex items-center gap-3"
-          >
-            <span className="blink h-2 w-2 rounded-full bg-[#00FF66] shadow-[0_0_10px_#00FF66]" />{" "}
-            {EVENT.org} presents
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05, ease }}
-            className="mb-2 font-mono text-xs uppercase tracking-[0.35em] text-[#8B9691]"
-          >
-            {EVENT.name}
-          </motion.p>
-          <h1 className="display text-[clamp(2.5rem,7.4vw,6.6rem)]">
-            {[
-              { t: "CODE", c: "text-grad" },
-              { t: "CREATE", c: "text-glow" },
-              { t: "COLLABORATE", c: "text-grad" },
-            ].map((w, i) => (
-              <motion.span
-                key={w.t}
-                className={`block ${w.c}`}
-                initial={{ opacity: 0, y: 60, filter: "blur(12px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 1, delay: 0.2 + i * 0.18, ease }}
-              >
-                {w.t}
-              </motion.span>
-            ))}
-          </h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.9, ease }}
-            className="mt-7 max-w-xl text-base text-[#c8d6cf]/85 md:text-xl"
-          >
-            {EVENT.sub}
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 1.1, ease }}
-            className="mt-9 flex flex-wrap gap-4"
-          >
-            <MagneticButton to="/register" variant="solid">
-              Register Now →
-            </MagneticButton>
-            <MagneticButton to={{ pathname: "/", hash: "#about" }}>
-              Explore Event
-            </MagneticButton>
+      <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end px-5 pb-8 pt-[38svh] md:px-10 lg:pt-28">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.1 }} className="mb-5 flex items-center gap-3">
+          <img src={LOGO_SRC} alt="" className="h-7 w-auto" />
+          <span className="meta text-paper">MATRIX / JEC <span className="text-silver">presents</span></span>
+        </motion.div>
+
+        <h1 className="display text-[clamp(3.1rem,9.2vw,8.5rem)] leading-[0.88]" aria-label="Vibe Coding 2.0">
+          <Line i={0}>Vibe Coding</Line>
+          <Line i={1} accent>2.0</Line>
+        </h1>
+
+        <div className="mt-8 grid items-end gap-8 lg:grid-cols-[1fr_auto]">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease }}>
+            <p className="max-w-xl text-lg leading-relaxed text-paper/85 md:text-xl">{EVENT.sub}</p>
+            <ul className="mt-5 flex flex-wrap gap-x-7 gap-y-2 text-paper">
+              <li className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-accent" strokeWidth={1.75} /><span className="meta !text-paper">14 October 2026</span></li>
+              <li className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent" strokeWidth={1.75} /><span className="meta !text-paper">JEC Campus, Jabalpur</span></li>
+              <li className="flex items-center gap-2"><Users className="h-4 w-4 text-accent" strokeWidth={1.75} /><span className="meta !text-paper">Solo or duo</span></li>
+            </ul>
           </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 1.2, ease }}
-            className="mt-10 max-w-3xl"
-          >
-            <Countdown />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1.3, ease }}
-            className="glass hud-corners relative mt-8 grid max-w-3xl grid-cols-3 px-4 py-3 md:mt-20 md:px-6 md:py-5"
-          >
-            {STATS.map((s, i) => (
-              <div
-                key={s.label}
-                className={`px-2 md:px-3 ${i > 0 ? "border-l border-white/[0.06]" : ""}`}
-              >
-                <div className="text-3xl font-bold leading-none text-white md:text-4xl md:leading-none [text-shadow:0_0_22px_rgba(0,255,102,0.5)]">
-                  <CountUp to={s.value} prefix={s.prefix} suffix={s.suffix} />
-                </div>
-                <div className="mt-1.5 font-mono text-[0.56rem] uppercase leading-tight tracking-[0.14em] text-[#00D9FF]/80 md:text-[0.62rem] md:tracking-[0.2em]">
-                  {s.label}
-                </div>
-              </div>
-            ))}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.95, ease }} className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+            <Link to="/register" className="btn btn-solid btn-lg">Register now <ArrowRight className="h-4 w-4" strokeWidth={2} /></Link>
+            <a href="#how" onClick={goTo("how")} className="btn btn-lg">How it works</a>
           </motion.div>
         </div>
 
-        {/* Floating 3D logo */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, filter: "blur(16px)" }}
-          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-          transition={{ duration: 1.2, delay: 0.4, ease }}
-          className="relative mx-auto hidden aspect-square w-full max-w-md items-center justify-center lg:flex"
-        >
-          <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(0,255,102,0.22),rgba(0,217,255,0.08)_45%,transparent_70%)] blur-xl" />
-          <div className="pointer-events-none absolute inset-8 rounded-full border border-[#00FF66]/15" />
-          <div className="pointer-events-none absolute inset-16 rounded-full border border-[#00D9FF]/10" />
-          <img
-            src={LOGO_SRC}
-            alt="MATRIX.JEC logo"
-            className="logo-float relative z-10 w-3/4 max-w-[340px] object-contain drop-shadow-[0_0_35px_rgba(0,255,102,0.25)]"
-          />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.9, delay: 1.2 }} className="mt-9 flex flex-wrap items-center justify-between gap-5 border-t border-white/15 pt-5">
+          <div>
+            <p className="meta !text-accent">Event starts in</p>
+          </div>
+          <Countdown />
         </motion.div>
       </div>
-
-      <div className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 md:flex">
-        <span className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-[#00D9FF]/70">
-          Scroll
-        </span>
-        <span className="h-10 w-px bg-gradient-to-b from-[#00D9FF] to-transparent" />
-      </div>
     </section>
   );
 }
 
-function About() {
+function Intro() {
   return (
-    <section id="about" className="relative px-5 py-28 md:px-10 md:py-36">
+    <section id="event" className={section}>
       <div className="mx-auto max-w-7xl">
-        <div className="grid items-start gap-14 lg:grid-cols-[1.05fr_1fr]">
-          <div>
-            <SectionTitle
-              kicker="About MATRIX"
-              title="Enter the build arena."
-            />
-            <Reveal delay={0.1}>
-              <p className="max-w-xl text-lg leading-relaxed text-white">
-                MATRIX Vibe Coding 2.0 is a technology event hosted by the
-                MATRIX community at JEC. Student teams from colleges across the
-                country team up to turn real problem statements into working
-                products, using modern stacks and AI-assisted development.
-              </p>
-              <p className="mt-5 max-w-xl leading-relaxed text-white">
-                Expect a build round, mentors on call, and a live finale, with a
-                ₹6K+ prize pool for the teams that ship the best ideas.
-              </p>
-            </Reveal>
-          </div>
-          <div
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1"
-            style={{ perspective: 1200 }}
-          >
-            {ABOUT.map((a, i) => (
-              <Reveal key={a.code} delay={i * 0.1}>
-                <TiltCard className="p-6">
-                  <div className="flex items-baseline justify-between">
-                    <h3 className="text-2xl font-semibold text-white">
-                      {a.title}
-                    </h3>
-                    <span className="font-mono text-xs tracking-widest text-cyan-300/70">
-                      {a.code}
-                    </span>
+        <SectionHead index="01" label="The event" title={<>What is<br />Vibe Coding 2.0?</>} />
+        <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr] lg:gap-20">
+          <Reveal>
+            <p className="font-display text-[clamp(1.5rem,2.8vw,2.3rem)] font-bold leading-[1.15] tracking-[-0.02em] text-paper">
+              A technology event hosted by MATRIX at JEC. Solo participants and duos turn a real problem statement, revealed on the day, into{" "}
+              <span className="text-accent">working products</span>, using modern stacks and AI-assisted development.
+            </p>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-silver">
+              Expect a build round, mentors on call, and a live finale, with a {TOTAL_PRIZE_POOL} prize pool for the teams that ship the best ideas.
+            </p>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="meta mb-4">What happens</p>
+            <ul className="border-t border-white/15">
+              {EVENTS.map((e) => (
+                <li key={e.code} className="border-b border-white/15 py-5">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <p className="font-display text-xl font-bold tracking-tight text-paper">{e.title}</p>
+                    <span className="meta">{e.code}</span>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-sky-100/65">
-                    {a.text}
-                  </p>
-                </TiltCard>
+                  <p className="mt-2 text-sm leading-relaxed text-silver">{e.text}</p>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
+
+        <div className="mt-20 md:mt-28">
+          <Reveal><p className="meta mb-6">Why take part</p></Reveal>
+          <ol className="grid border-t border-white/15 md:grid-cols-3">
+            {REASONS.map((r, i) => (
+              <Reveal key={r.code} delay={i * 0.07}>
+                <li className={`h-full border-b border-white/15 py-8 md:border-b-0 md:py-10 ${i > 0 ? "md:border-l md:pl-8" : ""} ${i < 2 ? "md:pr-8" : ""}`}>
+                  <span className="font-mono text-sm text-accent">{r.code}</span>
+                  <p className="display mt-5 text-[clamp(2.4rem,4.5vw,3.6rem)] text-paper">{r.title}</p>
+                  <p className="mt-3 max-w-xs text-base leading-relaxed text-silver">{r.text}</p>
+                </li>
               </Reveal>
             ))}
-          </div>
+          </ol>
         </div>
       </div>
     </section>
   );
 }
 
-function Events() {
-  const [open, setOpen] = useState<string | null>(null);
+function HowItWorks() {
   return (
-    <section id="events" className="relative px-5 py-28 md:px-10 md:py-36">
+    <section id="how" className={`${section} !pt-0`}>
       <div className="mx-auto max-w-7xl">
-        <SectionTitle
-          kicker="Event modules"
-          title="Three ways to compete and level up."
-        />
-        <div
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-          style={{ perspective: 1200 }}
-        >
-          {EVENTS.map((e, i) => (
-            <Reveal key={e.code} delay={(i % 3) * 0.1}>
-              <TiltCard
-                className="h-full cursor-pointer overflow-hidden p-6"
-                max={12}
-                onClick={() => setOpen(open === e.code ? null : e.code)}
-              >
-                {[12, 32, 55, 78, 90].map((l, k) => (
-                  <span
-                    key={k}
-                    className="spark"
-                    style={{
-                      left: `${l}%`,
-                      bottom: "18%",
-                      animationDelay: `${k * 0.25}s`,
-                    }}
-                  />
-                ))}
-                <div className="flex items-center justify-between font-mono text-[0.65rem] tracking-[0.25em] text-cyan-300/70">
-                  <span>{e.code}</span>
-                  <span className="rounded border border-cyan-400/30 px-2 py-0.5">
-                    {open === e.code ? "OPEN" : "ACTIVE"}
-                  </span>
-                </div>
-                <h3 className="mt-8 text-2xl font-bold tracking-wide text-white">
-                  {e.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-sky-100/65">
-                  {e.text}
-                </p>
-                <AnimatePresence initial={false}>
-                  {open === e.code && (
-                    <motion.p
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden pt-4 text-sm leading-relaxed text-cyan-100/80"
-                    >
-                      {e.more}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {e.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full border border-cyan-400/25 bg-cyan-400/5 px-3 py-1 font-mono text-[0.6rem] uppercase tracking-widest text-cyan-200"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-                <p className="mt-5 font-mono text-[0.62rem] uppercase tracking-[0.25em] text-cyan-300/60">
-                  {open === e.code ? "Tap to collapse −" : "Tap for details +"}
-                </p>
-              </TiltCard>
+        <SectionHead index="03" label="How it works" title={<>From sign-up<br />to showtime.</>}>
+          Five steps. Register first; the problem statement and the build happen on the day.
+        </SectionHead>
+        <ol className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-5">
+          {WORKFLOW.map((s, i) => (
+            <Reveal key={s.title} delay={i * 0.06}>
+              <li className="h-full border-t border-white/15 py-6">
+                <span className="display text-5xl text-paper/25">{String(i + 1).padStart(2, "0")}</span>
+                <p className="mt-6 font-display text-xl font-bold tracking-tight text-paper">{s.title.charAt(0) + s.title.slice(1).toLowerCase()}</p>
+                <p className="mt-2 text-sm leading-relaxed text-silver">{s.text}</p>
+              </li>
             </Reveal>
           ))}
+        </ol>
+        <Reveal>
+          <div className="mt-10">
+            <Link to="/register" className="btn btn-solid btn-lg">Start with step 01: register <ArrowRight className="h-4 w-4" strokeWidth={2} /></Link>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Details() {
+  return (
+    <section id="details" className={section}>
+      <div className="mx-auto max-w-7xl">
+        <SectionHead index="05" label="Important details" title={<>The details<br />you need.</>} />
+        <div className="grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-20">
+          <Reveal>
+            <dl className="border-t border-white/15">
+              {DETAILS.map((d) => (
+                <div key={d.k} className="row-hover grid gap-1 border-b border-white/15 px-1 py-5 sm:grid-cols-[10rem_1fr] sm:gap-8 md:px-3">
+                  <dt className="meta pt-1">{d.k}</dt>
+                  <dd className="text-lg text-paper">{d.v}</dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <div id="prizes">
+              <p className="meta">Prize pool</p>
+              <p className="display mt-2 text-[clamp(4.5rem,10vw,8rem)] text-accent">{TOTAL_PRIZE_POOL}</p>
+              <ul className="mt-6 border-t border-white/15">
+                {PRIZES.map((p) => (
+                  <li key={p.place} className="flex items-baseline justify-between gap-6 border-b border-white/15 py-4">
+                    <span className="meta">{p.name}</span>
+                    <span className="display text-3xl text-paper">{p.amount}</span>
+                  </li>
+                ))}
+              </ul>
+              <div id="special-prize" className="mt-6 flex items-start gap-4">
+                <Award className="mt-1 h-6 w-6 shrink-0 text-amber" strokeWidth={1.5} />
+                <div>
+                  <p className="font-display text-lg font-bold tracking-tight text-paper">Special Prize for First Year</p>
+                  <p className="mt-1 text-sm leading-relaxed text-silver">Created exclusively for First Year participants and teams.</p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
         </div>
       </div>
     </section>
   );
 }
 
-function Workflow() {
+function FirstVibe() {
   return (
-    <section id="workflow" className="relative px-5 py-28 md:px-10 md:py-36">
+    <section id="first-vibe" className={`${section} theme-first`}>
       <div className="mx-auto max-w-7xl">
-        <SectionTitle
-          align="center"
-          kicker="Mission workflow"
-          title="From registration to build."
-          sub="Four stages. One pipeline. Scroll to travel through it."
-        />
-        <Timeline />
+        <SectionHead index="04" label="Vibe Coding 1.0" title={<>From <span className="text-accent">1.0</span><br />to <span className="theme-second text-accent">2.0.</span></>}>
+          1.0 established the idea. 2.0 takes it further.
+        </SectionHead>
+
+        <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
+          <Reveal>
+            <p className="meta !text-accent">{ARCHIVE.code} / {ARCHIVE.date}</p>
+            <h3 className="display mt-3 text-[clamp(2.4rem,5vw,4.2rem)] text-paper">Vibe Coding</h3>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-silver">{ARCHIVE.text}</p>
+            <p className="meta mt-5 flex items-center gap-2"><MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />{ARCHIVE.venue}</p>
+
+            <div className="mt-10 grid grid-cols-2 border-t border-white/15">
+              {IMPACT.map((s, i) => (
+                <div key={s.label} className={`py-6 ${i > 0 ? "border-l border-white/15 pl-6" : "pr-6"}`}>
+                  <p className="display text-[clamp(3.4rem,8vw,6rem)] text-accent">{s.value}</p>
+                  <p className="mt-3 text-base text-paper">{s.label}</p>
+                  <p className="meta mt-1">{s.note}</p>
+                </div>
+              ))}
+            </div>
+
+            <a href={ARCHIVE.source} target="_blank" rel="noreferrer" className="group mt-4 inline-flex items-center gap-2 font-mono text-[0.72rem] uppercase tracking-[0.14em] text-paper">
+              <span className="u-link">Read the JEC report</span>
+              <ArrowUpRight className="h-4 w-4 text-accent transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" strokeWidth={1.75} />
+            </a>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <p className="meta mb-4 !text-accent">How 1.0 ran</p>
+            <ul className="border-t border-white/15">
+              {FIRST_FORMAT.map((t, i) => (
+                <li key={t} className="grid grid-cols-[2.4rem_1fr] gap-3 border-b border-white/15 py-4">
+                  <span className="font-mono text-sm text-accent">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="text-paper">{t}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="theme-second mt-8 border-l-2 border-accent pl-5">
+              <p className="meta !text-accent">Now: 2.0</p>
+              <p className="mt-2 text-lg leading-relaxed text-paper">Solo or duo, with the problem statement revealed on the day.</p>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
 }
 
-function Podium() {
-  const order = [PRIZES[1], PRIZES[0], PRIZES[2]];
-  const heights = ["h-32 md:h-44", "h-44 md:h-64", "h-24 md:h-36"];
+/**
+ * Scroll-linked hand-over from 1.0 (red) to 2.0 (green): the 1.0 numerals fall back as the 2.0 numerals
+ * come forward, and a line draws across from red to green. Pure transform/opacity, driven by scroll progress.
+ */
+function VersionShift() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: p } = useScroll({ target: ref, offset: ["start 85%", "end 35%"] });
+  const oldOpacity = useTransform(p, [0, 0.55], [1, 0.18]);
+  const oldX = useTransform(p, [0, 1], ["0%", "-8%"]);
+  const newOpacity = useTransform(p, [0.3, 0.85], [0.18, 1]);
+  const newX = useTransform(p, [0, 1], ["8%", "0%"]);
+  const line = useTransform(p, [0.05, 0.9], [0, 1]);
   return (
-    <div
-      className="mx-auto mt-4 flex max-w-4xl items-end justify-center gap-3 md:gap-6"
-      style={{ perspective: 1000 }}
-    >
-      {order.map((p, i) => (
-        <Reveal key={p.place} delay={i === 1 ? 0 : 0.15} className="flex-1">
-          <motion.div
-            whileHover={{ y: -8 }}
-            className="flex flex-col items-center text-center"
-          >
-            <Trophy
-              tone={p.tone}
-              className={i === 1 ? "h-28 md:h-44" : "h-20 md:h-32"}
-            />
-            <p
-              className="mt-3 font-mono text-[0.65rem] tracking-[0.3em]"
-              style={{ color: p.tone }}
-            >
-              {p.name.toUpperCase()}
-            </p>
-            <p className="mt-1 text-lg font-bold text-white md:text-3xl [text-shadow:0_0_20px_rgba(0,255,102,0.4)]">
-              {p.amount}
-            </p>
-            <div
-              className={`relative mt-4 w-full ${heights[i]} overflow-hidden rounded-t-xl border border-b-0 border-[#00D9FF]/30 bg-gradient-to-b from-[#00D9FF]/15 via-[#0A3D24]/40 to-transparent`}
-              style={{
-                transform: "rotateX(8deg)",
-                transformOrigin: "bottom",
-                boxShadow: `0 -10px 50px -18px ${p.tone}`,
-              }}
-            >
-              <span
-                className="absolute inset-x-0 top-0 h-px"
-                style={{ background: p.tone, boxShadow: `0 0 16px ${p.tone}` }}
-              />
-              <span className="display absolute inset-0 grid place-items-center text-4xl text-white/10 md:text-7xl">
-                {p.place}
-              </span>
-            </div>
+    <div ref={ref} aria-label="From Vibe Coding 1.0 to Vibe Coding 2.0" role="group" className="relative px-5 py-20 md:px-10 md:py-32">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid grid-cols-2 items-end gap-4">
+          <motion.div style={{ opacity: oldOpacity, x: oldX }} className="theme-first">
+            <p className="meta !text-accent">Vibe Coding 1.0 / 25 Jul 2025</p>
+            <p className="display mt-2 text-[clamp(4rem,17vw,15rem)] leading-[0.82] text-accent">1.0</p>
           </motion.div>
-        </Reveal>
-      ))}
+          <motion.div style={{ opacity: newOpacity, x: newX }} className="theme-second text-right">
+            <p className="meta !text-accent">Vibe Coding 2.0 / 14 Oct 2026</p>
+            <p className="display mt-2 text-[clamp(4rem,17vw,15rem)] leading-[0.82] text-accent">2.0</p>
+          </motion.div>
+        </div>
+        <div className="relative mt-8 h-px bg-white/15">
+          <motion.div style={{ scaleX: line }} className="absolute inset-0 origin-left bg-gradient-to-r from-[#FF0000] to-[#35E884]" />
+          <motion.span style={{ left: useTransform(line, (v) => `${v * 100}%`) }} className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#35E884]" />
+        </div>
+        <p className="meta mt-5 text-center">The idea, then the next step</p>
+      </div>
     </div>
   );
 }
 
-function Prizes() {
+function Register() {
   return (
-    <section id="prizes" className="relative px-5 py-28 md:px-10 md:py-36">
-      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[60vmin] w-[60vmin] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,255,102,0.12),transparent_65%)]" />
-      <div className="relative mx-auto max-w-7xl">
-        <SectionTitle
-          align="center"
-          kicker="Championship"
-          title="₹6K+ in prizes."
-          sub="The podium is waiting. Ship something remarkable."
-        />
-        <Podium />
-        <Reveal delay={0.2}>
-          <div className="glass hud-corners relative mx-auto mt-16 max-w-md p-6 text-center">
-            <p className="hud-label">Total Prize Pool</p>
-            <p className="mt-2 text-4xl font-bold text-white [text-shadow:0_0_24px_rgba(0,255,102,0.5)] md:text-5xl">
-              {TOTAL_PRIZE_POOL}
-            </p>
+    <section id="register" className={`${section} !pb-16 md:!pb-20`}>
+      <div className="mx-auto max-w-7xl">
+        <Reveal className="mb-10 flex items-center justify-between border-t border-white/15 pt-3">
+          <span className="meta">08 / Register</span>
+          <span className="meta hidden sm:inline">Vibe Coding 2.0</span>
+        </Reveal>
+        <Reveal>
+          <h2 className="display text-[clamp(3.4rem,11vw,10rem)] text-paper">
+            Ready<br />to <span className="text-accent">build?</span>
+          </h2>
+        </Reveal>
+        <Reveal delay={0.1} className="mt-10 grid items-end gap-8 md:grid-cols-[1fr_auto]">
+          <p className="max-w-lg text-lg leading-relaxed text-paper/85">
+            Register solo or as a duo and lock in your place for 14 October 2026. The problem statement is revealed on the day.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link to="/register" className="btn btn-solid btn-lg">Register for Vibe Coding 2.0 <ArrowRight className="h-4 w-4" strokeWidth={2} /></Link>
+            <Link to="/login" className="btn btn-lg">Team login</Link>
           </div>
         </Reveal>
-      </div>
-    </section>
-  );
-}
 
-function ContactInfo() {
-  const c = EVENT.contact;
-  return (
-    <section id="find-us" className="relative px-5 py-28 md:px-10 md:py-36">
-      <div className="mx-auto max-w-7xl">
-        <SectionTitle
-          kicker="Find us"
-          title="Open a channel."
-          sub="Prefer email or social? Reach the organizers here."
-        />
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Reveal>
-            <div className="glass h-full p-6">
-              <p className="hud-label">Email</p>
-              <a
-                href={`mailto:${c.email}`}
-                className="mt-2 block break-words text-lg text-white hover:text-cyan-200"
-              >
-                {c.email}
-              </a>
-            </div>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <div className="glass h-full p-6">
-              <p className="hud-label">Location</p>
-              <p className="mt-2 text-lg text-white">{c.location}</p>
-            </div>
-          </Reveal>
-          <Reveal delay={0.16}>
-            <div className="glass h-full p-6">
-              <p className="hud-label">Social</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {c.socials.map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-lg border border-[#00D9FF]/25 px-3 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-slate-200 transition-all hover:border-[#00D9FF] hover:shadow-[0_0_20px_-4px_#00D9FF]"
-                  >
-                    {s.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-          <Reveal delay={0.24}>
-            <div className="glass h-full p-6">
-              <p className="hud-label">Event organizers</p>
-              <ul className="mt-3 divide-y divide-cyan-400/10">
-                {c.organizers.map((o) => (
-                  <li
-                    key={o.role}
-                    className="flex justify-between gap-4 py-2.5 text-sm"
-                  >
-                    <span className="text-white">{o.role}</span>
-                    <span className="text-sky-200/60">{o.team}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
-        </div>
+        <Reveal className="mt-20 grid items-center gap-6 border-t border-white/15 pt-8 md:grid-cols-[auto_1fr] md:gap-8">
+          <img src={LOGO_SRC} alt="MATRIX JEC logo" className="h-12 w-auto" />
+          <p className="max-w-xl text-silver">
+            <span className="text-paper">Organised by MATRIX</span>, the technical community of Jabalpur Engineering College.
+          </p>
+        </Reveal>
       </div>
     </section>
   );
@@ -445,23 +344,20 @@ function ContactInfo() {
 export default function Home() {
   return (
     <div className="relative">
-      <div className="fixed inset-0 z-0">
-        <SceneBackdrop variant="hero" className="absolute inset-0" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-void/50 via-transparent to-void/60" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(3,5,4,0.85)_100%)]" />
-      </div>
+      <SmoothScroll />
+      <SiteBackground />
       <Navbar />
       <main className="relative z-10">
         <Hero />
-        <About />
-        <Events />
-        <Workflow />
-        <Prizes />
-        <SpecialPrize />
-        <AnnouncementsSection />
+        <Intro />
         <ProblemsSection />
-        <WhatsAppContacts />
-        <ContactInfo />
+        <HowItWorks />
+        <FirstVibe />
+        <VersionShift />
+        <Details />
+        <AnnouncementsSection />
+        <OrganizerContacts />
+        <Register />
       </main>
       <Footer />
     </div>

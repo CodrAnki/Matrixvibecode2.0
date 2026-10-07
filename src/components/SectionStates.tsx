@@ -1,28 +1,26 @@
 import type { ReactNode } from 'react'
 
-/** Placeholder cards (same footprint as HoloCard) shown while a homepage section loads. */
+/** Placeholder rows shown while a homepage list loads. */
 export function CardSkeletons({ count = 3 }: { count?: number }) {
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Loading">
+    <div className="border-t border-white/10" role="status" aria-label="Loading">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="glass relative min-h-[15rem] overflow-hidden p-6">
-          <div className="h-3 w-24 animate-pulse rounded bg-white/10" />
-          <div className="mt-10 h-6 w-3/4 animate-pulse rounded bg-white/10" />
-          <div className="mt-4 h-3 w-full animate-pulse rounded bg-white/5" />
-          <div className="mt-2 h-3 w-5/6 animate-pulse rounded bg-white/5" />
-          <span className="loader-bar absolute inset-x-0 bottom-0 h-px" />
+        <div key={i} className="flex items-center gap-6 border-b border-white/10 py-6">
+          <div className="h-3 w-8 animate-pulse rounded bg-white/10" />
+          <div className="h-5 w-1/2 animate-pulse rounded bg-white/10" />
+          <div className="ml-auto h-3 w-20 animate-pulse rounded bg-white/5" />
         </div>
       ))}
     </div>
   )
 }
 
-/** Empty / error message panel. `action` is an optional retry button. */
+/** Empty / error message. `action` is an optional retry button. */
 export function StateMessage({ tone = 'neutral', title, children, action }: { tone?: 'neutral' | 'error'; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div role={tone === 'error' ? 'alert' : 'status'} className={`glass hud-corners relative mx-auto max-w-xl p-8 text-center ${tone === 'error' ? '!border-rose-400/30' : ''}`}>
-      <p className={`hud-label ${tone === 'error' ? '!text-rose-300' : ''}`}>{title}</p>
-      {children && <p className="mt-3 text-sm leading-relaxed text-sky-100/65">{children}</p>}
+    <div role={tone === 'error' ? 'alert' : 'status'} className={`border-y py-10 ${tone === 'error' ? 'border-amber/40' : 'border-white/10'}`}>
+      <p className={`font-display text-2xl font-bold tracking-tight ${tone === 'error' ? 'text-amber' : 'text-paper'}`}>{title}</p>
+      {children && <p className="mt-2 max-w-xl text-silver">{children}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   )

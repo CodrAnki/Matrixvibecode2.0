@@ -8,8 +8,8 @@ import { useAuth } from '../context/AuthContext'
 import { isEmail, isPhone } from '../lib/validate'
 import { TEAM_YEARS } from '../lib/types'
 
-// Leader + 3 members = the default max team size of 4. The server enforces the real (configurable) limit.
-const MAX_REGISTRATION_MEMBERS = 3
+// Vibe Coding 2.0 teams are solo or duo: leader + at most 1 partner. The server enforces the same fixed limit (MAX_TEAM_SIZE = 2).
+const MAX_REGISTRATION_MEMBERS = 1
 
 type MemberInput = { name: string; email: string }
 type Errors = Record<string, string>
@@ -17,7 +17,7 @@ type Errors = Record<string, string>
 export default function Register() {
   const { team, register } = useAuth()
   const nav = useNavigate()
-  const [f, setF] = useState({ teamName: '', leaderName: '', email: '', phone: '', college: '', teamYear: '', password: '' })
+  const [f, setF] = useState({ teamName: '', leaderName: '', email: '', phone: '', college: 'Jabalpur Engineering College', teamYear: '', password: '' })
   const [members, setMembers] = useState<MemberInput[]>([])
   const [errs, setErrs] = useState<Errors>({})
   const [top, setTop] = useState('')
@@ -49,7 +49,7 @@ export default function Register() {
     finally { inFlight.current = false; setBusy(false) }
   }
   return (
-    <AuthShell kicker="Team registration" title="Join the Matrix" sub="Create your team leader account. You can add up to 3 more members now or later.">
+    <AuthShell kicker="Team registration" title="Register for Vibe Coding 2.0" sub="Solo or duo. Create your account and add your partner now or later.">
       <form onSubmit={submit} className="grid gap-4" noValidate>
         <Field label="Team name" value={f.teamName} onChange={set('teamName')} error={errs.teamName} placeholder="Team Neo" />
         <Field label="Leader name" value={f.leaderName} onChange={set('leaderName')} error={errs.leaderName} autoComplete="name" />
@@ -66,7 +66,7 @@ export default function Register() {
         </div>
         <Field label="Password" type="password" value={f.password} onChange={set('password')} error={errs.password} autoComplete="new-password" hint="Minimum 8 characters." />
         <div>
-          <p className="mb-2 font-mono text-[0.66rem] uppercase tracking-[0.22em] text-cyan-200/80">Team members ({members.length}/{MAX_REGISTRATION_MEMBERS})</p>
+          <p className="mb-2 font-mono text-[0.66rem] uppercase tracking-[0.22em] text-cyan-200/80">Partner (duo only) {members.length}/{MAX_REGISTRATION_MEMBERS}</p>
           <div className="grid gap-3">
             {members.map((m, i) => (
               <div key={i} className="grid grid-cols-[1fr_auto] gap-2">

@@ -13,7 +13,7 @@ npm run build && npm run preview
 ## IMPORTANT: add the official logo
 Put the real MATRIX.JEC logo (transparent PNG recommended) at:
 
-    public/matrix-logo.png
+    public/matrixLogo.png
 
 It is used automatically in the navbar, hero 3D scene, login/register, dashboard and footer.
 Until the file exists, a plain text wordmark is shown (no substitute logo is drawn).

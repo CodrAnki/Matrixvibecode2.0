@@ -6,15 +6,10 @@ const pad = (n: number) => String(n).padStart(2, '0')
 function diff(target: number) {
   const ms = Math.max(0, target - Date.now())
   const s = Math.floor(ms / 1000)
-  return {
-    done: ms <= 0,
-    days: Math.floor(s / 86400),
-    hours: Math.floor((s % 86400) / 3600),
-    minutes: Math.floor((s % 3600) / 60),
-    seconds: s % 60,
-  }
+  return { done: ms <= 0, days: Math.floor(s / 86400), hours: Math.floor((s % 86400) / 3600), minutes: Math.floor((s % 3600) / 60), seconds: s % 60 }
 }
 
+/** Plain typographic countdown: four numerals separated by thin rules. No panel, no glow. */
 export default function Countdown() {
   const target = EVENT_DATE.getTime()
   const [t, setT] = useState(() => diff(target))
@@ -29,39 +24,22 @@ export default function Countdown() {
     return () => window.clearInterval(id)
   }, [target])
 
-  if (t.done) {
-    return (
-      <div className="cd-panel cd-done text-center" role="status">
-        <p className="hud-label mb-2">14 October 2026</p>
-        <p className="display text-3xl text-glow md:text-5xl">Vibe Coding 2.0 Has Started!</p>
-      </div>
-    )
-  }
+  if (t.done) return <p className="display text-3xl text-paper md:text-4xl" role="status">Vibe Coding 2.0 is on.</p>
 
   const units = [
     { label: 'Days', value: t.days },
-    { label: 'Hours', value: t.hours },
-    { label: 'Minutes', value: t.minutes },
-    { label: 'Seconds', value: t.seconds },
+    { label: 'Hrs', value: t.hours },
+    { label: 'Min', value: t.minutes },
+    { label: 'Sec', value: t.seconds },
   ]
-
   return (
-    <div className="cd-panel" role="timer" aria-label={`${t.days} days, ${t.hours} hours, ${t.minutes} minutes, ${t.seconds} seconds until Vibe Coding 2.0`}>
-      <p className="hud-label mb-4 flex items-center justify-center gap-3 text-center">
-        <span className="blink h-2 w-2 rounded-full bg-[#00FF66] shadow-[0_0_10px_#00FF66]" />
-        Event starts 14 October 2026
-      </p>
-      <div className="flex items-start justify-center gap-1.5 sm:gap-3 md:gap-4">
-        {units.map((u, i) => (
-          <div key={u.label} className="flex items-start gap-1.5 sm:gap-3 md:gap-4">
-            <div className="cd-cell">
-              <span className="cd-num" aria-hidden="true">{pad(u.value)}</span>
-              <span className="cd-label" aria-hidden="true">{u.label}</span>
-            </div>
-            {i < units.length - 1 && <span className="cd-sep" aria-hidden="true">:</span>}
-          </div>
-        ))}
-      </div>
+    <div role="timer" aria-label={`${t.days} days, ${t.hours} hours, ${t.minutes} minutes, ${t.seconds} seconds until Vibe Coding 2.0`} className="flex items-stretch">
+      {units.map((u, i) => (
+        <div key={u.label} aria-hidden="true" className={`pr-4 sm:pr-6 ${i > 0 ? 'border-l border-white/15 pl-4 sm:pl-6' : ''}`}>
+          <div className="cd-num text-[clamp(1.7rem,6vw,2.6rem)] text-paper">{pad(u.value)}</div>
+          <div className="meta mt-1.5 !text-[0.6rem]">{u.label}</div>
+        </div>
+      ))}
     </div>
   )
 }

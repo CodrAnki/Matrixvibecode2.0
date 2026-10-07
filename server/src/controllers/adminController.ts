@@ -21,8 +21,8 @@ export const getSettings = asyncHandler(async (_req: Request, res: Response) => 
 
 /** PATCH /api/admin/settings — SUPER_ADMIN only (route-gated). Never trusts arbitrary fields from the body. */
 export const updateSettings = asyncHandler(async (req: Request, res: Response) => {
-  const { name, maxTeamSize, registrationOpen, checkInOpen }: {
-    name?: string; maxTeamSize?: number; registrationOpen?: boolean; checkInOpen?: boolean
+  const { name, registrationOpen, checkInOpen }: {
+    name?: string; registrationOpen?: boolean; checkInOpen?: boolean
   } = req.body ?? {}
 
   for (const [k, v] of [['registrationOpen', registrationOpen], ['checkInOpen', checkInOpen]] as const) {
@@ -32,10 +32,6 @@ export const updateSettings = asyncHandler(async (req: Request, res: Response) =
 
   const settings = (await EventSettings.findOne()) ?? (await EventSettings.create({}))
   if (name !== undefined) settings.name = name.trim()
-  if (maxTeamSize !== undefined) {
-    if (!Number.isInteger(maxTeamSize) || maxTeamSize < 1 || maxTeamSize > 20) throw new ApiError(400, 'maxTeamSize must be an integer between 1 and 20')
-    settings.maxTeamSize = maxTeamSize
-  }
   if (registrationOpen !== undefined) settings.registrationOpen = registrationOpen
   if (checkInOpen !== undefined) settings.checkInOpen = checkInOpen
   await settings.save()

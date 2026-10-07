@@ -1,75 +1,73 @@
 import { Link } from "react-router-dom";
+import { Mail, MapPin } from "lucide-react";
 import Logo from "./Logo";
+import { SOCIAL_ICON } from "./icons";
+import { NAV_LINKS } from "./Navbar";
 import { EVENT } from "../data/event";
-
-const NAV = ["About", "Events", "Workflow", "Prizes", "Contact"];
 
 export default function Footer() {
   return (
-    <footer
-      className="relative z-10 border-t border-white/[0.06]"
-      style={{ background: "#070908" }}
-    >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#00FF66] to-transparent opacity-60" />
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
+    <footer className="relative z-10 border-t border-white/10 bg-ink">
+      <div className="mx-auto grid max-w-7xl gap-12 px-5 py-14 md:grid-cols-[1.4fr_1fr_1fr_1.2fr] md:px-10">
         <div>
-          <Logo className="h-12" />
-          <p className="mt-5 max-w-sm text-lg text-sky-100/80">
-            “{EVENT.tagline}”
-          </p>
-          <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-slate-500">
-            {EVENT.org}
+          <Logo className="h-9" />
+          <p className="mt-5 max-w-xs text-silver">
+            Organiser of Vibe Coding 2.0.
+            <br />
+            The technical community of Jabalpur Engineering College.
           </p>
         </div>
-        <div>
-          <h4 className="hud-label mb-4">Navigate</h4>
-          <ul className="space-y-2 text-sm text-slate-300">
-            {NAV.map((n) => (
-              <li key={n}>
-                <Link
-                  className="transition-colors hover:text-cyan-200"
-                  to={{ pathname: "/", hash: `#${n.toLowerCase()}` }}
-                >
-                  {n}
-                </Link>
+
+        <nav aria-label="Footer">
+          <h4 className="meta mb-4">Vibe Coding 2.0</h4>
+          <ul className="space-y-2.5 text-paper">
+            {NAV_LINKS.map((n) => (
+              <li key={n.id}>
+                <Link className="u-link" to={{ pathname: "/", hash: `#${n.id}` }}>{n.label}</Link>
               </li>
             ))}
-            <li>
-              <Link
-                className="transition-colors hover:text-cyan-200"
-                to="/login"
-              >
-                Team Login
-              </Link>
+            <li><Link className="u-link" to="/register">Register</Link></li>
+            <li><Link className="u-link" to="/login">Team login</Link></li>
+          </ul>
+        </nav>
+
+        <div>
+          <h4 className="meta mb-4">Follow MATRIX</h4>
+          <ul className="space-y-2.5">
+            {EVENT.contact.socials.map((s) => {
+              const Icon = SOCIAL_ICON[s.label];
+              return (
+                <li key={s.label}>
+                  <a href={s.href} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-2.5 text-paper">
+                    {Icon && <Icon className="h-4 w-4 text-silver transition-colors group-hover:text-accent" />}
+                    <span className="u-link">{s.label}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="meta mb-4">Contact</h4>
+          <ul className="space-y-3 text-paper">
+            <li className="flex items-start gap-2.5">
+              <Mail className="mt-1 h-4 w-4 shrink-0 text-silver" strokeWidth={1.5} />
+              <a className="u-link break-all" href={`mailto:${EVENT.contact.email}`}>{EVENT.contact.email}</a>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <MapPin className="mt-1 h-4 w-4 shrink-0 text-silver" strokeWidth={1.5} />
+              <span>{EVENT.contact.location}</span>
             </li>
           </ul>
         </div>
-        <div>
-          <h4 className="hud-label mb-4">Connect</h4>
-          <div className="flex flex-wrap gap-2">
-            {EVENT.contact.socials.map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-cyan-400/25 px-3 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-slate-300 transition-all hover:border-cyan-300 hover:text-cyan-100 hover:shadow-[0_0_20px_-4px_#00FF66]"
-              >
-                {s.label}
-              </a>
-            ))}
-          </div>
-          <a
-            className="mt-4 block text-sm text-cyan-200 hover:underline"
-            href={`mailto:${EVENT.contact.email}`}
-          >
-            {EVENT.contact.email}
-          </a>
-        </div>
       </div>
-      <div className="border-t border-white/5 py-5 text-center font-mono text-[0.62rem] uppercase tracking-[0.25em] text-slate-600">
-        © {new Date().getFullYear()} {EVENT.name} · {EVENT.org} · Developed by
-        Ankit Dubey
+
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-5 md:flex-row md:justify-between md:px-10">
+          <p className="meta">&copy; {new Date().getFullYear()} MATRIX, Jabalpur Engineering College</p>
+          <p className="meta">Site developed by Ankit Dubey</p>
+        </div>
       </div>
     </footer>
   );

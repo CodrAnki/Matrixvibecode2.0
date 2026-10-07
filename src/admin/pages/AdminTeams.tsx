@@ -115,12 +115,12 @@ export default function AdminTeams() {
               <tr key={t.teamId} className="border-b border-white/5 hover:bg-white/[0.02]">
                 <td className="px-4 py-3 font-mono text-cyan-300"><Link to={`/admin/teams/${t.teamId}`}>{t.teamId}</Link></td>
                 <td className="px-4 py-3 text-white">{t.teamName}</td>
-                <td className="px-4 py-3">{t.teamYear ? <span className="rounded border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-cyan-200">{t.teamYear}</span> : <span className="text-slate-500">Not specified</span>}</td>
+                <td className="px-4 py-3">{t.teamYear ? <span className="rounded border border-[#B9BCB3]/40 bg-[#B9BCB3]/10 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-cyan-200">{t.teamYear}</span> : <span className="text-slate-500">Not specified</span>}</td>
                 <td className="px-4 py-3 text-slate-300">{t.leader && typeof t.leader === 'object' ? (t.leader as { name: string }).name : '—'}</td>
                 <td className="px-4 py-3 text-slate-300">{t.college}</td>
                 <td className="px-4 py-3 text-slate-300">{(t.members ?? []).length + 1}</td>
                 <td className="px-4 py-3"><span className={`rounded border px-2 py-0.5 font-mono text-[0.58rem] tracking-widest ${STATUS_TONE[t.verificationStatus]}`}>{t.verificationStatus}</span></td>
-                <td className="px-4 py-3 text-slate-300">{t.checkedIn ? '✓' : '—'}</td>
+                <td className="px-4 py-3 text-slate-300">{t.checkedIn ? 'Yes' : '—'}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
                     {t.verificationStatus !== 'VERIFIED' && (

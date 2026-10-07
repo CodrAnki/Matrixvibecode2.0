@@ -28,12 +28,12 @@ export default function AdminLayout() {
       <div className="grid lg:grid-cols-[15rem_1fr]">
         <aside className={`admin-glass fixed inset-y-0 left-0 z-40 w-64 -translate-x-full overflow-y-auto p-5 transition-transform duration-300 lg:static lg:translate-x-0 ${open ? 'translate-x-0' : ''}`}>
           <div className="mb-6 flex items-center gap-2 px-1">
-            <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#00D9FF]" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" strokeLinejoin="round" /></svg>
+            <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#B9BCB3]" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" strokeLinejoin="round" /></svg>
             <span className="font-mono text-[0.62rem] uppercase tracking-[0.25em] text-cyan-200/80">Command Center</span>
           </div>
           <nav className="grid gap-1">
             {nav.map((n) => (
-              <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-widest transition-colors ${isActive ? 'bg-[#00D9FF]/12 text-[#8fe3ff] shadow-[inset_0_0_0_1px_rgba(0,217,255,0.3)]' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}`}>
+              <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-widest transition-colors ${isActive ? 'bg-[#B9BCB3]/12 text-[#D6D3C9] shadow-[inset_0_0_0_1px_rgba(0,217,255,0.3)]' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}`}>
                 {n.label}
               </NavLink>
             ))}

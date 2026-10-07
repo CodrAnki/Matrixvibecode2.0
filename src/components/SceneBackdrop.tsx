@@ -1,14 +1,13 @@
-import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
 import { detectTier, type Tier } from '../lib/capabilities'
 
 const MatrixScene = lazy(() => import('../scenes/MatrixScene'))
 
+/** Calm fallback (and the look of every non-hero page): flat ink with a faint grid. No glow. */
 export function StaticBackdrop() {
   return (
-    <div className="absolute inset-0 overflow-hidden bg-void">
-      <div className="absolute inset-0 grid-bg" />
-      <div className="absolute left-1/2 top-[38%] h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,255,102,0.22),rgba(0,217,255,0.1)_45%,transparent_70%)]" />
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-[#0A3D24]/25 to-transparent" />
+    <div className="absolute inset-0 overflow-hidden bg-ink">
+      <div className="absolute inset-0 grid-bg opacity-70" />
     </div>
   )
 }
@@ -20,18 +19,27 @@ class Boundary extends Component<{ children: ReactNode; fallback: ReactNode }, {
   render() { return this.state.failed ? this.props.fallback : this.props.children }
 }
 
-export default function SceneBackdrop({ variant = 'hero', className = '' }: { variant?: 'hero' | 'auth'; className?: string }) {
+/** The ONE WebGL scene on the site. Hero only; rendering pauses when the hero scrolls out of view. */
+export default function HeroScene({ className = '' }: { className?: string }) {
   const [tier, setTier] = useState<Tier | null>(null)
+  const [active, setActive] = useState(true)
+  const ref = useRef<HTMLDivElement>(null)
   useEffect(() => setTier(detectTier()), [])
-  if (tier === null) return <div className={className}><StaticBackdrop /></div>
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => setActive(e.isIntersecting), { threshold: 0 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
   return (
-    <div className={`pointer-events-none ${className}`} aria-hidden>
-      {tier === 'none' ? (
+    <div ref={ref} className={`pointer-events-none ${className}`} aria-hidden>
+      {tier === null || tier === 'none' ? (
         <StaticBackdrop />
       ) : (
         <Boundary fallback={<StaticBackdrop />}>
           <Suspense fallback={<StaticBackdrop />}>
-            <MatrixScene tier={tier} variant={variant} />
+            <MatrixScene tier={tier} active={active} />
           </Suspense>
         </Boundary>
       )}

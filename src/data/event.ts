@@ -8,16 +8,15 @@ export const LINKEDIN_URL = "https://www.linkedin.com/company/matrix-jec/";
 export const EVENT = {
   name: "MATRIX VIBE CODING 2.0",
   org: "MATRIX, JEC",
-  tagline: "Where Ideas Meet Impact.",
+  tagline: "Code. Create. Collaborate.",
   sub: "A tech event to build, innovate and turn ideas into real world impact.",
   contact: {
     email: "team.matrix.jec@gmail.com",
     location: "JEC Campus, Jabalpur, Madhya Pradesh, India",
+    // Only channels MATRIX actually uses. (The generic GitHub / X placeholder links were removed.)
     socials: [
       { label: "Instagram", href: INSTAGRAM_URL },
       { label: "LinkedIn", href: LINKEDIN_URL },
-      { label: "GitHub", href: "https://github.com/" },
-      { label: "X", href: "https://x.com/" },
     ],
     organizers: [
       { role: "Event Lead", team: "MATRIX Core Team" },
@@ -31,28 +30,44 @@ export const EVENT = {
 // Event start: 14 October 2026, 00:00 local time (month is 0-indexed)
 export const EVENT_DATE = new Date(2026, 9, 14, 0, 0, 0);
 
-export const STATS = [
-  { value: 500, suffix: "+", prefix: "", label: "Participants" },
-  { value: 4, suffix: "+", prefix: "", label: "Problem Statements" },
-  { value: 6, suffix: "K+", prefix: "₹", label: "Prize Pool" },
+// Why take part. Copy carried over from the original event page.
+export const REASONS = [
+  { code: "01", title: "Build", text: 'Turn a raw idea into a working product using modern stacks and AI-assisted "vibe coding" workflows.' },
+  { code: "02", title: "Innovate", text: "Solve curated real-world problem statements from industry, campus and community challenges." },
+  { code: "03", title: "Impact", text: "Get mentored by engineers and showcased to a wider audience of builders." },
 ];
 
-export const ABOUT = [
-  {
-    code: "01",
-    title: "Build",
-    text: 'Turn a raw idea into a working product using modern stacks and AI-assisted "vibe coding" workflows.',
-  },
-  {
-    code: "02",
-    title: "Innovate",
-    text: "Solve curated real-world problem statements from industry, campus and community challenges.",
-  },
-  {
-    code: "03",
-    title: "Impact",
-    text: "Get mentored by engineers and showcased to a wider audience of builders.",
-  },
+// Key facts for Vibe Coding 2.0. Only facts already present in this project: do not add dates, deadlines or rules that are not documented.
+export const DETAILS = [
+  { k: "Date", v: "14 October 2026" },
+  { k: "Venue", v: "JEC Campus, Jabalpur, Madhya Pradesh" },
+  { k: "Team size", v: "Solo or duo (1 or 2 participants)" },
+  { k: "Problem statements", v: "Revealed on the day of the event" },
+  { k: "Format", v: "A build round with mentors on call, then a live finale" },
+  { k: "Registration", v: "Create a team account on this site" },
+];
+
+// Vibe Coding 1.0 format, from the original event page (matrix-jec/vibe_code_event).
+export const FIRST_FORMAT = [
+  "20 minutes to plan before building starts",
+  "4 hours of building a problem-solving website with AI and web tools",
+  "Shortlisted teams demoed to mentors and judges",
+];
+
+// Past event, as documented by the JEC college activity report (25 July 2025).
+export const ARCHIVE = {
+  code: "EVENT 01",
+  title: "VIBE CODING",
+  date: "25 JUL 2025",
+  venue: "Jashan Auditorium, JEC",
+  text: "The first Vibe Coding, organised by MATRIX at JEC. Students from all branches took part and shortlisted teams presented their projects to an evaluation panel of faculty.",
+  source: "https://jecjabalpur.ac.in/college-activity/college-activity-2025-26/matrix-club-hosts-vibe-coding-event-at-jec-19-july-2025",
+};
+
+// Verified figures from the same JEC report. Do not add numbers that are not documented.
+export const IMPACT = [
+  { value: "150", label: "Students took part", note: "From all branches" },
+  { value: "19", label: "Teams shortlisted and presented", note: "To a faculty evaluation panel" },
 ];
 
 export const EVENTS = [
@@ -60,7 +75,7 @@ export const EVENTS = [
     code: "MOD-01",
     title: "VIBE CODING",
     text: "The flagship round. Prompt, iterate and ship a working product with AI-assisted development.",
-    more: "Teams of up to 5 pick a problem statement and build end-to-end: idea, prototype, deployment. Originality, execution and real-world fit are scored.",
+    more: "Solo participants and duos take a problem statement and build end-to-end: idea, prototype, deployment. Originality, execution and real-world fit are scored.",
     tags: ["AI-Assisted", "Flagship"],
   },
   {
@@ -86,13 +101,14 @@ export const WORKFLOW = [
   },
   {
     title: "TEAM FORMATION",
-    text: "Add members, confirm details and get verified by organizers.",
+    text: "Register solo, or add one partner for a duo. Organizers verify your details.",
   },
   {
     title: "PROBLEM STATEMENT",
-    text: "Choose a problem statement that matches your team’s strengths.",
+    text: "Problem statements are revealed on the day of the event.",
   },
   { title: "BUILD", text: "Design, code and iterate with mentors on call." },
+  { title: "PRESENT", text: "Finalists pitch live in front of the audience." },
 ];
 
 export const PRIZES = [
