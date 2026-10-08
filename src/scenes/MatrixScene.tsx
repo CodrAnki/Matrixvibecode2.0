@@ -31,22 +31,41 @@ function Rig({ variant }: { variant: 'hero' | 'auth' }) {
   return null
 }
 
+// The MATRIX "M" mark, traced from public/matrix-logo.png (768px image coords) and extruded.
+const M_PARTS: { pts: [number, number][]; accent?: boolean }[] = [
+  { pts: [[148, 152], [615, 572], [615, 650], [148, 222]] },
+  { pts: [[148, 252], [305, 383], [265, 417], [205, 360], [205, 470], [148, 515]] },
+  { pts: [[620, 252], [620, 530], [567, 485], [567, 358], [492, 417], [455, 385]] },
+  { pts: [[400, 322], [618, 152], [618, 225], [430, 362]], accent: true },
+  { pts: [[148, 537], [320, 405], [355, 435], [148, 605]], accent: true },
+]
+const M_DEPTH = 0.42
+
+function useMGeometries() {
+  return useMemo(() => M_PARTS.map(({ pts, accent }) => {
+    const shape = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2((x - 384) / 140, -(y - 400) / 140)))
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: M_DEPTH, bevelEnabled: false })
+    geo.translate(0, 0, -M_DEPTH / 2)
+    return { geo, accent }
+  }), [])
+}
+
 function FloatingLogo() {
   const root = useRef<THREE.Group>(null)
-  const xRef = useRef<THREE.Group>(null)
+  const mRef = useRef<THREE.Group>(null)
+  const parts = useMGeometries()
   useFrame((s) => {
     const t = s.clock.elapsedTime
-    if (xRef.current) { xRef.current.rotation.y = t * 0.25; xRef.current.rotation.z = Math.sin(t * 0.4) * 0.05 }
+    if (mRef.current) { mRef.current.rotation.y = t * 0.25; mRef.current.rotation.z = Math.sin(t * 0.4) * 0.05 }
     if (root.current) root.current.position.y = 0.6 + Math.sin(t * 0.9) * 0.12
   })
   return (
     <group ref={root}>
-      <group ref={xRef} scale={1.15}>
-        {[Math.PI / 4, -Math.PI / 4].map((r, i) => (
-          <mesh key={i} rotation={[0, 0, r]}>
-            <boxGeometry args={[0.42, 4.2, 0.42]} />
-            <meshStandardMaterial color="#171719" metalness={0.9} roughness={0.28} />
-            <Edges color={CYAN} threshold={15} />
+      <group ref={mRef} scale={1.15}>
+        {parts.map(({ geo, accent }, i) => (
+          <mesh key={i} geometry={geo}>
+            <meshStandardMaterial color={accent ? CYAN : '#171719'} metalness={0.9} roughness={0.28} />
+            <Edges color={accent ? '#F4F4F5' : CYAN} threshold={15} />
           </mesh>
         ))}
       </group>
@@ -205,8 +224,11 @@ function Cubes({ count }: { count: number }) {
 }
 
 function Structures({ count }: { count: number }) {
+  // Skyline towers sit on an arc *behind* the logo only. On a full ring some landed on the camera's
+  // side, and the scroll/mouse camera sway could push the lens up against one — a near-opaque tower
+  // filling the screen as a black rectangle.
   const items = useMemo(() => Array.from({ length: count }, (_, i) => {
-    const a = (i / count) * Math.PI * 2
+    const a = Math.PI * (1.12 + (0.76 * i) / Math.max(1, count - 1))
     const r = 15 + Math.random() * 5
     return { pos: [Math.cos(a) * r, -1 + Math.random() * 2, Math.sin(a) * r - 6] as [number, number, number], h: 4 + Math.random() * 9, w: 0.6 + Math.random() * 1.2 }
   }), [count])

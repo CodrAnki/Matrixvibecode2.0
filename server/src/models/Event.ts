@@ -4,10 +4,13 @@ import { Schema, model, type InferSchemaType } from 'mongoose'
 const eventSchema = new Schema(
   {
     name: { type: String, default: 'MATRIX Vibe Coding 2.0' },
-    // Includes the team leader: 4 = 1 leader + at most 3 members. Admin API limits this to 1..20.
-    maxTeamSize: { type: Number, default: 4, min: 1, max: 20 },
+    // No maxTeamSize here on purpose: the event is solo or duo, fixed in code as MAX_TEAM_SIZE.
     registrationOpen: { type: Boolean, default: true },
     checkInOpen: { type: Boolean, default: false },
+    // The official problem-statement reveal. Until this is true the public problems endpoint returns
+    // nothing, regardless of each problem's own isPublished flag. Flipped by an admin on event day.
+    problemsRevealed: { type: Boolean, default: false },
+    problemsRevealedAt: { type: Date, default: null },
   },
   { timestamps: true },
 )

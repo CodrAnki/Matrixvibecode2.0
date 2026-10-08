@@ -2,9 +2,9 @@ import { apiFetch, setAuthToken } from '../lib/api'
 import type { Team } from '../lib/types'
 
 export interface RegisterInput {
-  teamName: string; leaderName: string; email: string; phone: string; college: string
-  teamYear?: string | null; branch?: string; password: string
-  members: { name: string; email: string; phone?: string; college?: string; branch?: string; year?: string }[]
+  teamName: string; leaderName: string; email: string; phone: string
+  teamYear?: string | null; password: string
+  members: { name: string; email: string; phone?: string; year?: string }[]
 }
 
 export interface LoginUser { id: string; name: string; email: string; role: string }

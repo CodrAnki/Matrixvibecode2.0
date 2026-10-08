@@ -10,18 +10,19 @@ import { generateTeamId, generateMemberId } from "../utils/generateId.js";
 import { signToken, authCookieOptions } from "../utils/generateToken.js";
 import {
   serializeTeam,
-  getMaxTeamSize,
   assertTeamNameFree,
   assertMembersAvailable,
 } from "../services/teamService.js";
 import {
   EMAIL_RE,
   PHONE_RE,
+  MAX_TEAM_SIZE,
   parseMembersPayload,
   type CleanMember,
 } from "../utils/memberValidation.js";
 import { isDuplicateKeyError } from "../utils/dbErrors.js";
 import { runInTransaction } from "../utils/transaction.js";
+import { registrationOpenNow } from "../eventSchedule.js";
 
 const SALT_ROUNDS = 12;
 
@@ -85,8 +86,6 @@ interface RegistrationFields {
   leaderName: string;
   email: string;
   phone: string;
-  college: string;
-  branch?: string;
   teamYear: TeamYear | null;
   password: string;
   rawMembers: unknown;
@@ -102,12 +101,11 @@ function parseRegistrationFields(body: unknown): RegistrationFields {
   const leaderName = cleanText(b.leaderName);
   const email = cleanText(b.email).toLowerCase();
   const phone = cleanText(b.phone);
-  const college = cleanText(b.college);
   const password = typeof b.password === "string" ? b.password : "";
-  if (!teamName || !leaderName || !email || !phone || !college || !password) {
+  if (!teamName || !leaderName || !email || !phone || !password) {
     throw new ApiError(
       400,
-      "teamName, leaderName, email, phone, college and password are required",
+      "teamName, leaderName, email, phone and password are required",
     );
   }
   if (teamName.length < 3 || teamName.length > 100)
@@ -117,21 +115,9 @@ function parseRegistrationFields(body: unknown): RegistrationFields {
   if (!EMAIL_RE.test(email) || email.length > 254)
     throw bad("Enter a valid email address");
   if (!PHONE_RE.test(phone)) throw bad("Enter a valid phone number");
-  if (college.length < 3 || college.length > 150)
-    throw bad("College must be 3–150 characters");
   if (password.length < 8) throw bad("Password must be at least 8 characters");
   if (password.length > 128)
     throw bad("Password must be 128 characters or fewer");
-
-  if (
-    b.branch !== undefined &&
-    b.branch !== null &&
-    typeof b.branch !== "string"
-  )
-    throw bad("branch must be text");
-  const branch = cleanText(b.branch) || undefined;
-  if (branch && branch.length > 100)
-    throw bad("branch must be 100 characters or fewer");
 
   // teamYear is OPTIONAL: missing / null / '' are all "not specified". Anything else must be an allowed value.
   const teamYear = parseTeamYear(b.teamYear);
@@ -140,8 +126,6 @@ function parseRegistrationFields(body: unknown): RegistrationFields {
     leaderName,
     email,
     phone,
-    college,
-    branch,
     teamYear,
     password,
     rawMembers: b.members,
@@ -150,15 +134,13 @@ function parseRegistrationFields(body: unknown): RegistrationFields {
 
 function memberDocs(
   members: CleanMember[],
-  f: Pick<RegistrationFields, "college" | "branch" | "teamYear">,
+  f: Pick<RegistrationFields, "teamYear">,
 ) {
   return members.map((m) => ({
     memberId: generateMemberId(),
     name: m.name,
     email: m.email,
     phone: m.phone,
-    college: m.college ?? f.college,
-    branch: m.branch ?? f.branch,
     year: m.year ?? f.teamYear ?? undefined,
     status: "ACTIVE" as const,
   }));
@@ -186,7 +168,6 @@ async function createTeamWithLeader(
         teamId,
         teamName: f.teamName,
         leader: leaderId,
-        college: f.college,
         teamYear: f.teamYear,
         phone: f.phone,
         members: memberDocs(members, f),
@@ -251,10 +232,14 @@ async function withFreshTeamId<T>(
  */
 export const registerTeam = asyncHandler(
   async (req: Request, res: Response) => {
+    // Closed once the event starts, or earlier if an admin switches registration off.
+    if (!(await registrationOpenNow())) {
+      throw new ApiError(403, "Registrations for Vibe Coding 2.0 are closed.", "REGISTRATION_CLOSED");
+    }
     const f = parseRegistrationFields(req.body);
-    // The backend is the authority on team size (leader + members <= EventSettings.maxTeamSize, default 4).
+    // The backend is the authority on team size: solo or duo (leader + at most one teammate).
     const members = parseMembersPayload(f.rawMembers, {
-      maxTeamSize: await getMaxTeamSize(),
+      maxTeamSize: MAX_TEAM_SIZE,
       leaderEmail: f.email,
       leaderPhone: f.phone,
     });
@@ -285,7 +270,6 @@ export const registerTeam = asyncHandler(
       if (team) {
         await existingUser.save();
         team.teamName = f.teamName;
-        team.college = f.college;
         team.teamYear = f.teamYear;
         team.phone = f.phone;
         team.members = memberDocs(members, f) as never;
@@ -298,7 +282,6 @@ export const registerTeam = asyncHandler(
             teamId,
             teamName: f.teamName,
             leader: existingUser._id,
-            college: f.college,
             teamYear: f.teamYear,
             phone: f.phone,
             members: memberDocs(members, f),

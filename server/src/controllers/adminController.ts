@@ -21,8 +21,9 @@ export const getSettings = asyncHandler(async (_req: Request, res: Response) => 
 
 /** PATCH /api/admin/settings — SUPER_ADMIN only (route-gated). Never trusts arbitrary fields from the body. */
 export const updateSettings = asyncHandler(async (req: Request, res: Response) => {
-  const { name, maxTeamSize, registrationOpen, checkInOpen }: {
-    name?: string; maxTeamSize?: number; registrationOpen?: boolean; checkInOpen?: boolean
+  // Team size is intentionally absent: solo/duo is fixed by the event format, not configurable.
+  const { name, registrationOpen, checkInOpen }: {
+    name?: string; registrationOpen?: boolean; checkInOpen?: boolean
   } = req.body ?? {}
 
   for (const [k, v] of [['registrationOpen', registrationOpen], ['checkInOpen', checkInOpen]] as const) {
@@ -32,10 +33,6 @@ export const updateSettings = asyncHandler(async (req: Request, res: Response) =
 
   const settings = (await EventSettings.findOne()) ?? (await EventSettings.create({}))
   if (name !== undefined) settings.name = name.trim()
-  if (maxTeamSize !== undefined) {
-    if (!Number.isInteger(maxTeamSize) || maxTeamSize < 1 || maxTeamSize > 20) throw new ApiError(400, 'maxTeamSize must be an integer between 1 and 20')
-    settings.maxTeamSize = maxTeamSize
-  }
   if (registrationOpen !== undefined) settings.registrationOpen = registrationOpen
   if (checkInOpen !== undefined) settings.checkInOpen = checkInOpen
   await settings.save()
@@ -82,11 +79,24 @@ async function setVerification(req: Request, res: Response, status: 'VERIFIED' |
   if (rawNote !== undefined && rawNote !== null && typeof rawNote !== 'string') throw new ApiError(400, 'note must be text')
   const note = typeof rawNote === 'string' && rawNote.trim() ? rawNote.trim().slice(0, 500) : undefined
 
+  // Guards the UI also applies, enforced here so a stale tab or a double click can't bypass them.
+  if (team.verificationStatus === status) {
+    throw new ApiError(409, `This team is already ${status.replace('_', ' ').toLowerCase()}`, 'NO_CHANGE')
+  }
+  if (team.checkedIn && status !== 'VERIFIED') {
+    throw new ApiError(409, 'This team has already checked in at the venue — it can no longer be rejected or sent back for changes', 'ALREADY_CHECKED_IN')
+  }
+  if (team.disabled && status === 'VERIFIED') {
+    throw new ApiError(409, 'This team is disabled — enable it before verifying', 'TEAM_DISABLED')
+  }
+
   team.verificationStatus = status
   team.verificationHistory.push({ status, note, by: req.auth?.id as never, at: new Date() })
   if (team.verificationHistory.length > MAX_VERIFICATION_HISTORY) team.verificationHistory.splice(0, team.verificationHistory.length - MAX_VERIFICATION_HISTORY)
   // Never move a team backwards (e.g. re-verifying must not reset PROBLEM_SELECTED / BUILDING to VERIFIED).
   if (status === 'VERIFIED' && PRE_VERIFIED_STAGES.includes(team.eventStatus)) team.eventStatus = 'VERIFIED'
+  // …and the mirror case: un-verifying must not leave the event stage claiming VERIFIED.
+  if (status !== 'VERIFIED' && team.eventStatus === 'VERIFIED') team.eventStatus = 'VERIFICATION_PENDING'
   await team.save()
 
   // Idempotent: re-verifying keeps the QR the team already has instead of silently invalidating it.
@@ -209,18 +219,24 @@ export const deleteTestTeams = asyncHandler(async (req: Request, res: Response) 
 export const getDashboardStats = asyncHandler(async (_req: Request, res: Response) => {
   const activeFilter = ACTIVE_TEAM_FILTER
   const [
-    totalTeams, verifiedTeams, pendingTeams, rejectedTeams, deletedTeams,
-    checkedInTeams, registrationsByDay, collegeWise, problemSelection,
+    totalTeams, verifiedTeams, pendingTeams, rejectedTeams, changesRequestedTeams, deletedTeams,
+    checkedInTeams, registrationsByDay, teamSize, problemSelection,
     publishedAnnouncements, totalAnnouncements, draftAnnouncements, latestAnnouncement, adminAccounts,
   ] = await Promise.all([
     Team.countDocuments(activeFilter),
     Team.countDocuments({ ...activeFilter, verificationStatus: 'VERIFIED' }),
     Team.countDocuments({ ...activeFilter, verificationStatus: 'PENDING' }),
     Team.countDocuments({ ...activeFilter, verificationStatus: 'REJECTED' }),
+    Team.countDocuments({ ...activeFilter, verificationStatus: 'CHANGES_REQUIRED' }),
     Team.countDocuments({ isDeleted: true }),
     Team.countDocuments({ ...activeFilter, checkedIn: true }),
     Team.aggregate([{ $match: activeFilter }, { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } }, { $sort: { _id: 1 } }]),
-    Team.aggregate([{ $match: activeFilter }, { $group: { _id: '$college', count: { $sum: 1 } } }, { $sort: { count: -1 } }, { $limit: 10 }]),
+    // Solo vs duo, now that team size is fixed at 1–2: a team with no listed member is solo.
+    Team.aggregate([
+      { $match: activeFilter },
+      { $group: { _id: { $cond: [{ $gt: [{ $size: { $ifNull: ['$members', []] } }, 0] }, 'Duo', 'Solo'] }, count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
     Team.aggregate([{ $match: { ...activeFilter, problemStatement: { $ne: null } } }, { $group: { _id: '$problemStatement', count: { $sum: 1 } } }]),
     Announcement.countDocuments({ status: 'PUBLISHED' }),
     Announcement.countDocuments(),
@@ -232,9 +248,9 @@ export const getDashboardStats = asyncHandler(async (_req: Request, res: Respons
   res.json({
     success: true,
     stats: {
-      totalTeams, activeTeams: totalTeams, verifiedTeams, pendingTeams, rejectedTeams, deletedTeams,
+      totalTeams, activeTeams: totalTeams, verifiedTeams, pendingTeams, rejectedTeams, changesRequestedTeams, deletedTeams,
       checkedInTeams, publishedAnnouncements, totalAnnouncements, draftAnnouncements, latestAnnouncement, adminAccounts,
     },
-    charts: { registrationsByDay, collegeWise, problemSelection },
+    charts: { registrationsByDay, teamSize, problemSelection },
   })
 })

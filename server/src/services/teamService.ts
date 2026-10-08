@@ -1,9 +1,8 @@
 import type { HydratedDocument, Types } from 'mongoose'
 import { Team, type TeamDoc } from '../models/Team.js'
 import { User } from '../models/User.js'
-import { EventSettings } from '../models/Event.js'
 import { ApiError } from '../middleware/errorHandler.js'
-import { resolveMaxTeamSize, type CleanMember } from '../utils/memberValidation.js'
+import type { CleanMember } from '../utils/memberValidation.js'
 
 /** The ONE definition of "active team". Every active-team query must spread/use this. */
 export const ACTIVE_TEAM_FILTER = { isDeleted: { $ne: true } } as const
@@ -11,12 +10,6 @@ export const ACTIVE_TEAM_FILTER = { isDeleted: { $ne: true } } as const
 /** Escapes user input before it is placed in a RegExp (prevents regex injection / ReDoS). */
 export function escapeRegex(input: string): string {
   return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-/** EventSettings.maxTeamSize (leader included). Falls back to 4 if the settings document is missing or invalid. */
-export async function getMaxTeamSize(): Promise<number> {
-  const settings = await EventSettings.findOne().select('maxTeamSize').lean()
-  return resolveMaxTeamSize(settings?.maxTeamSize)
 }
 
 /** 409 if another team (soft-deleted ones included — their names stay reserved) already uses this name, case-insensitively. */
@@ -68,7 +61,6 @@ export function serializeTeam(team: HydratedDocument<TeamDoc> & { _id: unknown }
     teamId: team.teamId,
     teamName: team.teamName,
     leader,
-    college: team.college,
     teamYear: team.teamYear ?? null,
     phone: team.phone,
     members: team.members,

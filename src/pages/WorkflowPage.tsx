@@ -2,7 +2,7 @@ import PageHeader from '../components/PageHeader'
 import Pipeline from '../components/Pipeline'
 import { useAuth } from '../context/AuthContext'
 import { WORKFLOW } from '../data/event'
-import { pipelineStep } from '../lib/pipeline'
+import { pipelineBlocked, pipelineStep } from '../lib/pipeline'
 
 export default function WorkflowPage() {
   const { team } = useAuth()
@@ -11,7 +11,7 @@ export default function WorkflowPage() {
     <>
       <PageHeader kicker="Pipeline" title="Workflow" sub="Your team’s progress through the event, and what each stage means." />
       <section className="glass hud-corners relative p-6 md:p-8">
-        <Pipeline completed={pipelineStep(team)} showDesc />
+        <Pipeline completed={pipelineStep(team)} blocked={pipelineBlocked(team)} showDesc />
       </section>
       <section className="glass mt-6 p-6">
         <p className="hud-label mb-5">Event roadmap</p>

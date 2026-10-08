@@ -1,4 +1,5 @@
 import Reveal from "./Reveal";
+import { VIBE_CODING_1_REPORT as REPORT } from "../data/event";
 
 const FIRST_EVENT = [
   "20 minutes to plan before building starts.",
@@ -15,9 +16,13 @@ export default function EventEvolution() {
     >
       <div className="relative z-0 mx-auto max-w-7xl">
         <Reveal className="mb-16">
-          <div className="flex items-center justify-between gap-4 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-slate-500 sm:text-xs sm:tracking-[0.25em]">
-            <span>04 / Vibe Coding 1.0</span>
-            <span className="text-right">Vibe Coding 2.0 / MATRIX JEC</span>
+          {/* Just the section eyebrow, matching every other section's kicker — the "1.0 / 2.0" and
+              MATRIX credit are already spelled out in the heading, the detail card and the "Now: 2.0"
+              block below, so repeating them here again was just noise. */}
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[0.66rem] font-medium tracking-[0.2em] text-[#C44552]">02</span>
+            <span className="h-px w-8 bg-[#C44552]/45" />
+            <span className="hud-label">Event Evolution</span>
           </div>
         </Reveal>
 
@@ -69,7 +74,7 @@ export default function EventEvolution() {
 
               <div className="mt-10 grid max-w-xl grid-cols-2 border-t border-white/[0.1] pt-6">
                 <div className="pr-4 sm:pr-8">
-                  <p className="text-[clamp(3.5rem,8vw,5.5rem)] font-bold leading-none tracking-[-0.07em] text-[#C44552]">
+                  <p className="display text-[clamp(3.5rem,8vw,5.5rem)] leading-none tracking-[-0.05em] text-[#C44552]">
                     150
                   </p>
                   <p className="mt-3 text-sm font-medium text-slate-200 sm:text-base">
@@ -80,7 +85,7 @@ export default function EventEvolution() {
                   </p>
                 </div>
                 <div className="border-l border-white/[0.1] pl-4 sm:pl-8">
-                  <p className="text-[clamp(3.5rem,8vw,5.5rem)] font-bold leading-none tracking-[-0.07em] text-[#C44552]">
+                  <p className="display text-[clamp(3.5rem,8vw,5.5rem)] leading-none tracking-[-0.05em] text-[#C44552]">
                     19
                   </p>
                   <p className="mt-3 text-sm font-medium text-slate-200 sm:text-base">
@@ -91,6 +96,26 @@ export default function EventEvolution() {
                   </p>
                 </div>
               </div>
+
+              <a
+                href={REPORT.url}
+                target="_blank"
+                rel="noreferrer"
+                className="group mt-10 block max-w-xl border border-white/[0.1] bg-[#090909]/80 p-5 transition-colors hover:border-[#38B878]/60 sm:p-6"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[0.58rem] uppercase tracking-[0.2em]">
+                  <span className="text-[#C44552]">Official report / JEC</span>
+                  <span className="text-slate-500 transition-colors group-hover:text-[#70D6A2]">
+                    jecjabalpur.ac.in ↗
+                  </span>
+                </div>
+                <blockquote className="mt-4 border-l-2 border-[#C44552]/50 pl-4 text-base leading-relaxed text-slate-200 md:text-lg">
+                  “{REPORT.quote}”
+                </blockquote>
+                <p className="mt-4 text-sm text-slate-400 transition-colors group-hover:text-[#F3F0E9]">
+                  Read the full report: {REPORT.title}
+                </p>
+              </a>
             </article>
           </Reveal>
 

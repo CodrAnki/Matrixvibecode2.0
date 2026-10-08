@@ -1,17 +1,43 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, type To } from 'react-router-dom'
 import Logo from './Logo'
 import MagneticButton from './MagneticButton'
 import { useAuth } from '../context/AuthContext'
+import { useEventPhase } from '../lib/eventPhase'
+import { useTapTrigger } from '../hooks/useTapTrigger'
+import { triggerEasterEgg } from '../lib/easterEgg'
 
-const LINKS = ['Home', 'About', 'Events', 'Workflow', 'Prizes', 'Contact']
+// Home sections scroll in place (`id`); Problems and Support are their own pages (`route`).
+const LINKS: { label: string; id?: string; route?: string }[] = [
+  { label: 'Home', id: 'home' },
+  { label: 'About', id: 'about' },
+  { label: 'Mini-Games', id: 'games' },
+  { label: 'Workflow', id: 'workflow' },
+  { label: 'Prizes', id: 'prizes' },
+  { label: 'Problems', route: '/problems' },
+  { label: 'Support', route: '/support' },
+]
+const SECTION_IDS = LINKS.flatMap((l) => (l.id ? [l.id] : []))
+const target = (l: (typeof LINKS)[number]): To =>
+  l.route ?? { pathname: '/', hash: l.id === 'home' ? '' : `#${l.id}` }
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [spy, setSpy] = useState('home')
-  const { pathname } = useLocation()
+  const { pathname, key } = useLocation()
   const { team } = useAuth()
+  const { registrationOpen } = useEventPhase()
+  // A signed-in team is never shown "Register" again, regardless of whether registration is still
+  // open — they already have an account. Otherwise: register while open, or once registrations
+  // close (event day) the button leads to the problem statements instead.
+  const cta = team
+    ? { to: '/dashboard', label: 'Dashboard →' }
+    : registrationOpen
+      ? { to: '/register', label: 'Team Register →' }
+      : { to: '/problems', label: 'Problems →' }
+  // Easter egg: 5 quick taps on the logo. Doesn't stop it navigating home as normal.
+  const onLogoTap = useTapTrigger(triggerEasterEgg)
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 40)
@@ -19,14 +45,14 @@ export default function Navbar() {
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)
   }, [])
-  useEffect(() => setOpen(false), [pathname])
+  useEffect(() => setOpen(false), [key])
   useEffect(() => {
     if (pathname !== '/') return
     const obs = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && setSpy(e.target.id)),
       { rootMargin: '-45% 0px -50% 0px' },
     )
-    LINKS.forEach((l) => { const el = document.getElementById(l.toLowerCase()); if (el) obs.observe(el) })
+    SECTION_IDS.forEach((id) => { const el = document.getElementById(id); if (el) obs.observe(el) })
     return () => obs.disconnect()
   }, [pathname])
 
@@ -38,46 +64,55 @@ export default function Navbar() {
       <div
         className={`mx-auto flex max-w-7xl items-center justify-between gap-4 border-b px-4 transition-all duration-500 md:px-6 ${scrolled ? 'border-transparent py-2.5' : 'border-transparent py-2'}`}
       >
-        <Link to="/" aria-label="MATRIX Vibe Coding 2.0 home"><Logo className={scrolled ? 'h-8' : 'h-10'} showImage /></Link>
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+        <Link to="/" aria-label="MATRIX, JEC — Vibe Coding 2.0 home" onClick={onLogoTap}><Logo className={scrolled ? 'h-8' : 'h-10'} showImage /></Link>
+        <nav className="hidden items-center gap-1 xl:flex" aria-label="Primary">
           {LINKS.map((l) => {
-            const active = pathname === '/' && spy === l.toLowerCase()
+            const active = l.route ? pathname === l.route : pathname === '/' && spy === l.id
             return (
               <Link
-                key={l}
-                to={{ pathname: '/', hash: l === 'Home' ? '' : `#${l.toLowerCase()}` }}
-                className={`group relative rounded-lg px-3.5 py-2 font-mono text-[0.7rem] uppercase tracking-[0.2em] transition-colors ${active ? 'text-[#E08B93] [text-shadow:0_0_8px_#C44552]' : 'text-slate-400 hover:text-[#F2C9CC]'}`}
+                key={l.label}
+                to={target(l)}
+                aria-current={active ? (l.route ? 'page' : 'location') : undefined}
+                className={`group relative rounded px-3.5 py-2 font-mono text-[0.7rem] uppercase tracking-[0.2em] transition-colors ${active ? 'text-[#70D6A2]' : 'text-slate-400 hover:text-[#70D6A2]'}`}
               >
-                {l}
-                <span className={`pointer-events-none absolute inset-x-3 -bottom-0.5 h-px origin-left scale-x-0 bg-gradient-to-r from-[#C44552] to-[#F4F4F5] transition-transform duration-300 ${active ? 'scale-x-100' : 'group-hover:scale-x-100'}`} />
+                {l.label}
+                <span className={`pointer-events-none absolute inset-x-3 -bottom-0.5 h-px origin-left scale-x-0 bg-[#38B878] transition-transform duration-300 ${active ? 'scale-x-100' : 'group-hover:scale-x-100'}`} />
               </Link>
             )
           })}
         </nav>
         <div className="flex items-center gap-3">
-          {!team && <Link to="/login" className="hidden font-mono text-[0.7rem] uppercase tracking-[0.2em] text-slate-300 transition-colors hover:text-[#E08B93] sm:block">Login</Link>}
+          {!team && <Link to="/login" className="hidden font-mono text-[0.7rem] uppercase tracking-[0.2em] text-slate-300 transition-colors hover:text-[#70D6A2] sm:block">Login</Link>}
           <div className="hidden items-center gap-2 sm:flex">
-            <MagneticButton to="/register" variant="solid" size="sm">Team Register →</MagneticButton>
-            {team && <MagneticButton to="/dashboard" variant="ghost" size="sm">Dashboard</MagneticButton>}
+            <MagneticButton to={cta.to} variant="solid" size="sm">{cta.label}</MagneticButton>
           </div>
-          <button className="grid h-10 w-10 place-items-center rounded-lg border border-[#C44552]/25 bg-[#111113] lg:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu" aria-expanded={open}>
+          <button className="grid h-10 w-10 place-items-center rounded border border-white/12 bg-[#111113] transition-colors hover:border-[#38B878]/60 xl:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu" aria-expanded={open}>
             <span className="relative block h-3 w-5">
-              <span className={`absolute left-0 top-0 h-px w-5 bg-[#E08B93] transition-transform ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
+              <span className={`absolute left-0 top-0 h-px w-5 transition-transform ${open ? 'translate-y-[6px] rotate-45 bg-[#70D6A2]' : 'bg-[#E08B93]'}`} />
               <span className={`absolute left-0 top-[6px] h-px w-5 bg-[#E08B93] transition-opacity ${open ? 'opacity-0' : ''}`} />
-              <span className={`absolute left-0 top-3 h-px w-5 bg-[#E08B93] transition-transform ${open ? '-translate-y-[6px] -rotate-45' : ''}`} />
+              <span className={`absolute left-0 top-3 h-px w-5 transition-transform ${open ? '-translate-y-[6px] -rotate-45 bg-[#70D6A2]' : 'bg-[#E08B93]'}`} />
             </span>
           </button>
         </div>
       </div>
       {open && (
-        <div className="glass mx-4 mt-2 !rounded-2xl p-4 lg:hidden">
+        <div className="glass mx-4 mt-2 !rounded-2xl p-4 xl:hidden">
           <div className="grid gap-1">
-            {LINKS.map((l) => (
-              <Link key={l} to={{ pathname: '/', hash: l === 'Home' ? '' : `#${l.toLowerCase()}` }} className="rounded-lg px-3 py-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-200 hover:bg-[#C44552]/10">{l}</Link>
-            ))}
-            {!team && <Link to="/login" className="rounded-lg px-3 py-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-200 hover:bg-[#C44552]/10">Login</Link>}
-            <Link to="/register" className="btn btn-solid mt-2">Team Register →</Link>
-            {team && <Link to="/dashboard" className="btn btn-ghost mt-2">Dashboard</Link>}
+            {LINKS.map((l) => {
+              const active = l.route ? pathname === l.route : pathname === '/' && spy === l.id
+              return (
+                <Link
+                  key={l.label}
+                  to={target(l)}
+                  aria-current={active ? (l.route ? 'page' : 'location') : undefined}
+                  className={`rounded px-3 py-3 font-mono text-xs uppercase tracking-[0.2em] transition-colors hover:bg-[#38B878]/10 hover:text-[#70D6A2] ${active ? 'text-[#70D6A2]' : 'text-slate-200'}`}
+                >
+                  {l.label}
+                </Link>
+              )
+            })}
+            {!team && <Link to="/login" className="rounded px-3 py-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-200 transition-colors hover:bg-[#38B878]/10 hover:text-[#70D6A2]">Login</Link>}
+            <Link to={cta.to} className="btn btn-solid mt-2">{cta.label}</Link>
           </div>
         </div>
       )}

@@ -3,20 +3,22 @@
 // Shared social URLs, so every Instagram / LinkedIn button on the site opens the same page.
 export const INSTAGRAM_URL =
   "https://www.instagram.com/matrix.jec?stkn=MXI1OGw1eGw4cmNqeQ==";
+export const INSTAGRAM_HANDLE = "@matrix.jec";
 export const LINKEDIN_URL = "https://www.linkedin.com/company/matrix-jec/";
 
 export const EVENT = {
-  name: "MATRIX VIBE CODING 2.0",
+  // Keep the event name (Vibe Coding 2.0) and the club name (MATRIX) separate rather than fused
+  // into one string — `org` already carries MATRIX, and most call sites show both side by side.
+  name: "VIBE CODING 2.0",
   org: "MATRIX, JEC",
   tagline: "Where Ideas Meet Impact.",
-  sub: "A tech event to build, innovate and turn ideas into real world impact.",
+  sub: "A hackathon to build, innovate and turn ideas into real world impact.",
   contact: {
     email: "team.matrix.jec@gmail.com",
     location: "JEC Campus, Jabalpur, Madhya Pradesh, India",
     socials: [
       { label: "Instagram", href: INSTAGRAM_URL },
       { label: "LinkedIn", href: LINKEDIN_URL },
-      { label: "X", href: "https://x.com/" },
     ],
     organizers: [
       { role: "Event Lead", team: "MATRIX Core Team" },
@@ -28,7 +30,17 @@ export const EVENT = {
 };
 
 // Event start: 14 October 2026, 00:00 local time (month is 0-indexed)
-export const EVENT_DATE = new Date(2026, 9, 14, 0, 0, 0);
+// Event day starts at midnight IST for everyone. `new Date(2026, 9, 14)` would mean midnight in each
+// visitor's own timezone, flipping the hero to "event day" at a different moment per visitor.
+export const EVENT_DATE = new Date("2026-10-14T00:00:00+05:30");
+
+// JEC's own published write-up of the first event. The URL slug says "19-july" but the page itself
+// (title and body) dates the event 25 July 2025, which is what the site uses.
+export const VIBE_CODING_1_REPORT = {
+  url: "https://jecjabalpur.ac.in/college-activity/college-activity-2025-26/matrix-club-hosts-vibe-coding-event-at-jec-19-july-2025",
+  title: "Matrix Club Hosts “Vibe Coding” Event at JEC: 25 July 2025",
+  quote: "The event encouraged students to think creatively and enhance their technological skills.",
+};
 
 export const STATS = [
   { value: 500, suffix: "+", prefix: "", label: "Participants" },
@@ -54,38 +66,40 @@ export const ABOUT = [
   },
 ];
 
+// Light, crowd-wide mini-games that run between build sessions — not competition formats. Every
+// team is heads-down building for most of the event; these are the loud, five-minute breaks.
 export const EVENTS = [
   {
-    code: "MOD-01",
-    title: "VIBE CODING",
-    text: "The flagship round. Prompt, iterate and ship a working product with AI-assisted development.",
-    more: "Teams of up to 5 pick a problem statement and build end-to-end: idea, prototype, deployment. Originality, execution and real-world fit are scored.",
-    tags: ["AI-Assisted", "Flagship"],
+    code: "G-01",
+    title: "CHILLY SHOT",
+    text: "A question lands on two participants. Answer wrong, and the shot is yours — chilli sauce, a lemon shot, or whatever's on the tray.",
+    more: "Two players step up, a quickfire question is read out, and there's no hiding from a wrong answer. The loser knocks it back in front of the whole room — chilli sauce, sharp lemon juice, or whatever the hosts are serving that round.",
+    tags: ["On-stage", "No mercy"],
   },
   {
-    code: "MOD-02",
-    title: "BUILD CHALLENGE",
-    text: "A timed build sprint where constraints spark creativity and every commit counts.",
-    more: "Surprise constraints are revealed on the day. Mentors circulate for live feedback while teams push toward a demo-ready build.",
-    tags: ["Timed", "Hands-on"],
+    code: "G-02",
+    title: "OPEN QUIZ",
+    text: "Open floor, open mic. Whoever answers first and right walks off with a small prize — no teams, no turns.",
+    more: "Questions are thrown open to the entire auditorium. No sign-up, no waiting your turn — the fastest correct answer from anywhere in the room takes a small prize on the spot.",
+    tags: ["Open floor", "Fastest wins"],
   },
   {
-    code: "MOD-03",
-    title: "TEAM BATTLE",
-    text: "Head-to-head demo showdowns where the best teams pitch live in front of the audience.",
-    more: "Finalists present live, defend their choices and face rapid-fire questions.",
-    tags: ["Live Pitch", "Finals"],
+    code: "G-03",
+    title: "TECH OR BULLSHIT?",
+    text: "Two \"facts\" about tech, read back to back. One's real, one's made up — call it A or B before the timer runs out.",
+    more: "One true tech fact and one convincing lie, read out one after another — like \"Python was named after Monty Python.\" Two participants call it, A or B, before time's up. Get it right and you're still standing for the next round.",
+    tags: ["True or false", "Quickfire"],
   },
 ];
 
 export const WORKFLOW = [
   {
     title: "REGISTER",
-    text: "Create your team account and lock in your squad.",
+    text: "Create your team account — enter solo or lock in your teammate.",
   },
   {
     title: "TEAM FORMATION",
-    text: "Add members, confirm details and get verified by organizers.",
+    text: "Add your teammate, confirm details and get verified by MATRIX.",
   },
   {
     title: "PROBLEM STATEMENT",
@@ -94,10 +108,12 @@ export const WORKFLOW = [
   { title: "BUILD", text: "Design, code and iterate with mentors on call." },
 ];
 
+// Rank is expressed as intensity on the site palette (brand red at the top, cooling to neutral),
+// not as gold/silver/bronze — three extra hues would fight the red/green/neutral system.
 export const PRIZES = [
-  { place: "1ST", name: "1st Prize", amount: "₹3,000", tone: "#facc15" },
-  { place: "2ND", name: "2nd Prize", amount: "₹2,000", tone: "#cbd5e1" },
-  { place: "3RD", name: "3rd Prize", amount: "₹1,000", tone: "#fb923c" },
+  { place: "1ST", name: "1st Prize", amount: "₹3,000", tone: "#C44552" },
+  { place: "2ND", name: "2nd Prize", amount: "₹2,000", tone: "#C9C5BE" },
+  { place: "3RD", name: "3rd Prize", amount: "₹1,000", tone: "#7A7872" },
 ];
 export const TOTAL_PRIZE_POOL = "₹6K+";
 
@@ -115,7 +131,8 @@ export const PROBLEM_STATEMENTS = [
   "Open Innovation (own problem statement)",
 ];
 
-// Organizers reachable on WhatsApp. `wa` is the wa.me link: country code + number, digits only.
+// MATRIX club members assigned to answer participant queries on WhatsApp (MATRIX as a whole is the
+// organizer). `wa` is the wa.me link: country code + number, digits only.
 // wa.me opens the WhatsApp app on phones and WhatsApp Web / desktop app on computers.
 export const WHATSAPP_CONTACTS = [
   {
@@ -134,9 +151,9 @@ export const WHATSAPP_CONTACTS = [
     wa: "https://wa.me/919039485800",
   },
   {
-    name: "Dhruv Kolare",
-    phone: "+91 89890 61904",
-    wa: "https://wa.me/918989061904",
+    name: "Garvit Dayal",
+    phone: "+91 76920 79667",
+    wa: "https://wa.me/917692079667",
   },
   {
     name: "Ankit Dubey",

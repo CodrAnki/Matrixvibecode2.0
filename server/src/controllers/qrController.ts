@@ -3,8 +3,17 @@ import type { Request, Response } from 'express'
 import { Team } from '../models/Team.js'
 import { User } from '../models/User.js'
 import { CheckIn } from '../models/CheckIn.js'
+import { EventSettings } from '../models/Event.js'
 import { ApiError } from '../middleware/errorHandler.js'
-import { issueTeamQrToken, verifyQrToken, getActiveTeamQrUrl } from '../services/qrService.js'
+import { issueTeamQrToken, verifyQrToken, ensureTeamQrToken } from '../services/qrService.js'
+
+/** The admin "Check-in open" switch in Settings. It used to be stored and never read. */
+async function assertCheckInOpen() {
+  const s = await EventSettings.findOne().select('checkInOpen').lean()
+  if (s?.checkInOpen !== true) {
+    throw new ApiError(403, 'Check-in is closed. A Super Admin can open it in Settings.', 'CHECKIN_CLOSED')
+  }
+}
 import { generateCheckInId } from '../utils/generateId.js'
 import { serializeTeam, ACTIVE_TEAM_FILTER } from '../services/teamService.js'
 import { parsePagination } from '../utils/pagination.js'
@@ -16,9 +25,20 @@ export const getMyQr = asyncHandler(async (req: Request, res: Response) => {
   const team = await Team.findById(user?.team)
   if (!team) throw new ApiError(404, 'Team not found', 'TEAM_NOT_FOUND')
   if (team.verificationStatus !== 'VERIFIED') throw new ApiError(400, 'QR codes are only issued to verified teams', 'TEAM_NOT_VERIFIED')
-  const qr = await getActiveTeamQrUrl(String(team._id))
-  if (!qr) throw new ApiError(404, 'No active QR code — contact an admin')
+  // Idempotent: returns the existing live QR. Only mints one if the team has none at all (e.g. a
+  // verified team whose token was somehow lost) — this never replaces a working QR, so it isn't
+  // the "regenerate" that stays SUPER_ADMIN-only below.
+  const qr = await ensureTeamQrToken(String(team._id))
   res.json({ success: true, teamId: team.teamId, checkedIn: team.checkedIn, qr })
+})
+
+/** GET /api/admin/teams/:teamId/qr — any admin can VIEW a verified team's current QR. Read-only. */
+export const getTeamQrAdmin = asyncHandler(async (req: Request, res: Response) => {
+  const team = await Team.findOne({ teamId: req.params.teamId, ...ACTIVE_TEAM_FILTER })
+  if (!team) throw new ApiError(404, 'Team not found', 'TEAM_NOT_FOUND')
+  if (team.verificationStatus !== 'VERIFIED') throw new ApiError(400, 'This team is not verified, so it has no QR code', 'TEAM_NOT_VERIFIED')
+  const qr = await ensureTeamQrToken(String(team._id))
+  res.json({ success: true, qr })
 })
 
 /**
@@ -43,6 +63,7 @@ export const regenerateQr = asyncHandler(async (req: Request, res: Response) => 
 export const verifyQr = asyncHandler(async (req: Request, res: Response) => {
   const { teamId, token } = (req.body ?? {}) as { teamId?: unknown; token?: unknown }
   if (!teamId || !token) throw new ApiError(400, 'teamId and token are required')
+  await assertCheckInOpen()
 
   const { team } = await verifyQrToken(teamId, token)
   const alreadyCheckedIn = await CheckIn.findOne({ team: team._id })
@@ -58,9 +79,14 @@ export const verifyQr = asyncHandler(async (req: Request, res: Response) => {
  * a duplicate scan/confirm never creates a second CheckIn record.
  */
 export const confirmCheckIn = asyncHandler(async (req: Request, res: Response) => {
+  await assertCheckInOpen()
   const team = await Team.findOne({ teamId: req.params.teamId, ...ACTIVE_TEAM_FILTER })
   if (!team) throw new ApiError(404, 'Team not found', 'TEAM_NOT_FOUND')
   if (team.checkedIn) throw new ApiError(409, 'Team already checked in', 'ALREADY_CHECKED_IN')
+  // This endpoint takes a bare teamId, not a QR token, so it has to re-check what the QR scan
+  // step checks — otherwise an unverified or disabled team could be checked in by calling it directly.
+  if (team.verificationStatus !== 'VERIFIED') throw new ApiError(403, 'Only verified teams can be checked in', 'TEAM_NOT_VERIFIED')
+  if (team.disabled) throw new ApiError(403, 'This team has been disabled by an admin', 'TEAM_DISABLED')
 
   const body = (req.body ?? {}) as Record<string, unknown>
   const text = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : undefined)

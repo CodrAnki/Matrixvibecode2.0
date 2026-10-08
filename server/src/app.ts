@@ -11,6 +11,7 @@ import authRoutes from "./routes/authRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import problemRoutes from "./routes/problemRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import { notFound, errorHandler, ApiError } from "./middleware/errorHandler.js";
@@ -56,9 +57,16 @@ const apiLimiter = limiter({
   max: 3000,
   message: "Too many requests. Please slow down and try again shortly.",
   skip: (req) =>
-    req.path === "/health" || req.path.startsWith("/announcements"),
+    req.path === "/health" ||
+    req.path.startsWith("/announcements") ||
+    req.path.startsWith("/event"),
 });
 const announcementsLimiter = limiter({
+  max: 10000,
+  message: "Too many requests. Please try again shortly.",
+});
+// The reveal-status poll (every 30s, event day only) — same campus-NAT reasoning as announcements.
+const eventStateLimiter = limiter({
   max: 10000,
   message: "Too many requests. Please try again shortly.",
 });
@@ -137,6 +145,7 @@ export function createApp() {
 
   app.use("/api", apiLimiter);
   app.use("/api/announcements", announcementsLimiter);
+  app.use("/api/event", eventStateLimiter);
   app.use("/api/auth/register", registerIpLimiter, registerEmailLimiter);
   app.use("/api/auth/login", loginIpLimiter, loginAccountLimiter);
   app.use("/api/admin/login", loginIpLimiter, loginAccountLimiter);
@@ -148,6 +157,7 @@ export function createApp() {
   app.use("/api/teams", teamRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/problems", problemRoutes);
+  app.use("/api/event", eventRoutes);
   app.use("/api/announcements", announcementRoutes);
   app.use("/api/contact", contactRoutes);
 

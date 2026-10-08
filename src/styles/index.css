@@ -3,16 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* Experimental MATRIX red, white and black palette. */
-  --green: #C44552;
-  --cyan: #F4F4F5;
-  --red-deep: #A8323D;
-  --red-royal: #842A32;
-  --highlight: #FFFFFF;
-  --red: #C44552;
+  /* Two-role accent system:
+     --action (green) is every interactive affordance — primary buttons, hover, focus, selected,
+     progress, success. --brand (red) is the structural/editorial voice — kickers, codes, HUD
+     brackets, urgency. Red stays frequent as texture; green stays exclusive to things you can act on. */
+  --action: #38B878;
+  --action-bright: #70D6A2;
+  --action-ink: #07110B;
+  --brand: #C44552;
+  --brand-dim: rgba(196, 69, 82, 0.4);
+
+  /* Error state is a brighter rose than the brand red, so an invalid field is distinguishable
+     from the red used decoratively everywhere else. */
+  --danger: #FB7185;
+
+  /* Neutral base: the background and surfaces the accents sit on. */
   --void: #050506;
-  --bg-2: #080809;
-  --bg-3: #0C0C0D;
   --surface: #080809;
   --surface-2: #0D0D0F;
   --surface-3: #121214;
@@ -20,15 +26,17 @@
   --muted: #A1A1AA;
   --border: rgba(255, 255, 255, 0.06);
   --border-hover: rgba(196, 69, 82, 0.48);
-  --border-admin-hover: rgba(196, 69, 82, 0.48);
 }
 
-html { scroll-behavior: smooth; background: var(--void); }
+html { background: var(--void); }
+/* Native smooth scrolling only where Lenis isn't running (admin, reduced motion) — with both on,
+   the browser re-animates every frame Lenis writes and scrolling turns to treacle. */
+html:not(.lenis) { scroll-behavior: smooth; }
 body {
   margin: 0;
   background: var(--void);
   color: var(--text);
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-family: 'Archivo', system-ui, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -44,38 +52,46 @@ body {
 }
 
 /* ---------- Obsidian 3D Cards ---------- */
+/* Cards sit on a neutral hairline by default; red is an accent for hover/active state, not the
+   resting border, so a grid of cards reads as one surface instead of a row of glowing boxes. */
 .glass {
-  background: linear-gradient(160deg, var(--surface-2) 0%, var(--surface) 60%, #060607 100%);
-  border: 1px solid rgba(196, 69, 82, 0.22);
-  border-radius: 20px;
+  background: linear-gradient(162deg, var(--surface-2) 0%, var(--surface) 58%, #060607 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  color: var(--text);
   transition: border-color 300ms ease, box-shadow 300ms ease;
   box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    inset 0 0 40px rgba(196, 69, 82, 0.02);
-}
-.glass *:not(.btn):not(.btn *),
-.admin-glass *:not(.btn):not(.btn *) {
-  color: #FFFFFF !important;
+    0 18px 44px -24px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 .admin-glass {
-  background: linear-gradient(160deg, var(--surface-3) 0%, var(--surface-2) 55%, #070708 100%);
-  border: 1px solid rgba(196, 69, 82, 0.22);
-  border-radius: 20px;
+  background: linear-gradient(162deg, var(--surface-3) 0%, var(--surface-2) 55%, #070708 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: var(--text);
   transition: border-color 300ms ease, box-shadow 300ms ease;
   box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    inset 0 0 40px rgba(185, 28, 28, 0.03);
+    0 18px 50px -24px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .glass:hover, .admin-glass:hover, .glass:active, .admin-glass:active {
   border-color: var(--border-hover);
-  box-shadow: 0 20px 44px -18px rgba(0, 0, 0, 0.65), 0 0 28px -16px rgba(196, 69, 82, 0.3);
+  box-shadow: 0 22px 48px -26px rgba(0, 0, 0, 0.85), 0 0 26px -18px rgba(196, 69, 82, 0.3);
 }
 .holo-card {
   position: relative;
   transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
 }
+/* Shared card signature: a bracket tick cut into the top-left corner. One consistent technical
+   detail across the card family — structured, not decorative noise. */
+.holo-card::before {
+  content: '';
+  position: absolute; top: -1px; left: -1px; width: 14px; height: 14px; pointer-events: none;
+  border-top: 1px solid var(--brand); border-left: 1px solid var(--brand);
+  border-top-left-radius: inherit;
+  opacity: 0.5; transition: opacity 300ms ease, width 300ms ease, height 300ms ease;
+}
+.holo-card:hover::before { opacity: 1; width: 20px; height: 20px; }
 .holo-card::after {
   content: '';
   position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
@@ -100,89 +116,124 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.workflow-stage::before {
-  content: '';
-  position: absolute;
-  inset: 8rem 0 5rem;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 42%, rgba(196, 69, 82, 0.1), transparent 58%),
-    radial-gradient(ellipse at 18% 72%, rgba(196, 69, 82, 0.055), transparent 42%),
-    linear-gradient(180deg, rgba(2, 6, 17, 0.04), rgba(2, 6, 17, 0.48));
-}
-.workflow-stage::after {
-  content: '';
-  position: absolute;
-  inset: 8rem 0 5rem;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.18;
-  background-image:
-    linear-gradient(rgba(196, 69, 82, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(196, 69, 82, 0.08) 1px, transparent 1px);
-  background-size: 56px 56px;
-  -webkit-mask-image: radial-gradient(ellipse at center, #000 10%, transparent 75%);
-  mask-image: radial-gradient(ellipse at center, #000 10%, transparent 75%);
-}
-
 .hud-corners::before {
   content: ''; position: absolute; inset: -1px; pointer-events: none; border-radius: inherit;
   background:
-    linear-gradient(var(--green), var(--green)) top left / 16px 2px no-repeat,
-    linear-gradient(var(--green), var(--green)) top left / 2px 16px no-repeat,
-    linear-gradient(var(--green), var(--green)) top right / 16px 2px no-repeat,
-    linear-gradient(var(--green), var(--green)) top right / 2px 16px no-repeat,
-    linear-gradient(var(--green), var(--green)) bottom left / 16px 2px no-repeat,
-    linear-gradient(var(--green), var(--green)) bottom left / 2px 16px no-repeat,
-    linear-gradient(var(--green), var(--green)) bottom right / 16px 2px no-repeat,
-    linear-gradient(var(--green), var(--green)) bottom right / 2px 16px no-repeat;
+    linear-gradient(var(--brand), var(--brand)) top left / 16px 2px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) top left / 2px 16px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) top right / 16px 2px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) top right / 2px 16px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) bottom left / 16px 2px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) bottom left / 2px 16px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) bottom right / 16px 2px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) bottom right / 2px 16px no-repeat;
   opacity: 0.85;
 }
 .glass.hud-corners::before { display: none; }
 
 /* ---------- Buttons ---------- */
+/* Terminal-key shape: near-square corners, mono caps, no gradient fills. Secondary buttons are
+   neutral until touched, then pick up the green action colour. */
 .btn {
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
-  padding: 0.9rem 1.55rem; border-radius: 10px; cursor: pointer;
-  font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; white-space: nowrap;
-  color: #FFFFFF; background: var(--surface);
-  border: 1px solid rgba(196, 69, 82, 0.35);
-  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.6), 0 0 22px -10px rgba(196, 69, 82, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  padding: 0.85rem 1.5rem; border-radius: 3px; cursor: pointer;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap;
+  color: var(--text); background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
 }
-.btn:hover { background: var(--surface-2); box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.7), 0 0 28px -10px rgba(196, 69, 82, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08); border-color: var(--green); transform: translateY(-1px); }
-.btn:active { transform: scale(0.99) translateY(0); background: #38B878; border-color: #38B878; color: #07110B; box-shadow: 0 0 20px -8px rgba(56, 184, 120, 0.55); }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-solid { background: linear-gradient(135deg, #B91C2B 0%, #D9273B 100%); border-color: rgba(217, 39, 59, 0.65); color: #FFFFFF; font-weight: 700; box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.65), 0 0 30px -8px rgba(217, 39, 59, 0.42); }
-.btn-solid:hover { background: linear-gradient(135deg, #A9E7C4 0%, #70D6A2 100%); border-color: #70D6A2; color: #07110B; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.24); box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.65), 0 0 26px -10px rgba(112, 214, 162, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
-.btn-solid:active { background: #38B878; border-color: #38B878; color: #07110B; box-shadow: 0 0 20px -8px rgba(56, 184, 120, 0.55); }
-.btn:focus { background: #A9E7C4; border-color: #70D6A2; color: #07110B; box-shadow: 0 0 0 3px rgba(112, 214, 162, 0.2), 0 0 22px -8px rgba(56, 184, 120, 0.55); }
-.btn-solid:focus { background: linear-gradient(135deg, #A9E7C4 0%, #70D6A2 100%); border-color: #70D6A2; color: #07110B; }
-.btn:focus-visible { outline: 2px solid #A9E7C4; outline-offset: 3px; }
+.btn:hover { background: rgba(56, 184, 120, 0.07); border-color: var(--action); color: var(--action-bright); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); background: rgba(56, 184, 120, 0.12); border-color: var(--action); color: var(--action-bright); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-solid {
+  background: var(--action); border-color: var(--action); color: var(--action-ink); font-weight: 600;
+  box-shadow: 0 10px 26px -14px rgba(56, 184, 120, 0.7);
+}
+.btn-solid:hover { background: var(--action-bright); border-color: var(--action-bright); color: var(--action-ink); box-shadow: 0 14px 30px -14px rgba(56, 184, 120, 0.8); }
+.btn-solid:active { background: var(--action); border-color: var(--action); color: var(--action-ink); }
+
+/* Red is reserved for destructive / urgent actions, so it keeps its weight elsewhere. */
+.btn-danger { border-color: var(--brand-dim); color: #F2C9CC; }
+.btn-danger:hover { background: rgba(196, 69, 82, 0.1); border-color: var(--brand); color: #F2C9CC; }
+
+.btn:focus-visible { outline: 2px solid var(--action-bright); outline-offset: 3px; }
 @media (hover: none) {
   .btn:hover { transform: none; }
 }
-.btn-sm { padding: 0.55rem 0.8rem; font-size: 0.62rem; letter-spacing: 0.12em; }
+.btn-sm { padding: 0.5rem 0.8rem; font-size: 0.6rem; letter-spacing: 0.13em; }
 
-/* ---------- Typography ---------- */
-.hud-label { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(196, 69, 82, 0.75); }
-.display { font-weight: 700; letter-spacing: -0.025em; line-height: 0.92; }
-.text-glow { color: #F2C9CC; text-shadow: 0 0 28px rgba(196, 69, 82, 0.22), 0 0 2px rgba(255, 255, 255, 0.6); }
+/* ---------- Typography ----------
+   One system: Bricolage Grotesque is the primary voice and owns every heading. Archivo is the
+   quiet companion for body copy and form input. IBM Plex Mono is restricted to genuinely
+   technical text — ids, codes, status labels, metadata. An explicit font-mono utility still wins
+   over the element rule below, so deliberate mono headings keep working. */
+h1, h2, h3, h4 {
+  font-family: 'Bricolage Grotesque', 'Archivo', system-ui, sans-serif;
+  font-optical-sizing: auto; letter-spacing: -0.02em;
+}
+.hud-label { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 0.66rem; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(196, 69, 82, 0.8); }
+.display {
+  font-family: 'Bricolage Grotesque', 'Archivo', system-ui, sans-serif;
+  font-weight: 800; font-optical-sizing: auto;
+  letter-spacing: -0.035em; line-height: 0.9;
+}
+/* Second voice for display type: a high-contrast serif italic, against the flat heavy grotesque of
+   .display. Used for the hero's outlined middle word — the thick/thin modulation and the slant are
+   what make it read as a different voice rather than the same font twice. */
+.display-serif {
+  font-family: 'Instrument Serif', Georgia, serif;
+  /* Instrument Serif ships in 400 only. .display sets 800, and inheriting that would make the
+     browser synthesise a fake bold — which smears badly under an outline. Pin it to 400. */
+  font-weight: 400;
+  font-style: italic;
+  /* .display's negative tracking is for a tight grotesque; a slanted serif needs room to breathe. */
+  letter-spacing: 0.01em;
+  /* Its caps sit shorter than Bricolage's, so a little size keeps the stack flush. */
+  font-size: 1.12em;
+}
+/* The outline is tuned for heavy grotesque stems; on this serif's hairlines a 1.5px stroke closes
+   them up, so it's thinned here. Two classes outrank .text-outline's one, so order doesn't matter. */
+.text-outline.display-serif { -webkit-text-stroke-width: 1px; }
 .text-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.72); }
-.text-grad { background: linear-gradient(180deg, #fff 15%, #E08B93 60%, #F4F4F5 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.text-head { color: #F3F0E9; }
+/* Headline accents, at most one of each per headline: red marks the origin (where it starts,
+   the brand, 1.0), green marks the destination (the payoff, the next step, 2.0). */
+.hl-red { color: var(--brand); }
+.hl-green { color: var(--action); }
 
 /* ---------- Form ---------- */
 .field {
-  width: 100%; padding: 0.85rem 1rem; border-radius: 10px; color: #FFFFFF; font-size: 0.95rem;
+  width: 100%; padding: 0.85rem 1rem; border-radius: 4px; color: #FFFFFF; font-size: 0.95rem;
   background: var(--surface); border: 1px solid var(--border); outline: none;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .field::placeholder { color: rgba(139, 150, 145, 0.6); }
-.field:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(196, 69, 82, 0.15), 0 0 24px -8px rgba(196, 69, 82, 0.4); }
-.field.invalid { border-color: var(--red); }
+.field:focus { border-color: var(--action); box-shadow: 0 0 0 3px rgba(56, 184, 120, 0.16); }
+.field.invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.12); }
 textarea.field { resize: vertical; min-height: 7rem; }
 select.field option { background: var(--surface); }
+
+/* ---------- Select (custom dropdown; replaces the native <select>) ---------- */
+.select-trigger { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; cursor: pointer; }
+.select-trigger:disabled { cursor: not-allowed; opacity: 0.5; }
+.select-panel {
+  position: absolute; z-index: 50; top: calc(100% + 0.4rem); left: 0; right: 0;
+  max-height: 16rem; overflow-y: auto; border-radius: 6px; padding: 0.35rem;
+  background: linear-gradient(162deg, var(--surface-2) 0%, var(--surface) 70%, #060607 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 44px -18px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+.select-option {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  width: 100%; padding: 0.55rem 0.7rem; border-radius: 4px; font-size: 0.9rem;
+  color: #D4D4D8; text-align: left; cursor: pointer; transition: background-color 0.12s ease, color 0.12s ease;
+}
+.select-option[data-active="true"] { background: rgba(56, 184, 120, 0.12); color: #F4F4F5; }
+.select-option[data-selected="true"] { color: var(--action-bright); }
+.select-option-disabled { cursor: not-allowed; opacity: 0.4; }
+.select-option-disabled[data-active="true"] { background: transparent; }
 
 /* ---------- Backgrounds ---------- */
 .grid-bg {
@@ -191,7 +242,9 @@ select.field option { background: var(--surface); }
   -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 75%);
   mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 75%);
 }
-.footer-grid {
+/* The site's opaque "graph paper" surface. Use it wherever content needs a solid backing over the
+   3D scene, instead of a translucent or blurred glass panel. */
+.grid-surface {
   background-color: #090909;
   background-image:
     radial-gradient(circle, rgba(196, 69, 82, 0.16) 1px, transparent 1.5px),
@@ -199,85 +252,40 @@ select.field option { background: var(--surface); }
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 32px 32px, 48px 48px, 48px 48px;
 }
-.contact-organizers::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 18% 12%, rgba(196, 69, 82, 0.07), transparent 42%),
-    linear-gradient(180deg, rgba(8, 8, 9, 0.72), rgba(5, 5, 6, 0.96));
-}
-.contact-organizers::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.16;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 48px 48px;
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 92%);
-  mask-image: linear-gradient(180deg, #000 0%, transparent 92%);
-}
+/* Same graph paper, but the 3D scene stays faintly visible through it. Only the fill is
+   translucent — the dots and rules stay at full strength so the texture still reads. */
+.grid-surface-soft { background-color: rgba(9, 9, 9, 0.72); }
 .scanlines::after {
   content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.3;
   background: repeating-linear-gradient(to bottom, transparent 0 3px, rgba(196, 69, 82, 0.035) 3px 4px);
 }
 
 /* ---------- Animations ---------- */
-@keyframes spark { 0% { transform: translateY(0) scale(1); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-46px) scale(0.3); opacity: 0; } }
-.spark { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #E08B93; box-shadow: 0 0 8px #C44552; opacity: 0; pointer-events: none; }
-.holo-card:hover .spark { animation: spark 1.6s ease-out infinite; }
 @keyframes ping-ring { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2.4); opacity: 0; } }
 .ping-ring { animation: ping-ring 1.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
-@keyframes rays { to { transform: rotate(360deg); } }
-.rays { animation: rays 40s linear infinite; }
-@keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 18px 0 rgba(196, 69, 82, 0.55); } 50% { box-shadow: 0 0 34px 6px rgba(196, 69, 82, 0.9); } }
-.pulse-glow { animation: pulse-glow 2.2s ease-in-out infinite; }
-@keyframes blink { 50% { opacity: 0.25; } }
-.blink { animation: blink 1.4s steps(2) infinite; }
 @keyframes shimmer { to { background-position: -200% 0; } }
-.loader-bar { background: linear-gradient(90deg, transparent, #C44552, transparent); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
-
-/* ---------- Hero logo float ---------- */
-@keyframes logo-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8px) rotate(1deg); } }
-.logo-float { animation: logo-float 6s ease-in-out infinite; }
-@keyframes orb-drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, -30px); } }
-.orb-drift { animation: orb-drift 12s ease-in-out infinite; }
+.loader-bar { background: linear-gradient(90deg, transparent, #38B878, transparent); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
 
 /* ---------- Countdown ---------- */
 .cd-panel {
-  position: relative; padding: 1.1rem 0.9rem 1.25rem; border-radius: 1rem;
-  background: linear-gradient(160deg, rgba(10, 22, 38, 0.55), rgba(6, 17, 31, 0.4));
-  border: 1px solid rgba(196, 69, 82, 0.22);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 40px -14px rgba(196, 69, 82, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  animation: cd-glow 4s ease-in-out infinite;
+  position: relative; padding: 1.1rem 0.9rem 1.25rem; border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 44px -24px rgba(0, 0, 0, 0.8);
 }
 .cd-cell { display: flex; flex-direction: column; align-items: center; min-width: 0; }
 .cd-num {
   display: block; min-width: 2.4ch; padding: 0.45rem 0.35rem; text-align: center;
-  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-variant-numeric: tabular-nums;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 600; font-variant-numeric: tabular-nums;
   font-size: clamp(1.5rem, 6.2vw, 3.2rem); line-height: 1; color: #fff;
   border-radius: 0.7rem; border: 1px solid rgba(196, 69, 82, 0.25);
   background: linear-gradient(180deg, rgba(196, 69, 82, 0.08), rgba(196, 69, 82, 0.04));
   text-shadow: 0 0 18px rgba(196, 69, 82, 0.28);
 }
 .cd-label {
-  margin-top: 0.5rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+  margin-top: 0.5rem; font-family: 'IBM Plex Mono', ui-monospace, monospace; text-transform: uppercase;
   font-size: clamp(0.5rem, 1.9vw, 0.68rem); letter-spacing: 0.18em; color: rgba(196, 69, 82, 0.85);
 }
 .cd-sep {
-  padding-top: 0.35rem; font-family: 'JetBrains Mono', monospace; font-weight: 700;
-  font-size: clamp(1.2rem, 5vw, 2.4rem); color: rgba(196, 69, 82, 0.6); animation: blink 1s steps(2) infinite;
+  padding-top: 0.35rem; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 600;
+  font-size: clamp(1.2rem, 5vw, 2.4rem); color: rgba(196, 69, 82, 0.6);
 }
-.cd-done { padding: 1.5rem 1rem; border-color: rgba(196, 69, 82, 0.4); }
-@keyframes cd-glow {
-  0%, 100% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 36px -16px rgba(196, 69, 82, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06); }
-  50% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 54px -12px rgba(196, 69, 82, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06); }
-}
-@media (prefers-reduced-motion: reduce) { .cd-panel, .cd-sep { animation: none; } }

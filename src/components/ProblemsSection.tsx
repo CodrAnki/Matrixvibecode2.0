@@ -1,77 +1,92 @@
-import { useMemo } from 'react'
-import { useProblems } from '../hooks/useProblems'
-import type { ProblemStatement } from '../lib/types'
-import HoloCard from './HoloCard'
+import { Link } from 'react-router-dom'
 import Reveal from './Reveal'
 import SectionTitle from './SectionTitle'
 import MagneticButton from './MagneticButton'
-import { CardSkeletons, StateMessage } from './SectionStates'
+import { DIFFICULTY, useOrderedProblems } from './ProblemsGrid'
+import { RedactedRow, lockedCopy } from './ProblemsLocked'
 
-const DIFFICULTY: Record<ProblemStatement['difficulty'], { label: string; cls: string }> = {
-  BEGINNER: { label: 'Beginner', cls: 'border-red-400/40 text-red-300' },
-  INTERMEDIATE: { label: 'Intermediate', cls: 'border-red-400/40 text-red-200' },
-  ADVANCED: { label: 'Advanced', cls: 'border-rose-400/40 text-rose-300' },
-}
+const PREVIEW = 3
 
-const Detail = ({ label, value }: { label: string; value?: string }) =>
-  value?.trim() ? (
-    <div>
-      <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#C44552]/80">{label}</p>
-      <p className="mt-1 whitespace-pre-line break-words">{value}</p>
-    </div>
-  ) : null
-
-/** Homepage "Problem Statements" section: every published problem statement from the existing problems API. */
+/** Homepage preview of the problem statements. Sealed until the reveal; the full briefs live on /problems. */
 export default function ProblemsSection() {
-  const { items, loading, error, reload } = useProblems()
-  // API returns newest first; show oldest first so ids read in order (PS-1, PS-2, ...).
-  const problems = useMemo(() => [...items].sort((a, b) => (a.createdAt ?? '').localeCompare(b.createdAt ?? '')), [items])
+  const { problems, loading, error, locked, previewDenied, phase } = useOrderedProblems()
+  const sealed = locked || previewDenied
+  const preview = problems.slice(0, PREVIEW)
+  const more = problems.length - preview.length
+  const copy = lockedCopy(phase)
 
   return (
     <section id="problems" aria-label="Problem statements" className="relative px-5 py-28 md:px-10 md:py-36">
       <div className="mx-auto max-w-7xl">
-        <SectionTitle kicker="Challenges" title="Problem Statements" sub="Pick the challenge that fits your team. Tap a card to see the full brief." />
+        <SectionTitle
+          index="07"
+          kicker="Problem statements"
+          title={<>Pick your <span className="hl-green">challenge.</span></>}
+          sub={sealed ? copy.text : "A first look at this year's challenges. Open the full list to read every brief."}
+        />
 
-        {loading ? (
-          <CardSkeletons />
-        ) : error ? (
-          <StateMessage tone="error" title="Couldn't load problem statements" action={<MagneticButton onClick={reload} size="sm">Try again</MagneticButton>}>
-            Something went wrong while fetching the problem statements. Please check your connection and try again.
-          </StateMessage>
-        ) : problems.length === 0 ? (
-          <StateMessage title="Problem statements coming soon">The organizers haven't published any problem statements yet. Check back soon.</StateMessage>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" style={{ perspective: 1200 }}>
-            {problems.map((p, i) => {
-              const d = DIFFICULTY[p.difficulty] ?? DIFFICULTY.BEGINNER
-              const summary = p.shortDescription?.trim() || p.description?.trim() || ''
-              // Open card shows the full description only if the summary above is something shorter.
-              const full = p.description?.trim() && p.description.trim() !== summary ? p.description.trim() : ''
-              const hasMore = Boolean(full || p.constraints?.trim() || p.inputFormat?.trim() || p.outputFormat?.trim())
-              return (
-                <Reveal key={p._id} delay={(i % 3) * 0.1} className="h-full">
-                  <HoloCard
-                    code={p.problemId}
-                    badge={d.label}
-                    badgeClass={d.cls}
-                    title={p.title}
-                    text={summary || undefined}
-                    clampText={summary.length > 160}
-                    details={hasMore ? (
-                      <div className="grid gap-3">
-                        <Detail label="Description" value={full} />
-                        <Detail label="Constraints" value={p.constraints} />
-                        <Detail label="Input" value={p.inputFormat} />
-                        <Detail label="Output" value={p.outputFormat} />
-                      </div>
-                    ) : undefined}
-                    tags={[...(p.category ? [p.category] : []), ...(p.tags ?? [])]}
-                  />
-                </Reveal>
-              )
-            })}
-          </div>
-        )}
+        <ol className="border-t border-white/[0.12]" aria-live="polite">
+          {loading
+            ? Array.from({ length: PREVIEW }, (_, i) => (
+                <li key={i} className="flex items-center gap-6 border-b border-white/[0.12] py-7" aria-hidden>
+                  <span className="h-3 w-12 animate-pulse rounded bg-white/10" />
+                  <span className="h-6 w-1/2 animate-pulse rounded bg-white/10" />
+                </li>
+              ))
+            : sealed
+              ? [1, 2, 3].map((n) => <RedactedRow key={n} n={n} />)
+              : preview.length === 0
+                ? (
+                  <li className="border-b border-white/[0.12] py-7 text-slate-400">
+                    {error
+                      ? "Couldn't load the problem statements right now. The full list may still have them."
+                      : 'No problem statements are published yet. Check back soon.'}
+                  </li>
+                )
+                : preview.map((p, i) => {
+                    const d = DIFFICULTY[p.difficulty] ?? DIFFICULTY.BEGINNER
+                    return (
+                      <li key={p._id} className="border-b border-white/[0.12]">
+                        <Reveal delay={i * 0.08}>
+                          <Link
+                            to="/problems"
+                            className="group grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-4 py-6 outline-none transition-colors hover:bg-white/[0.02] focus-visible:bg-white/[0.03] sm:grid-cols-[6rem_minmax(0,1fr)_auto_2rem] sm:gap-8 sm:py-7"
+                          >
+                            <span className="pl-1 font-mono text-xs tracking-[0.18em] text-[#C44552]">{p.problemId}</span>
+                            <span className="display truncate text-xl text-[#F3F0E9] transition-colors group-hover:text-[#70D6A2] sm:text-[1.75rem]">
+                              {p.title}
+                            </span>
+                            <span className={`rounded border px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.18em] ${d.cls}`}>
+                              {d.label}
+                            </span>
+                            <span aria-hidden className="hidden text-slate-500 transition-all group-hover:translate-x-1 group-hover:text-[#38B878] sm:block">
+                              →
+                            </span>
+                          </Link>
+                        </Reveal>
+                      </li>
+                    )
+                  })}
+        </ol>
+
+        <Reveal delay={0.15} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
+          {sealed ? (
+            <p className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-slate-500">
+              {phase === 'event-day' ? 'Event day / awaiting reveal' : 'Sealed until 14 October 2026'}
+            </p>
+          ) : (
+            <>
+              <MagneticButton to="/problems" variant="solid">
+                View all problem statements →
+              </MagneticButton>
+              {more > 0 && (
+                <span className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-slate-500">
+                  +{more} more on the full list
+                </span>
+              )}
+            </>
+          )}
+        </Reveal>
       </div>
     </section>
   )

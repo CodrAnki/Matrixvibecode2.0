@@ -1,30 +1,24 @@
 import { describe, it, expect } from 'vitest'
-import { parseMembersPayload, parseMember, resolveMaxTeamSize, assertNoDuplicate } from './memberValidation.js'
+import { parseMembersPayload, parseMember, MAX_TEAM_SIZE, assertNoDuplicate } from './memberValidation.js'
 
-const leader = { maxTeamSize: 4, leaderEmail: 'lead@x.com', leaderPhone: '9876543210' }
+const leader = { maxTeamSize: MAX_TEAM_SIZE, leaderEmail: 'lead@x.com', leaderPhone: '9876543210' }
 const m = (name: string, email?: string) => ({ name, ...(email ? { email } : {}) })
 
-describe('resolveMaxTeamSize', () => {
-  it('defaults to 4 and clamps to 20', () => {
-    expect(resolveMaxTeamSize(undefined)).toBe(4)
-    expect(resolveMaxTeamSize(null)).toBe(4)
-    expect(resolveMaxTeamSize('x')).toBe(4)
-    expect(resolveMaxTeamSize(0)).toBe(4)
-    expect(resolveMaxTeamSize(6)).toBe(6)
-    expect(resolveMaxTeamSize(500)).toBe(20)
+describe('MAX_TEAM_SIZE', () => {
+  it('is solo or duo, and not configurable', () => {
+    expect(MAX_TEAM_SIZE).toBe(2)
   })
 })
 
 describe('parseMembersPayload — team size (leader + members <= maxTeamSize)', () => {
-  it('allows 3 members besides the leader (total 4)', () => {
-    expect(parseMembersPayload([m('Ann'), m('Bob'), m('Cy')], leader)).toHaveLength(3)
+  it('allows one teammate besides the leader (a duo)', () => {
+    expect(parseMembersPayload([m('Ann')], leader)).toHaveLength(1)
   })
-  it('rejects a 4th member (total 5)', () => {
-    expect(() => parseMembersPayload([m('Ann'), m('Bob'), m('Cy'), m('Di')], leader)).toThrow()
+  it('allows no members at all (a solo team)', () => {
+    expect(parseMembersPayload([], leader)).toHaveLength(0)
   })
-  it('respects a configured maxTeamSize', () => {
-    expect(() => parseMembersPayload([m('Ann'), m('Bob')], { ...leader, maxTeamSize: 2 })).toThrow()
-    expect(parseMembersPayload([m('Ann')], { ...leader, maxTeamSize: 2 })).toHaveLength(1)
+  it('rejects a second teammate (total 3)', () => {
+    expect(() => parseMembersPayload([m('Ann'), m('Bob')], leader)).toThrow()
   })
   it('treats missing/null as no members', () => {
     expect(parseMembersPayload(undefined, leader)).toEqual([])
@@ -47,13 +41,21 @@ describe('parseMembersPayload — malformed payloads', () => {
 })
 
 describe('parseMembersPayload — duplicates', () => {
+  // The size limit is checked before duplicates, so a 2-member payload under the real solo/duo cap
+  // would throw for the wrong reason and pass this suite vacuously. These cases lift the cap so
+  // what's actually under test is the duplicate detection.
+  const roomy = { ...leader, maxTeamSize: 4 }
+
   it('rejects the leader added again as a member (by email or phone)', () => {
     expect(() => parseMembersPayload([m('Lead', 'LEAD@x.com')], leader)).toThrow()
     expect(() => parseMembersPayload([{ name: 'Lead', phone: '+91 98765 43210' }], leader)).toThrow()
   })
   it('rejects duplicate member emails / phones within the payload', () => {
-    expect(() => parseMembersPayload([m('A1', 'a@x.com'), m('A2', 'A@x.com')], leader)).toThrow()
-    expect(() => parseMembersPayload([{ name: 'A1', phone: '9111111111' }, { name: 'A2', phone: '91111-11111' }], leader)).toThrow()
+    expect(() => parseMembersPayload([m('A1', 'a@x.com'), m('A2', 'A@x.com')], roomy)).toThrow()
+    expect(() => parseMembersPayload([{ name: 'A1', phone: '9111111111' }, { name: 'A2', phone: '91111-11111' }], roomy)).toThrow()
+  })
+  it('accepts two distinct members when the cap allows it', () => {
+    expect(parseMembersPayload([m('A1', 'a1@x.com'), m('A2', 'a2@x.com')], roomy)).toHaveLength(2)
   })
 })
 

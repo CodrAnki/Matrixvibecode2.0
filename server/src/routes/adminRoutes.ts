@@ -5,10 +5,11 @@ import {
   getDashboardStats, getSettings, updateSettings,
 } from '../controllers/adminController.js'
 import { loginAdmin, getAdminMe } from '../controllers/authController.js'
-import { regenerateQr, verifyQr, confirmCheckIn, listCheckIns, getCheckInForTeam } from '../controllers/qrController.js'
+import { regenerateQr, verifyQr, confirmCheckIn, listCheckIns, getCheckInForTeam, getTeamQrAdmin } from '../controllers/qrController.js'
 import { createProblem, updateProblem, deleteProblem, listProblems, getProblemDetail, publishProblem, unpublishProblem } from '../controllers/problemController.js'
 import { createAnnouncement, updateAnnouncement, deleteAnnouncement, listAnnouncementsAdmin, publishAnnouncement, unpublishAnnouncement } from '../controllers/announcementController.js'
 import { listAccounts, createAccount, updateAccount, deleteAccount } from '../controllers/accountController.js'
+import { getAdminEventState, setProblemsRevealed } from '../controllers/eventController.js'
 import { requireAdmin, requireSuperAdmin } from '../middleware/adminAuth.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 
@@ -56,9 +57,15 @@ router.post('/accounts', requireAuth, requireSuperAdmin, createAccount)
 router.patch('/accounts/:id', requireAuth, requireSuperAdmin, updateAccount)
 router.delete('/accounts/:id', requireAuth, requireSuperAdmin, deleteAccount)
 
+// Problem-statement reveal: same permission level as publishing a problem (ADMIN or SUPER_ADMIN),
+// since whoever runs the event floor on the day needs to be able to flip it.
+router.get('/event', ...requireAdmin, getAdminEventState)
+router.patch('/event/reveal', ...requireAdmin, setProblemsRevealed)
+
 router.get('/settings', ...requireAdmin, getSettings)
 router.patch('/settings', requireAuth, requireSuperAdmin, updateSettings)
 
+router.get('/teams/:teamId/qr', ...requireAdmin, getTeamQrAdmin)
 router.post('/teams/:teamId/qr/regenerate', requireAuth, requireSuperAdmin, regenerateQr)
 router.post('/qr/verify', ...requireAdmin, verifyQr)
 router.post('/teams/:teamId/checkin', ...requireAdmin, confirmCheckIn)

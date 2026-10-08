@@ -14,11 +14,10 @@ const memberSchema = new Schema(
   {
     memberId: { type: String, required: true },
     name: { type: String, required: true, trim: true },
-    // Optional: the registration form lets a leader list a member by name only; the add-member endpoint still requires an email.
+    // Optional at the schema level for teams registered before email/phone were asked for; both
+    // forms now collect them.
     email: { type: String, lowercase: true, trim: true },
     phone: { type: String, trim: true },
-    college: { type: String, trim: true },
-    branch: { type: String, trim: true },
     year: { type: String, trim: true },
     status: { type: String, enum: ['ACTIVE', 'REMOVED'], default: 'ACTIVE' },
   },
@@ -40,11 +39,10 @@ const teamSchema = new Schema(
     teamId: { type: String, required: true, unique: true, index: true },
     teamName: { type: String, required: true, trim: true, unique: true },
     leader: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    college: { type: String, trim: true },
     // Optional team year chosen at registration. Pre-existing teams without it keep working.
     teamYear: { type: String, enum: { values: [...TEAM_YEARS, null], message: 'teamYear must be "1st Year" or empty' }, required: false, default: null },
     phone: { type: String, trim: true },
-    // Bounded: the controllers enforce EventSettings.maxTeamSize (default 4 incl. leader); this is the schema-level backstop.
+    // Bounded: the controllers enforce MAX_TEAM_SIZE (solo or duo); this is the loose schema backstop.
     members: {
       type: [memberSchema],
       default: [],

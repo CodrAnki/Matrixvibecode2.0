@@ -2,11 +2,25 @@ import crypto from 'node:crypto'
 import { QRToken } from '../models/QRToken.js'
 import { Team } from '../models/Team.js'
 import { ApiError } from '../middleware/errorHandler.js'
+import { registrationClosesAt } from '../eventSchedule.js'
 
 const TOKEN_TTL_DAYS = 14
+const DAY_MS = 24 * 60 * 60 * 1000
 
 function hashToken(raw: string): string {
   return crypto.createHash('sha256').update(raw).digest('hex')
+}
+
+/**
+ * A QR must work at the check-in desk on event day no matter how early the team was verified.
+ * A flat 14-day TTL alone meant anyone verified more than two weeks out arrived with a dead code.
+ * So every token is valid until at least 3 days after the event starts — applied when checking,
+ * not just when issuing, so tokens already minted under the old rule (and already downloaded or
+ * printed by teams) keep working without being reissued.
+ */
+function validUntil(storedExpiry: Date): number {
+  const eventFloor = registrationClosesAt().getTime() + 3 * DAY_MS
+  return Math.max(storedExpiry.getTime(), eventFloor)
 }
 
 /**
@@ -23,7 +37,7 @@ export async function issueTeamQrToken(teamId: string): Promise<{ url: string; e
   await QRToken.updateMany({ team: team._id, active: true }, { active: false })
 
   const raw = crypto.randomBytes(32).toString('base64url')
-  const expiresAt = new Date(Date.now() + TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000)
+  const expiresAt = new Date(validUntil(new Date(Date.now() + TOKEN_TTL_DAYS * DAY_MS)))
   const doc = await QRToken.create({ team: team._id, tokenHash: hashToken(raw), rawToken: raw, expiresAt, active: true })
 
   team.qrTokenId = doc._id
@@ -39,9 +53,11 @@ export async function getActiveTeamQrUrl(teamId: string): Promise<{ url: string;
   const team = await Team.findById(teamId)
   if (!team) throw new ApiError(404, 'Team not found')
   const tokenDoc = await QRToken.findOne({ team: team._id, active: true }).sort({ createdAt: -1 }).select('+rawToken')
-  if (!tokenDoc || tokenDoc.expiresAt.getTime() < Date.now()) return null
+  if (!tokenDoc) return null
+  const until = validUntil(tokenDoc.expiresAt)
+  if (until < Date.now()) return null
   const base = process.env.PUBLIC_APP_URL ?? 'http://localhost:5173'
-  return { url: `${base}/checkin/${team.teamId}?t=${tokenDoc.rawToken}`, expiresAt: tokenDoc.expiresAt }
+  return { url: `${base}/checkin/${team.teamId}?t=${tokenDoc.rawToken}`, expiresAt: new Date(until) }
 }
 
 /**
@@ -65,13 +81,14 @@ export async function verifyQrToken(teamId: unknown, rawToken: unknown) {
   if (typeof teamId !== 'string' || typeof rawToken !== 'string' || !teamId || !rawToken || teamId.length > 40 || rawToken.length > 200) throw INVALID_QR()
 
   const tokenDoc = await QRToken.findOne({ tokenHash: hashToken(rawToken), active: true })
-  if (!tokenDoc || tokenDoc.expiresAt.getTime() < Date.now()) throw INVALID_QR()
+  if (!tokenDoc || validUntil(tokenDoc.expiresAt) < Date.now()) throw INVALID_QR()
 
   // Soft-deleted teams can never pass.
   const team = await Team.findOne({ _id: tokenDoc.team, teamId, isDeleted: { $ne: true } })
   if (!team) throw INVALID_QR()
   // A QR is only ever issued to a VERIFIED team; if the team was later rejected / sent back for changes, it stops working.
   if (team.verificationStatus !== 'VERIFIED') throw new ApiError(403, 'This team is not verified, so its QR code cannot be used', 'TEAM_NOT_VERIFIED')
+  if (team.disabled) throw new ApiError(403, 'This team has been disabled by an admin, so its QR code cannot be used', 'TEAM_DISABLED')
 
   return { team, tokenDoc }
 }

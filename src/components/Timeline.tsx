@@ -21,14 +21,14 @@ export default function Timeline() {
               <button
                 onClick={() => setActive(i)}
                 aria-label={`Step ${i + 1}: ${s.title}`}
-                className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-full border font-mono text-xs transition-all duration-500 md:absolute md:left-1/2 md:-translate-x-1/2 ${cur ? 'pulse-glow scale-110 border-[#70D6A2] bg-[#38B878] text-[#07110B]' : on ? 'border-[#38B878]/70 bg-[#38B878]/20 text-[#A9E7C4] shadow-[0_0_10px_rgba(56,184,120,0.25)]' : 'border-white/10 bg-deep text-[#4a544f]'}`}
+                className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-full border font-mono text-xs transition-all duration-500 md:absolute md:left-1/2 md:-translate-x-1/2 ${cur ? 'scale-110 border-[#70D6A2] bg-[#38B878] text-[#07110B] shadow-[0_0_20px_-4px_rgba(56,184,120,0.55)]' : on ? 'border-[#38B878]/70 bg-[#38B878]/20 text-[#A9E7C4] shadow-[0_0_10px_rgba(56,184,120,0.25)]' : 'border-white/10 bg-deep text-[#4a544f]'}`}
               >
                 {String(i + 1).padStart(2, '0')}
               </button>
               <div className={`md:w-1/2 ${left ? 'md:pr-16 md:text-right' : 'md:ml-auto md:pl-16'}`}>
                 <div className={`glass holo-card p-5 transition-all duration-300 ${cur ? 'border-[#38B878]/50 shadow-[0_12px_36px_-24px_rgba(56,184,120,0.3),0_0_24px_-18px_rgba(56,184,120,0.16)]' : on ? '' : 'opacity-60'}`}>
-                  <h3 className="font-mono text-sm tracking-[0.22em] text-[#C44552]">{s.title}</h3>
-                  <p className="mt-2 text-sm text-slate-200/70">{s.text}</p>
+                  <h3 className="display text-[1.2rem] leading-tight text-[#F3F0E9]">{s.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-400">{s.text}</p>
                 </div>
               </div>
             </li>

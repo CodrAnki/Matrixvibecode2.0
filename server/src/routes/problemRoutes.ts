@@ -1,9 +1,9 @@
 import { Router } from 'express'
-import { listProblems } from '../controllers/problemController.js'
+import { listPublicProblems } from '../controllers/problemController.js'
+import { optionalAuth } from '../middleware/auth.js'
 
 const router = Router()
-// PUBLIC (homepage): only published, non-deleted problem statements are returned here — the controller
-// only includes drafts for an authenticated admin, and admins use /api/admin/problems for that anyway.
-router.get('/', listProblems)
+// PUBLIC: empty until the official reveal; optionalAuth only so a signed-in admin can preview.
+router.get('/', optionalAuth, listPublicProblems)
 
 export default router

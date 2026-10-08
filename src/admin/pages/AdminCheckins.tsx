@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import * as adminApi from '../../api/adminApi'
 import type { Team } from '../../lib/types'
 import { ApiError } from '../../lib/api'
+import { IconCheck } from '../../components/Icons'
 
 /** Parses `.../checkin/MTX-10001?t=<token>` (or a bare "teamId|token" fallback) out of a scanned QR string. */
 function parseQrPayload(raw: string): { teamId: string; token: string } | null {
@@ -28,8 +30,12 @@ export default function AdminCheckins() {
   // same QR before a state update would flush — without this, one scan would hit the API dozens of times.
   const scanLockRef = useRef(false)
 
+  const [checkInOpen, setCheckInOpen] = useState<boolean | null>(null)
+
   const refreshLog = () => adminApi.listCheckIns({ limit: 50 }).then((r) => setLog((r.checkIns ?? []) as never)).catch(() => undefined)
   useEffect(() => { refreshLog() }, [])
+  // The server refuses every scan while "Check-in open" is off in Settings, so say so up front.
+  useEffect(() => { adminApi.getSettings().then((s) => setCheckInOpen(s.checkInOpen)).catch(() => undefined) }, [])
   // Leaving the page must release the camera — otherwise the stream (and its decode loop) keeps running.
   useEffect(() => () => { scannerRef.current?.stop().catch(() => undefined) }, [])
 
@@ -92,6 +98,11 @@ export default function AdminCheckins() {
     <>
       <p className="hud-label mb-1">Event Day</p>
       <h1 className="mb-6 text-3xl font-bold text-white">Check-ins</h1>
+      {checkInOpen === false && (
+        <p role="alert" className="mb-6 rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          Check-in is <strong>closed</strong> — scans will be refused. A Super Admin can open it in <Link to="/admin/settings" className="underline">Settings</Link>.
+        </p>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         <section className="admin-glass p-6">
@@ -117,12 +128,16 @@ export default function AdminCheckins() {
           {!result && !err && <p className="text-sm text-slate-500">Scan a team QR or use manual lookup.</p>}
           {result && (
             <div>
-              <p className="font-mono text-xs uppercase tracking-widest text-red-300">MATRIX Vibe Coding 2.0</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-red-300">MATRIX, JEC / Vibe Coding 2.0</p>
               <h2 className="mt-2 text-2xl font-bold text-white">{result.team.teamName}</h2>
               <dl className="mt-4 grid gap-2 text-sm">
-                {[['Team ID', result.team.teamId], ['College', result.team.college], ['Members', String((result.team.members ?? []).length + 1)], ['Verification', `✓ ${result.team.verificationStatus}`]].map(([k, v]) => (
+                {[['Team ID', result.team.teamId], ['Members', String((result.team.members ?? []).length + 1)]].map(([k, v]) => (
                   <div key={k} className="flex justify-between border-b border-white/5 pb-2"><dt className="text-slate-400">{k}</dt><dd className="text-white">{v}</dd></div>
                 ))}
+                <div className="flex justify-between border-b border-white/5 pb-2">
+                  <dt className="text-slate-400">Verification</dt>
+                  <dd className="flex items-center gap-1.5 text-white"><IconCheck className="h-3.5 w-3.5" /> {result.team.verificationStatus}</dd>
+                </div>
               </dl>
               {result.alreadyCheckedIn ? (
                 <p className="mt-5 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-center font-mono text-sm uppercase tracking-widest text-amber-300">Team already checked in</p>

@@ -10,6 +10,11 @@ const NAV = [
   { to: '/dashboard/qr', label: 'Team QR' },
   { to: '/dashboard/workflow', label: 'Workflow' },
   { to: '/dashboard/announcements', label: 'Announcements' },
+  // A real, non-admin way to get help — this used to be nothing but a line in the QR page telling
+  // teams to "contact an event SUPER_ADMIN", with no link anywhere in the dashboard to actually do
+  // it. Its own /dashboard/support route (not the public /support page) so it renders inside this
+  // sidebar/shell instead of navigating a signed-in team away to the public site.
+  { to: '/dashboard/support', label: 'Support' },
 ]
 
 export default function DashboardLayout() {

@@ -34,7 +34,7 @@ async function seed() {
   console.log('[seed] upserting event settings (created once, never overwritten after)...')
   await EventSettings.updateOne(
     {},
-    { $setOnInsert: { name: 'MATRIX Vibe Coding 2.0', maxTeamSize: 4, registrationOpen: true, checkInOpen: true } },
+    { $setOnInsert: { name: 'MATRIX Vibe Coding 2.0', registrationOpen: true, checkInOpen: true } },
     { upsert: true },
   )
 

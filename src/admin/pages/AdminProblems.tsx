@@ -3,6 +3,7 @@ import * as adminApi from '../../api/adminApi'
 import type { ProblemStatement } from '../../lib/types'
 import { ApiError } from '../../lib/api'
 import MagneticButton from '../../components/MagneticButton'
+import Select from '../../components/Select'
 
 type StatusFilter = 'ALL' | 'DRAFT' | 'PUBLISHED'
 type DifficultyFilter = 'ALL' | ProblemStatement['difficulty']
@@ -164,23 +165,37 @@ export default function AdminProblems() {
         <>
           <div className="admin-glass mb-5 flex flex-wrap items-center gap-3 p-4">
             <input className="field flex-1 min-w-[180px]" placeholder="Search title, ID, or category…" value={search} onChange={(e) => setSearch(e.target.value)} />
-            <select className="field w-auto" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}>
-              <option value="ALL">All statuses</option>
-              <option value="DRAFT">Draft</option>
-              <option value="PUBLISHED">Published</option>
-            </select>
-            <select className="field w-auto" value={difficultyFilter} onChange={(e) => setDifficultyFilter(e.target.value as DifficultyFilter)}>
-              <option value="ALL">All difficulties</option>
-              <option value="BEGINNER">Beginner</option>
-              <option value="INTERMEDIATE">Intermediate</option>
-              <option value="ADVANCED">Advanced</option>
-            </select>
-            <select className="field w-auto" value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
-              <option value="created_desc">Newest created</option>
-              <option value="created_asc">Oldest created</option>
-              <option value="updated_desc">Recently updated</option>
-              <option value="updated_asc">Least recently updated</option>
-            </select>
+            <Select
+              aria-label="Filter by status"
+              className="field w-auto"
+              value={statusFilter}
+              onChange={(v) => setStatusFilter(v as StatusFilter)}
+              options={[{ value: 'ALL', label: 'All statuses' }, { value: 'DRAFT', label: 'Draft' }, { value: 'PUBLISHED', label: 'Published' }]}
+            />
+            <Select
+              aria-label="Filter by difficulty"
+              className="field w-auto"
+              value={difficultyFilter}
+              onChange={(v) => setDifficultyFilter(v as DifficultyFilter)}
+              options={[
+                { value: 'ALL', label: 'All difficulties' },
+                { value: 'BEGINNER', label: 'Beginner' },
+                { value: 'INTERMEDIATE', label: 'Intermediate' },
+                { value: 'ADVANCED', label: 'Advanced' },
+              ]}
+            />
+            <Select
+              aria-label="Sort by"
+              className="field w-auto"
+              value={sortKey}
+              onChange={(v) => setSortKey(v as SortKey)}
+              options={[
+                { value: 'created_desc', label: 'Newest created' },
+                { value: 'created_asc', label: 'Oldest created' },
+                { value: 'updated_desc', label: 'Recently updated' },
+                { value: 'updated_asc', label: 'Least recently updated' },
+              ]}
+            />
           </div>
 
           {visible.length === 0 ? (
@@ -231,9 +246,11 @@ export default function AdminProblems() {
               <input className="field sm:col-span-2" placeholder="Short description (shown in listings)" value={form.shortDescription} onChange={(e) => setForm({ ...form, shortDescription: e.target.value })} />
               <textarea className="field sm:col-span-2" rows={4} placeholder="Full description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               <input className="field" placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-              <select className="field" value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value as ProblemStatement['difficulty'] })}>
-                <option value="BEGINNER">Beginner</option><option value="INTERMEDIATE">Intermediate</option><option value="ADVANCED">Advanced</option>
-              </select>
+              <Select
+                value={form.difficulty}
+                onChange={(v) => setForm({ ...form, difficulty: v as ProblemStatement['difficulty'] })}
+                options={[{ value: 'BEGINNER', label: 'Beginner' }, { value: 'INTERMEDIATE', label: 'Intermediate' }, { value: 'ADVANCED', label: 'Advanced' }]}
+              />
               <textarea className="field sm:col-span-2" rows={2} placeholder="Constraints" value={form.constraints} onChange={(e) => setForm({ ...form, constraints: e.target.value })} />
               <textarea className="field" rows={2} placeholder="Input format" value={form.inputFormat} onChange={(e) => setForm({ ...form, inputFormat: e.target.value })} />
               <textarea className="field" rows={2} placeholder="Output format" value={form.outputFormat} onChange={(e) => setForm({ ...form, outputFormat: e.target.value })} />

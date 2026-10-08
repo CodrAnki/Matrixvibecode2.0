@@ -6,6 +6,7 @@ const CARDS: { key: Exclude<keyof adminApi.DashboardStats, 'latestAnnouncement'>
   { key: 'totalTeams', label: 'Active Teams' },
   { key: 'verifiedTeams', label: 'Verified Teams' },
   { key: 'pendingTeams', label: 'Pending Teams' },
+  { key: 'changesRequestedTeams', label: 'Changes Requested' },
   { key: 'rejectedTeams', label: 'Rejected Teams' },
   { key: 'deletedTeams', label: 'Deleted Teams' },
   { key: 'totalAnnouncements', label: 'Total Announcements' },
@@ -65,11 +66,11 @@ export default function AdminDashboard() {
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
             <div className="admin-glass p-6">
-              <p className="hud-label mb-4">College-wise teams</p>
+              <p className="hud-label mb-4">Solo vs duo teams</p>
               <div className="grid gap-3">
-                {data.charts.collegeWise.length === 0 && <p className="text-sm text-slate-500">No data yet.</p>}
-                {data.charts.collegeWise.map((c) => (
-                  <Bar key={c._id ?? 'unknown'} label={c._id ?? 'Unknown'} value={c.count} max={data.charts.collegeWise[0]?.count ?? 1} />
+                {data.charts.teamSize.length === 0 && <p className="text-sm text-slate-500">No data yet.</p>}
+                {data.charts.teamSize.map((c) => (
+                  <Bar key={c._id ?? 'unknown'} label={c._id ?? 'Unknown'} value={c.count} max={data.charts.teamSize[0]?.count ?? 1} />
                 ))}
               </div>
             </div>

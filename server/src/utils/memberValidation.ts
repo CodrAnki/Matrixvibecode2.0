@@ -2,19 +2,21 @@ import { ApiError } from '../middleware/errorHandler.js'
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 export const PHONE_RE = /^[+]?[\d\s-]{10,15}$/
-export const DEFAULT_MAX_TEAM_SIZE = 4
-/** Absolute ceiling (matches the admin Settings validation). Also bounds the Team.members array. */
+/**
+ * Vibe Coding 2.0 is solo or duo: the team leader, plus at most one teammate. This is fixed by the
+ * event format, deliberately NOT an admin setting — the old EventSettings.maxTeamSize is gone.
+ */
+export const MAX_TEAM_SIZE = 2
+/**
+ * Schema-level backstop for Team.members only, kept deliberately loose. Teams registered before the
+ * solo/duo rule may still hold more members; a tight bound here would make those documents fail
+ * validation on any later save (e.g. an admin changing their verification status). The real limit
+ * is MAX_TEAM_SIZE, enforced in the controllers on registration and on adding a member.
+ */
 export const HARD_MAX_TEAM_SIZE = 20
 
-export interface CleanMember { name: string; email?: string; phone?: string; college?: string; branch?: string; year?: string }
+export interface CleanMember { name: string; email?: string; phone?: string; year?: string }
 export interface PersonKeys { email?: string | null; phone?: string | null }
-
-/** EventSettings.maxTeamSize (leader INCLUDED) -> a sane integer; anything missing/invalid falls back to 4. */
-export function resolveMaxTeamSize(raw: unknown): number {
-  const n = typeof raw === 'number' ? raw : Number(raw)
-  if (!Number.isInteger(n) || n < 1) return DEFAULT_MAX_TEAM_SIZE
-  return Math.min(n, HARD_MAX_TEAM_SIZE)
-}
 
 /** Last 10 digits, so "+91 98765-43210" and "9876543210" compare equal. */
 export const phoneKey = (v: string): string => v.replace(/\D/g, '').slice(-10)
@@ -47,16 +49,12 @@ export function parseMember(raw: unknown, index: number, opts: { requireEmail: b
   const phone = optionalText(o.phone, `${label} phone`, 20)
   if (phone && !PHONE_RE.test(phone)) throw bad(`${label}: enter a valid phone number`)
 
-  const college = optionalText(o.college, `${label} college`, 150)
-  const branch = optionalText(o.branch, `${label} branch`, 100)
   const year = optionalText(o.year, `${label} year`, 30)
 
   return {
     name,
     ...(email && { email }),
     ...(phone && { phone }),
-    ...(college && { college }),
-    ...(branch && { branch }),
     ...(year && { year }),
   }
 }

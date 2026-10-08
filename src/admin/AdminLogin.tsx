@@ -36,7 +36,7 @@ export default function AdminLogin() {
             <path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" strokeLinejoin="round" />
           </svg>
           <div>
-            <p className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-red-300/70">MATRIX Vibe Coding 2.0</p>
+            <p className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-red-300/70">MATRIX, JEC / Vibe Coding 2.0</p>
             <h1 className="text-lg font-bold text-white">Admin Panel</h1>
           </div>
         </div>

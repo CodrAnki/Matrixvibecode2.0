@@ -3,13 +3,13 @@ import type { Team, ProblemStatement, Announcement } from '../lib/types'
 
 export interface DashboardStats {
   totalTeams: number; verifiedTeams: number; pendingTeams: number; rejectedTeams: number
-  deletedTeams: number; checkedInTeams: number
+  changesRequestedTeams: number; deletedTeams: number; checkedInTeams: number
   publishedAnnouncements: number; totalAnnouncements: number; draftAnnouncements: number;
   latestAnnouncement: { _id: string; title: string; status: string; createdAt: string } | null; adminAccounts: number; activeTeams: number
 }
 export interface DashboardCharts {
   registrationsByDay: { _id: string; count: number }[]
-  collegeWise: { _id: string; count: number }[]
+  teamSize: { _id: string; count: number }[]
   problemSelection: { _id: string; count: number }[]
 }
 export const getDashboard = () => apiFetch<{ stats: DashboardStats; charts: DashboardCharts }>('/admin/dashboard')
@@ -35,6 +35,8 @@ export const permanentDeleteTeam = (teamId: string, confirmText: string) =>
     `/admin/teams/${teamId}/permanent`, { method: 'DELETE', body: { confirmText } },
   )
 export const deleteTestTeams = () => apiFetch<{ deletedCount: number }>('/admin/teams/test', { method: 'DELETE' })
+/** View-only: the team's current QR. Never invalidates anything (unlike regenerateQr). */
+export const getTeamQr = (teamId: string) => apiFetch<{ qr: { url: string; expiresAt: string } }>(`/admin/teams/${teamId}/qr`)
 export const regenerateQr = (teamId: string) => apiFetch<{ qr: { url: string; expiresAt: string } }>(`/admin/teams/${teamId}/qr/regenerate`, { method: 'POST' })
 
 export const listProblemsAdmin = () => apiFetch<{ problems: ProblemStatement[] }>('/admin/problems')
@@ -71,6 +73,7 @@ export const verifyQrScan = (teamId: string, token: string) => apiFetch<{ team: 
 export const confirmCheckIn = (teamId: string, extra: { location?: string; deviceInfo?: string } = {}) => apiFetch<{ checkIn: unknown; team: Team }>(`/admin/teams/${teamId}/checkin`, { method: 'POST', body: extra })
 export const listCheckIns = (params: { page?: number; limit?: number } = {}) => apiFetch<{ checkIns: unknown[]; total: number; page: number; pages: number }>(`/admin/checkins?page=${params.page ?? 1}&limit=${params.limit ?? 50}`)
 
-export const getSettings = () => apiFetch<{ settings: { name: string; maxTeamSize: number; registrationOpen: boolean; checkInOpen: boolean } }>('/admin/settings').then((r) => r.settings)
-export const updateSettings = (input: { name?: string; maxTeamSize?: number; registrationOpen?: boolean; checkInOpen?: boolean }) =>
+// Team size is not here on purpose: solo/duo is fixed in the backend, not an admin setting.
+export const getSettings = () => apiFetch<{ settings: { name: string; registrationOpen: boolean; checkInOpen: boolean } }>('/admin/settings').then((r) => r.settings)
+export const updateSettings = (input: { name?: string; registrationOpen?: boolean; checkInOpen?: boolean }) =>
   apiFetch<{ settings: unknown }>('/admin/settings', { method: 'PATCH', body: input })

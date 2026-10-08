@@ -4,6 +4,7 @@ import * as adminApi from '../../api/adminApi'
 import type { AdminAccount } from '../../api/adminApi'
 import { ApiError } from '../../lib/api'
 import MagneticButton from '../../components/MagneticButton'
+import Select from '../../components/Select'
 import { useAdminAuth } from '../AdminAuthContext'
 
 type Toast = { kind: 'ok' | 'err'; text: string } | null
@@ -143,11 +144,10 @@ export default function AdminAccounts() {
             <input className="field" placeholder="Phone (optional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             <input required type="password" minLength={8} autoComplete="new-password" className="field" placeholder="Password (min 8 characters)" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
             <input required type="password" minLength={8} autoComplete="new-password" className="field" placeholder="Confirm Password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} />
-            <label className="grid gap-1 text-xs text-slate-400">Role
-              <select className="field" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-                {roleOptions.map((r) => <option key={r} value={r}>{r.replace('_', ' ')}</option>)}
-              </select>
-            </label>
+            <div>
+              <label htmlFor="create-role" className="mb-1 block text-xs text-slate-400">Role</label>
+              <Select id="create-role" value={form.role} onChange={(v) => setForm({ ...form, role: v })} options={roleOptions.map((r) => ({ value: r, label: r.replace('_', ' ') }))} />
+            </div>
             {formErr && <p role="alert" className="text-sm text-rose-300">{formErr}</p>}
             <div className="mt-2 flex justify-end gap-3">
               <button type="button" onClick={() => setShowCreate(false)} className="rounded-lg border border-white/15 px-4 py-2 text-sm text-slate-300 hover:bg-white/5">Cancel</button>
@@ -163,11 +163,20 @@ export default function AdminAccounts() {
             <p className="text-lg font-semibold text-white">Edit {editTarget.email}</p>
             <input required className="field" placeholder="Full Name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
             <input className="field" placeholder="Phone" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
-            <label className="grid gap-1 text-xs text-slate-400">Role
-              <select className="field" disabled={editTarget.id === admin?.id} value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
-                {Array.from(new Set([editTarget.role, ...roleOptions])).map((r) => <option key={r} value={r} disabled={r === 'SUPER_ADMIN' && !superCreationEnabled && editTarget.role !== 'SUPER_ADMIN'}>{r.replace('_', ' ')}</option>)}
-              </select>
-            </label>
+            <div>
+              <label htmlFor="edit-role" className="mb-1 block text-xs text-slate-400">Role</label>
+              <Select
+                id="edit-role"
+                disabled={editTarget.id === admin?.id}
+                value={editForm.role}
+                onChange={(v) => setEditForm({ ...editForm, role: v })}
+                options={Array.from(new Set([editTarget.role, ...roleOptions])).map((r) => ({
+                  value: r,
+                  label: r.replace('_', ' '),
+                  disabled: r === 'SUPER_ADMIN' && !superCreationEnabled && editTarget.role !== 'SUPER_ADMIN',
+                }))}
+              />
+            </div>
             <input type="password" autoComplete="new-password" className="field" placeholder="New password (leave blank to keep)" value={editForm.password} onChange={(e) => setEditForm({ ...editForm, password: e.target.value })} />
             {editForm.password && <input type="password" autoComplete="new-password" className="field" placeholder="Confirm new password" value={editForm.confirmPassword} onChange={(e) => setEditForm({ ...editForm, confirmPassword: e.target.value })} />}
             {editErr && <p role="alert" className="text-sm text-rose-300">{editErr}</p>}

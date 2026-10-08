@@ -7,13 +7,9 @@ import MagneticButton from '../../components/MagneticButton'
 import { useAdminAuth } from '../AdminAuthContext'
 import Pager from '../Pager'
 import { useFlash } from '../../hooks/useFlash'
-
-const STATUS_TONE: Record<string, string> = {
-  VERIFIED: 'text-red-300 border-red-400/30 bg-red-400/10',
-  PENDING: 'text-amber-300 border-amber-400/30 bg-amber-400/10',
-  REJECTED: 'text-rose-300 border-rose-400/30 bg-rose-400/10',
-  CHANGES_REQUIRED: 'text-red-300 border-red-400/30 bg-red-400/10',
-}
+import { IconCheck } from '../../components/Icons'
+import ConfirmButton from '../../components/ConfirmButton'
+import { STATUS_BADGE } from '../teamStatus'
 
 export default function AdminTeams() {
   const { admin } = useAdminAuth()
@@ -95,8 +91,8 @@ export default function AdminTeams() {
       {toast && <p role="status" className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm text-red-200">{toast}</p>}
 
       <div className="mb-5 flex flex-wrap gap-2">
-        {['', 'PENDING', 'VERIFIED', 'REJECTED', 'CHANGES_REQUIRED'].map((s) => (
-          <button key={s || 'all'} onClick={() => { setPage(1); setParams(s ? { status: s } : {}) }} className={`rounded-full border px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-widest transition-colors ${status === s ? 'border-red-400/50 bg-red-400/15 text-red-100' : 'border-white/10 text-slate-400 hover:text-slate-200'}`}>{s || 'All'}</button>
+        {['', 'PENDING', 'CHANGES_REQUIRED', 'VERIFIED', 'REJECTED'].map((s) => (
+          <button key={s || 'all'} onClick={() => { setPage(1); setParams(s ? { status: s } : {}) }} className={`rounded-full border px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-widest transition-colors ${status === s ? 'border-red-400/50 bg-red-400/15 text-red-100' : 'border-white/10 text-slate-400 hover:text-slate-200'}`}>{s ? STATUS_BADGE[s].label : 'All'}</button>
         ))}
       </div>
 
@@ -105,7 +101,7 @@ export default function AdminTeams() {
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead>
             <tr className="border-b border-white/10 text-slate-400">
-              {['Team ID', 'Team Name', 'Team Year', 'Leader', 'College', 'Members', 'Status', 'Check-in', 'Actions'].map((h) => <th key={h} className="px-4 py-3 font-mono text-[0.6rem] uppercase tracking-widest">{h}</th>)}
+              {['Team ID', 'Team Name', 'Team Year', 'Leader', 'Members', 'Status', 'Check-in', 'Actions'].map((h) => <th key={h} className="px-4 py-3 font-mono text-[0.6rem] uppercase tracking-widest">{h}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -117,17 +113,26 @@ export default function AdminTeams() {
                 <td className="px-4 py-3 text-white">{t.teamName}</td>
                 <td className="px-4 py-3">{t.teamYear ? <span className="rounded border border-[#F4F4F5]/40 bg-[#F4F4F5]/10 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-red-200">{t.teamYear}</span> : <span className="text-slate-500">Not specified</span>}</td>
                 <td className="px-4 py-3 text-slate-300">{t.leader && typeof t.leader === 'object' ? (t.leader as { name: string }).name : '—'}</td>
-                <td className="px-4 py-3 text-slate-300">{t.college}</td>
                 <td className="px-4 py-3 text-slate-300">{(t.members ?? []).length + 1}</td>
-                <td className="px-4 py-3"><span className={`rounded border px-2 py-0.5 font-mono text-[0.58rem] tracking-widest ${STATUS_TONE[t.verificationStatus]}`}>{t.verificationStatus}</span></td>
-                <td className="px-4 py-3 text-slate-300">{t.checkedIn ? '✓' : '—'}</td>
+                <td className="px-4 py-3">
+                  <span className={`whitespace-nowrap rounded border px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest ${STATUS_BADGE[t.verificationStatus]?.cls ?? ''}`}>{STATUS_BADGE[t.verificationStatus]?.label ?? t.verificationStatus}</span>
+                  {t.disabled && <span className="ml-1.5 whitespace-nowrap rounded border border-rose-400/40 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-rose-200">Disabled</span>}
+                </td>
+                <td className="px-4 py-3 text-slate-300">{t.checkedIn ? <IconCheck className="h-3.5 w-3.5 text-[#38B878]" /> : '—'}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
-                    {t.verificationStatus !== 'VERIFIED' && (
-                      <button disabled={busyId === t.teamId} onClick={() => act((id) => adminApi.verifyTeam(id), t.teamId)} className="rounded border border-red-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-red-300 hover:bg-red-400/10 disabled:opacity-40">Verify</button>
+                    {t.verificationStatus !== 'VERIFIED' && !t.disabled && (
+                      <button disabled={busyId === t.teamId} onClick={() => act((id) => adminApi.verifyTeam(id), t.teamId)} className="rounded border border-[#38B878]/40 px-2 py-1 font-mono text-[0.58rem] uppercase text-[#A9E7C4] hover:bg-[#38B878]/10 disabled:opacity-40">Verify</button>
                     )}
-                    {t.verificationStatus !== 'REJECTED' && (
-                      <button disabled={busyId === t.teamId} onClick={() => act((id) => adminApi.rejectTeam(id), t.teamId)} className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10 disabled:opacity-40">Reject</button>
+                    {/* A checked-in team can't be rejected (server enforces it too), and rejecting is confirmed first. */}
+                    {t.verificationStatus !== 'REJECTED' && !t.checkedIn && (
+                      <ConfirmButton
+                        disabled={busyId === t.teamId}
+                        message={`Reject ${t.teamName}?`}
+                        confirmLabel="Yes, reject"
+                        onConfirm={() => act((id) => adminApi.rejectTeam(id), t.teamId)}
+                        className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10 disabled:opacity-40"
+                      >Reject</ConfirmButton>
                     )}
                     <Link to={`/admin/teams/${t.teamId}`} className="rounded border border-white/15 px-2 py-1 font-mono text-[0.58rem] uppercase text-slate-300 hover:bg-white/5">View Team</Link>
                     <button disabled={busyId === t.teamId} onClick={() => setDeleteTarget(t)} className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10 disabled:opacity-40">Delete</button>

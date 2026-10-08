@@ -1,7 +1,7 @@
 /** Shared shapes returned by the real backend (server/src/models). Mirrors serializeTeam. */
 export interface Member {
   memberId: string; name: string; email?: string; phone?: string
-  college?: string; branch?: string; year?: string; status: 'ACTIVE' | 'REMOVED'
+  year?: string; status: 'ACTIVE' | 'REMOVED'
 }
 export interface VerificationHistoryEntry { status: string; note?: string; at: string }
 export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'CHANGES_REQUIRED'
@@ -15,7 +15,6 @@ export interface Team {
   id: string
   teamId: string
   teamName: string
-  college?: string
   teamYear?: TeamYear | null
   phone?: string
   members: Member[]

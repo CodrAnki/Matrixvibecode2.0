@@ -2,7 +2,14 @@ import type * as React from 'react'
 import { useRef, type ReactNode } from 'react'
 import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 
-export default function TiltCard({ children, className = '', max = 9, onClick }: { children: ReactNode; className?: string; max?: number; onClick?: () => void }) {
+type Props = {
+  children: ReactNode
+  className?: string
+  max?: number
+  onClick?: () => void
+} & Pick<React.HTMLAttributes<HTMLDivElement>, 'role' | 'tabIndex' | 'onKeyDown' | 'aria-expanded'>
+
+export default function TiltCard({ children, className = '', max = 9, onClick, ...rest }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const shouldReduceMotion = useReducedMotion()
   const rx = useMotionValue(0)
@@ -27,6 +34,7 @@ export default function TiltCard({ children, className = '', max = 9, onClick }:
       onPointerMove={move}
       onPointerLeave={leave}
       onClick={onClick}
+      {...rest}
       whileHover={shouldReduceMotion ? undefined : { y: -3, scale: 1.015 }}
       transition={{ type: 'spring', stiffness: 220, damping: 26 }}
       style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}

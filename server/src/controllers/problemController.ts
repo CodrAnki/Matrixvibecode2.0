@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import type { Request, Response } from 'express'
 import { ProblemStatement } from '../models/ProblemStatement.js'
+import { EventSettings } from '../models/Event.js'
 import { Team } from '../models/Team.js'
 import { ApiError } from '../middleware/errorHandler.js'
 import { generateProblemId } from '../utils/generateId.js'
@@ -18,18 +19,34 @@ function pickEditable(body: Record<string, unknown>): Record<string, unknown> {
 }
 
 /**
- * GET /api/problems — team-facing: published + not-deleted only. An empty database (zero
- * problem statements at all, or zero published ones) is a normal, fully-supported state — this
- * always returns `{success:true, problems:[]}` rather than erroring.
  * GET /api/admin/problems — admin-facing: every non-deleted problem (draft + published), so the
- * management page can list everything. Deleted problems never appear in either list.
+ * management page can list everything. Deleted problems never appear.
  */
-export const listProblems = asyncHandler(async (req: Request, res: Response) => {
-  const isAdmin = req.auth?.role === 'ADMIN' || req.auth?.role === 'SUPER_ADMIN'
-  const filter: Record<string, unknown> = { isDeleted: { $ne: true } }
-  if (!isAdmin) filter.isPublished = true
-  const problems = await ProblemStatement.find(filter).sort({ createdAt: -1 }).limit(500)
+export const listProblems = asyncHandler(async (_req: Request, res: Response) => {
+  const problems = await ProblemStatement.find({ isDeleted: { $ne: true } }).sort({ createdAt: -1 }).limit(500)
   res.json({ success: true, problems })
+})
+
+/**
+ * GET /api/problems — public. Returns NOTHING until the official reveal (EventSettings.problemsRevealed),
+ * then every published, non-deleted problem. The one exception is a signed-in admin asking for
+ * `?preview=1`, which lets them test the participant view before the reveal; for anyone else the
+ * flag is ignored. An empty list is a normal state, never an error.
+ */
+export const listPublicProblems = asyncHandler(async (req: Request, res: Response) => {
+  const settings = await EventSettings.findOne().lean()
+  const revealed = settings?.problemsRevealed === true
+  const isAdmin = req.auth?.role === 'ADMIN' || req.auth?.role === 'SUPER_ADMIN'
+  const preview = !revealed && isAdmin && req.query.preview === '1'
+
+  // Per-user (an admin preview carries problems) and must change the instant a reveal happens.
+  res.set('Cache-Control', 'private, no-store')
+  if (!revealed && !preview) {
+    res.json({ success: true, revealed: false, preview: false, problems: [] })
+    return
+  }
+  const problems = await ProblemStatement.find({ isPublished: true, isDeleted: { $ne: true } }).sort({ createdAt: -1 }).limit(500)
+  res.json({ success: true, revealed, preview, problems })
 })
 
 /** GET /api/admin/problems/:id — full detail for the admin "View"/"Edit" actions. */
@@ -112,11 +129,16 @@ export const deleteProblem = asyncHandler(async (req: Request, res: Response) =>
 export const selectProblem = asyncHandler(async (req: Request, res: Response) => {
   const problemId = (req.body ?? {}).problemId
   if (typeof problemId !== 'string' || !problemId) throw new ApiError(400, 'problemId is required')
+  const settings = await EventSettings.findOne().lean()
+  if (settings?.problemsRevealed !== true) {
+    throw new ApiError(403, 'Problem statements have not been revealed yet.', 'NOT_REVEALED')
+  }
   const problem = await ProblemStatement.findOne({ _id: problemId, isPublished: true, isDeleted: { $ne: true } })
   if (!problem) throw new ApiError(404, 'Problem statement not found')
   const team = await Team.findOne({ leader: req.auth?.id, isDeleted: { $ne: true } })
   if (!team) throw new ApiError(404, 'Team not found')
   if (team.verificationStatus !== 'VERIFIED') throw new ApiError(400, 'Team must be verified before selecting a problem statement')
+  if (team.disabled) throw new ApiError(403, 'Your team has been disabled by an admin — contact support', 'TEAM_DISABLED')
   team.problemStatement = problem._id
   team.eventStatus = 'PROBLEM_SELECTED'
   await team.save()

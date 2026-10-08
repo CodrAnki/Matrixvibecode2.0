@@ -7,6 +7,7 @@ const NAV = [
   { to: '/admin/teams', label: 'Teams', superOnly: false },
   { to: '/admin/teams/deleted', label: 'Deleted Teams', superOnly: false },
   { to: '/admin/problems', label: 'Problem Statements', superOnly: false },
+  { to: '/admin/event-day', label: 'Event Day', superOnly: false },
   { to: '/admin/announcements', label: 'Announcements', superOnly: false },
   { to: '/admin/checkins', label: 'Check-ins', superOnly: false },
   { to: '/admin/accounts', label: 'Admin Accounts', superOnly: true },

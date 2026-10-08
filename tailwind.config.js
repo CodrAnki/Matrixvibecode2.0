@@ -22,13 +22,14 @@ export default {
         muted: '#A1A1AA',
       },
       fontFamily: {
-        sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        sans: ['"Archivo"', 'system-ui', 'sans-serif'],
+        display: ['"Bricolage Grotesque"', '"Archivo"', 'system-ui', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
         card: '0 20px 50px rgba(0,0,0,0.45)',
         'card-hover': '0 20px 44px -18px rgba(0,0,0,0.65), 0 0 32px -18px rgba(196,69,82,0.18)',
-        'admin-glow': '0 20px 60px rgba(0,0,0,0.55), 0 0 50px -16px rgba(0,140,255,0.45), 0 0 30px -18px rgba(37,99,255,0.4)',
+        'admin-glow': '0 20px 60px rgba(0,0,0,0.55), 0 0 50px -16px rgba(196,69,82,0.35)',
       },
     },
   },

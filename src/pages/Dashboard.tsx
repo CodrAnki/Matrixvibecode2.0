@@ -7,7 +7,8 @@ import MagneticButton from '../components/MagneticButton'
 import { useAuth } from '../context/AuthContext'
 import * as announcementApi from '../api/announcementApi'
 import type { Announcement } from '../lib/types'
-import { pipelineStep } from '../lib/pipeline'
+import { pipelineBlocked, pipelineStep } from '../lib/pipeline'
+import TeamStatusBanner, { TEAM_STATUS_LABEL } from '../components/TeamStatusBanner'
 
 export default function Dashboard() {
   const { team } = useAuth()
@@ -24,16 +25,23 @@ export default function Dashboard() {
 
   if (!team) return null
   const completed = pipelineStep(team)
-  const stage = STAGES[Math.min(completed, STAGES.length - 1)].key
-  const statusText = team.verificationStatus
+  const stageIndex = Math.min(completed, STAGES.length - 1)
+  // Once every stage is actually done (completed hits the full count), show the stage name itself
+  // ("CHECKED IN"). Otherwise this is the stage still ahead, so say so — showing the bare name here
+  // reads as "this already happened" even when it hasn't (see Pipeline's "awaiting" labels).
+  const blocked = pipelineBlocked(team)
+  const stage = completed >= STAGES.length ? STAGES[stageIndex].key : (blocked ?? STAGES[stageIndex].awaiting)
+  const statusText = team.disabled ? 'Disabled' : (TEAM_STATUS_LABEL[team.verificationStatus] ?? team.verificationStatus)
 
   return (
     <>
       <PageHeader kicker="Mission control" title="Team Dashboard" sub={`Welcome back, ${team.teamName}`} right={<div className="glass px-4 py-2 font-mono text-xs tracking-widest text-red-200">ID · {team.teamId}</div>} />
 
+      <TeamStatusBanner team={team} />
+
       <section className="glass hud-corners relative p-6 md:p-8">
         <p className="hud-label mb-6">Progress pipeline</p>
-        <Pipeline completed={completed} />
+        <Pipeline completed={completed} blocked={blocked} />
       </section>
 
       <section className="glass hud-corners relative mt-6 p-6">
@@ -48,7 +56,7 @@ export default function Dashboard() {
 
       <div className="mt-6 grid gap-6 md:grid-cols-2" style={{ perspective: 1200 }}>
         {[
-          { k: 'Team status', v: statusText, s: `${1 + team.members.length} member${team.members.length ? 's' : ''} · ${team.college ?? '—'}` },
+          { k: 'Team status', v: statusText, s: `${1 + team.members.length} member${team.members.length ? 's' : ''} · ${team.members.length ? 'Duo' : 'Solo'}` },
           { k: 'Current stage', v: stage, s: `${Math.min(completed, STAGES.length)} of ${STAGES.length} stages complete` },
         ].map((c) => (
           <TiltCard key={c.k} className="p-6">
@@ -87,6 +95,7 @@ export default function Dashboard() {
             <MagneticButton to="/dashboard/team" variant="solid" className="w-full">Manage team</MagneticButton>
             <MagneticButton to="/dashboard/qr" className="w-full">Team QR</MagneticButton>
             <MagneticButton to="/dashboard/workflow" className="w-full">View workflow</MagneticButton>
+            <MagneticButton to="/dashboard/support" className="w-full">Contact support</MagneticButton>
           </div>
         </section>
       </div>

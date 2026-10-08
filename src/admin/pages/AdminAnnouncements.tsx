@@ -4,6 +4,8 @@ import * as adminApi from '../../api/adminApi'
 import type { Announcement, AnnouncementPriority, AnnouncementType } from '../../lib/types'
 import { ApiError } from '../../lib/api'
 import MagneticButton from '../../components/MagneticButton'
+import Select from '../../components/Select'
+import ConfirmButton from '../../components/ConfirmButton'
 
 const TYPES: AnnouncementType[] = ['GENERAL', 'IMPORTANT', 'DEADLINE', 'SYSTEM']
 const PRIORITIES: AnnouncementPriority[] = ['NORMAL', 'HIGH', 'URGENT']
@@ -93,7 +95,6 @@ export default function AdminAnnouncements() {
 
   const act = (fn: () => Promise<unknown>, ok: string) => fn().then(() => { flash(ok); load() }).catch((x) => flash(x instanceof ApiError ? x.message : 'Action failed.', true))
   const remove = (a: Announcement) => {
-    if (!window.confirm(`Delete "${a.title}"? This cannot be undone.`)) return
     if (editingId === a._id) resetForm()
     act(() => adminApi.deleteAnnouncement(a._id), 'Announcement deleted.')
   }
@@ -114,23 +115,24 @@ export default function AdminAnnouncements() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block font-mono text-[0.58rem] uppercase tracking-widest text-slate-500">Type</label>
-              <select className="field" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as AnnouncementType })}>
-                {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <Select value={form.type} onChange={(v) => setForm({ ...form, type: v as AnnouncementType })} options={TYPES.map((t) => ({ value: t, label: t }))} />
             </div>
             <div>
               <label className="mb-1 block font-mono text-[0.58rem] uppercase tracking-widest text-slate-500">Priority</label>
-              <select className="field" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value as AnnouncementPriority })}>
-                {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <Select value={form.priority} onChange={(v) => setForm({ ...form, priority: v as AnnouncementPriority })} options={PRIORITIES.map((p) => ({ value: p, label: p }))} />
             </div>
           </div>
           <div>
             <label className="mb-1 block font-mono text-[0.58rem] uppercase tracking-widest text-slate-500">Status</label>
-            <select className="field" value={form.status} disabled={editingId !== null && items.find((i) => i._id === editingId)?.status === 'PUBLISHED'} onChange={(e) => setForm({ ...form, status: e.target.value as 'DRAFT' | 'PUBLISHED' })}>
-              <option value="PUBLISHED">PUBLISHED (visible on public site)</option>
-              <option value="DRAFT">DRAFT (hidden)</option>
-            </select>
+            <Select
+              disabled={editingId !== null && items.find((i) => i._id === editingId)?.status === 'PUBLISHED'}
+              value={form.status}
+              onChange={(v) => setForm({ ...form, status: v as 'DRAFT' | 'PUBLISHED' })}
+              options={[
+                { value: 'PUBLISHED', label: 'PUBLISHED (visible on public site)' },
+                { value: 'DRAFT', label: 'DRAFT (hidden)' },
+              ]}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -155,12 +157,18 @@ export default function AdminAnnouncements() {
         <div className="grid content-start gap-3">
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <input className="field" placeholder="Search title or message…" value={q} onChange={(e) => setQ(e.target.value)} />
-            <select className="field" value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
-              <option value="">All statuses</option><option>DRAFT</option><option>PUBLISHED</option><option>UNPUBLISHED</option>
-            </select>
-            <select className="field" value={fType} onChange={(e) => setFType(e.target.value)}>
-              <option value="">All types</option>{TYPES.map((t) => <option key={t}>{t}</option>)}
-            </select>
+            <Select
+              aria-label="Filter by status"
+              value={fStatus}
+              onChange={setFStatus}
+              options={[{ value: '', label: 'All statuses' }, { value: 'DRAFT', label: 'DRAFT' }, { value: 'PUBLISHED', label: 'PUBLISHED' }, { value: 'UNPUBLISHED', label: 'UNPUBLISHED' }]}
+            />
+            <Select
+              aria-label="Filter by type"
+              value={fType}
+              onChange={setFType}
+              options={[{ value: '', label: 'All types' }, ...TYPES.map((t) => ({ value: t, label: t }))]}
+            />
           </div>
           {loading && <p className="text-sm text-slate-500">Loading…</p>}
           {!loading && items.length === 0 && <p className="text-sm text-slate-500">No announcements found.</p>}
@@ -185,7 +193,13 @@ export default function AdminAnnouncements() {
                 {a.status === 'PUBLISHED'
                   ? <button onClick={() => act(() => adminApi.unpublishAnnouncement(a._id), 'Unpublished — removed from public site.')} className="rounded border border-amber-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-amber-300 hover:bg-amber-400/10">Unpublish</button>
                   : <button onClick={() => act(() => adminApi.publishAnnouncement(a._id), 'Published — live on the public site.')} className="rounded border border-red-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-red-300 hover:bg-red-400/10">Publish</button>}
-                <button onClick={() => remove(a)} className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10">Delete</button>
+                <ConfirmButton
+                  message={`Delete "${a.title}"?`}
+                  onConfirm={() => remove(a)}
+                  className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10"
+                >
+                  Delete
+                </ConfirmButton>
               </div>
             </div>
           ))}

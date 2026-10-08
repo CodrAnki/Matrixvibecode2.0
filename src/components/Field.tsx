@@ -1,9 +1,12 @@
 import type { InputHTMLAttributes, ReactNode } from 'react'
 
-export default function Field({ label, error, hint, as = 'input', ...rest }: {
+export default function Field({ label, error, hint, as = 'input', id: idProp, ...rest }: {
   label: string; error?: string; hint?: string; as?: 'input' | 'textarea'; children?: ReactNode
 } & InputHTMLAttributes<HTMLInputElement> & { rows?: number }) {
-  const id = 'f-' + label.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+  // The id is derived from the label, so two fields labelled the same on one page (a leader's
+  // "Email" and a teammate's) would collide and both labels would focus the first input. Pass `id`
+  // explicitly in that case.
+  const id = idProp ?? 'f-' + label.toLowerCase().replace(/[^a-z0-9]+/g, '-')
   const cls = `field ${error ? 'invalid' : ''}`
   return (
     <div>
