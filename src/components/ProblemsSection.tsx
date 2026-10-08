@@ -8,15 +8,15 @@ import MagneticButton from './MagneticButton'
 import { CardSkeletons, StateMessage } from './SectionStates'
 
 const DIFFICULTY: Record<ProblemStatement['difficulty'], { label: string; cls: string }> = {
-  BEGINNER: { label: 'Beginner', cls: 'border-emerald-400/40 text-emerald-300' },
-  INTERMEDIATE: { label: 'Intermediate', cls: 'border-cyan-400/40 text-cyan-200' },
+  BEGINNER: { label: 'Beginner', cls: 'border-red-400/40 text-red-300' },
+  INTERMEDIATE: { label: 'Intermediate', cls: 'border-red-400/40 text-red-200' },
   ADVANCED: { label: 'Advanced', cls: 'border-rose-400/40 text-rose-300' },
 }
 
 const Detail = ({ label, value }: { label: string; value?: string }) =>
   value?.trim() ? (
     <div>
-      <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#00FF66]/80">{label}</p>
+      <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-[#C44552]/80">{label}</p>
       <p className="mt-1 whitespace-pre-line break-words">{value}</p>
     </div>
   ) : null

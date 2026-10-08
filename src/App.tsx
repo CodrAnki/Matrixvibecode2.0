@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { AdminAuthProvider } from './admin/AdminAuthContext'
@@ -29,13 +29,27 @@ const AdminSettings = lazy(() => import('./admin/pages/AdminSettings'))
 
 function ScrollManager() {
   const { pathname, hash } = useLocation()
-  useEffect(() => {
-    if (!hash) { window.scrollTo(0, 0); return }
+  useLayoutEffect(() => {
+    window.history.scrollRestoration = 'manual'
+
+    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
+    if (pathname === '/' && navigation?.type === 'reload') {
+      window.history.replaceState(window.history.state, '', `${window.location.pathname}${window.location.search}`)
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+      return
+    }
+
+    if (!hash) {
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+      return
+    }
     let tries = 0
     const t = window.setInterval(() => {
       const el = document.querySelector(hash)
       if (el) { el.scrollIntoView({ behavior: 'smooth' }); window.clearInterval(t) }
-      else if (++tries > 20) window.clearInterval(t)
+      else if (++tries > 50) window.clearInterval(t)
     }, 100)
     return () => window.clearInterval(t)
   }, [pathname, hash])

@@ -7,30 +7,13 @@ import { glowTexture, glyphTexture } from '../lib/textures'
 import type { Tier } from '../lib/capabilities'
 
 const damp = THREE.MathUtils.damp
-const CYAN = '#00FF66'
-const LOGO_URL = `${import.meta.env.BASE_URL}matrix-logo.png`
+const CYAN = '#C44552'
 
 interface Cfg { dpr: number; particles: number; rain: number; code: number; cubes: number; panels: number; structures: number; env: boolean }
 const CONFIG: Record<Exclude<Tier, 'none'>, Cfg> = {
   high: { dpr: 1.75, particles: 1400, rain: 26, code: 14, cubes: 10, panels: 4, structures: 12, env: true },
   medium: { dpr: 1.5, particles: 700, rain: 16, code: 9, cubes: 6, panels: 3, structures: 8, env: true },
   low: { dpr: 1.25, particles: 260, rain: 8, code: 5, cubes: 3, panels: 2, structures: 0, env: false },
-}
-
-/** Loads /matrix-logo.png (the real MATRIX.JEC logo). Silently skipped if the file is missing. */
-function useLogoTexture() {
-  const [tex, setTex] = useState<THREE.Texture | null>(null)
-  useEffect(() => {
-    let dead = false
-    new THREE.TextureLoader().load(
-      LOGO_URL,
-      (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; if (!dead) setTex(t) },
-      undefined,
-      () => { /* logo not provided yet */ },
-    )
-    return () => { dead = true }
-  }, [])
-  return tex
 }
 
 function Rig({ variant }: { variant: 'hero' | 'auth' }) {
@@ -48,87 +31,25 @@ function Rig({ variant }: { variant: 'hero' | 'auth' }) {
   return null
 }
 
-function FloatingLogo({ logo }: { logo: THREE.Texture | null }) {
+function FloatingLogo() {
   const root = useRef<THREE.Group>(null)
   const xRef = useRef<THREE.Group>(null)
-  const plane = useRef<THREE.Group>(null)
   useFrame((s) => {
     const t = s.clock.elapsedTime
     if (xRef.current) { xRef.current.rotation.y = t * 0.25; xRef.current.rotation.z = Math.sin(t * 0.4) * 0.05 }
-    if (plane.current) { plane.current.rotation.y = Math.sin(t * 0.35) * 0.5 + input.mx * 0.25; plane.current.rotation.x = -input.my * 0.15 }
     if (root.current) root.current.position.y = 0.6 + Math.sin(t * 0.9) * 0.12
   })
-  const aspect = logo && logo.image ? (logo.image as HTMLImageElement).width / (logo.image as HTMLImageElement).height : 1
   return (
     <group ref={root}>
       <group ref={xRef} scale={1.15}>
         {[Math.PI / 4, -Math.PI / 4].map((r, i) => (
           <mesh key={i} rotation={[0, 0, r]}>
             <boxGeometry args={[0.42, 4.2, 0.42]} />
-            <meshStandardMaterial color="#0a1626" metalness={0.9} roughness={0.28} />
+            <meshStandardMaterial color="#171719" metalness={0.9} roughness={0.28} />
             <Edges color={CYAN} threshold={15} />
           </mesh>
         ))}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[2.3, 0.03, 12, 128]} />
-          <meshBasicMaterial color={CYAN} />
-        </mesh>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[1.5, 0.015, 8, 96]} />
-          <meshBasicMaterial color="#00D9FF" />
-        </mesh>
       </group>
-      {logo && (
-        <group ref={plane} position={[0, 0, 0.35]}>
-          <mesh position={[0, 0, -0.05]} scale={[5, 5, 1]}>
-            <planeGeometry args={[1, 1]} />
-            <meshBasicMaterial map={glowTexture()} color="#1ea7ff" transparent opacity={0.55} depthWrite={false} blending={THREE.AdditiveBlending} />
-          </mesh>
-          <mesh>
-            <planeGeometry args={[3.1, 3.1 / aspect]} />
-            <meshBasicMaterial map={logo} transparent alphaTest={0.02} toneMapped={false} side={THREE.DoubleSide} />
-          </mesh>
-        </group>
-      )}
-    </group>
-  )
-}
-
-function Platform() {
-  const pulse = useRef<THREE.Mesh>(null)
-  const arcs = useRef<THREE.Group>(null)
-  useFrame((s) => {
-    const t = s.clock.elapsedTime
-    const k = (t * 0.35) % 1
-    if (pulse.current) {
-      pulse.current.scale.setScalar(0.5 + k * 1.6)
-      ;(pulse.current.material as THREE.MeshBasicMaterial).opacity = (1 - k) * 0.7
-    }
-    if (arcs.current) arcs.current.rotation.z = t * 0.2
-  })
-  return (
-    <group position={[0, -2.3, 0]}>
-      <mesh>
-        <cylinderGeometry args={[3.3, 3.6, 0.18, 64]} />
-        <meshStandardMaterial color="#050d1a" metalness={0.9} roughness={0.25} />
-        <Edges color="#0A3D24" />
-      </mesh>
-      <group rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.1, 0]}>
-        <mesh><ringGeometry args={[2.6, 2.66, 96]} /><meshBasicMaterial color={CYAN} /></mesh>
-        <mesh><ringGeometry args={[3.2, 3.23, 96]} /><meshBasicMaterial color="#00B84D" /></mesh>
-        <group ref={arcs}>
-          <mesh><ringGeometry args={[2.95, 3.03, 64, 1, 0, Math.PI * 1.2]} /><meshBasicMaterial color={CYAN} /></mesh>
-          <mesh><ringGeometry args={[2.95, 3.03, 64, 1, Math.PI * 1.5, Math.PI * 0.4]} /><meshBasicMaterial color="#00D9FF" /></mesh>
-        </group>
-        <mesh ref={pulse}>
-          <ringGeometry args={[3.0, 3.06, 96]} />
-          <meshBasicMaterial color={CYAN} transparent opacity={0.6} depthWrite={false} />
-        </mesh>
-      </group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]} scale={[12, 12, 1]}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial map={glowTexture()} color="#0ea5e9" transparent opacity={0.5} depthWrite={false} blending={THREE.AdditiveBlending} />
-      </mesh>
     </group>
   )
 }
@@ -138,7 +59,7 @@ function ParticleSystem({ count }: { count: number }) {
   const { positions, colors } = useMemo(() => {
     const p = new Float32Array(count * 3)
     const c = new Float32Array(count * 3)
-    const palette = [new THREE.Color('#00FF66'), new THREE.Color('#00B84D'), new THREE.Color('#00D9FF'), new THREE.Color('#e0f2fe')]
+    const palette = [new THREE.Color('#C44552'), new THREE.Color('#C44552'), new THREE.Color('#F4F4F5'), new THREE.Color('#F4F4F5')]
     for (let i = 0; i < count; i++) {
       p[i * 3] = (Math.random() - 0.5) * 30
       p[i * 3 + 1] = (Math.random() - 0.4) * 16
@@ -275,7 +196,7 @@ function Cubes({ count }: { count: number }) {
           <mesh ref={(el) => { refs.current[i] = el }} position={it.pos} scale={it.s}>
             <boxGeometry args={[1, 1, 1]} />
             <meshStandardMaterial color="#08121f" metalness={0.9} roughness={0.3} />
-            <Edges color={i % 3 === 0 ? '#00D9FF' : CYAN} />
+            <Edges color={i % 3 === 0 ? '#F4F4F5' : CYAN} />
           </mesh>
         </Float>
       ))}
@@ -294,8 +215,8 @@ function Structures({ count }: { count: number }) {
       {items.map((it, i) => (
         <mesh key={i} position={[it.pos[0], it.pos[1] + it.h / 2 - 2, it.pos[2]]}>
           <boxGeometry args={[it.w, it.h, it.w]} />
-          <meshBasicMaterial color="#04101f" transparent opacity={0.85} />
-          <Edges color="#0c4a6e" />
+          <meshBasicMaterial color="#111113" transparent opacity={0.85} />
+          <Edges color="#3F1118" />
         </mesh>
       ))}
     </>
@@ -312,15 +233,15 @@ function Lights() {
   })
   return (
     <>
-      <ambientLight intensity={0.5} color="#5b86b8" />
+      <ambientLight intensity={0.5} color="#F4F4F5" />
       <pointLight ref={cyan} position={[-4, 2, 3]} intensity={70} color={CYAN} />
-      <pointLight position={[5, -1, 2]} intensity={45} color="#00D9FF" />
-      <pointLight position={[0, 4, -3]} intensity={30} color="#00B84D" />
+      <pointLight position={[5, -1, 2]} intensity={45} color="#F4F4F5" />
+      <pointLight position={[0, 4, -3]} intensity={30} color="#C44552" />
     </>
   )
 }
 
-function Stage({ variant, cfg, logo }: { variant: 'hero' | 'auth'; cfg: Cfg; logo: THREE.Texture | null }) {
+function Stage({ variant, cfg }: { variant: 'hero' | 'auth'; cfg: Cfg }) {
   const g = useRef<THREE.Group>(null)
   const { size } = useThree()
   useFrame((_, dt) => {
@@ -338,12 +259,11 @@ function Stage({ variant, cfg, logo }: { variant: 'hero' | 'auth'; cfg: Cfg; log
   })
   return (
     <group ref={g}>
-      <FloatingLogo logo={logo} />
-      <Platform />
+      <FloatingLogo />
       {cfg.panels > 0 && <HoloPanel position={[-3.6, 1.6, 0.4]} rotation={[0, 0.5, 0]} seed={1} />}
-      {cfg.panels > 1 && <HoloPanel position={[3.5, 2.2, -0.5]} rotation={[0, -0.5, 0]} w={2} h={1.2} color="#00D9FF" seed={2} />}
+      {cfg.panels > 1 && <HoloPanel position={[3.5, 2.2, -0.5]} rotation={[0, -0.5, 0]} w={2} h={1.2} color="#F4F4F5" seed={2} />}
       {cfg.panels > 2 && <HoloPanel position={[3.9, -0.6, 1]} rotation={[0, -0.7, 0]} w={1.8} h={1.1} seed={3} />}
-      {cfg.panels > 3 && <HoloPanel position={[-4, -0.9, -0.5]} rotation={[0, 0.7, 0]} w={2.1} h={1.2} color="#00B84D" seed={4} />}
+      {cfg.panels > 3 && <HoloPanel position={[-4, -0.9, -0.5]} rotation={[0, 0.7, 0]} w={2.1} h={1.2} color="#C44552" seed={4} />}
       <Cubes count={cfg.cubes} />
     </group>
   )
@@ -351,7 +271,6 @@ function Stage({ variant, cfg, logo }: { variant: 'hero' | 'auth'; cfg: Cfg; log
 
 export default function MatrixScene({ tier, variant = 'hero' }: { tier: Exclude<Tier, 'none'>; variant?: 'hero' | 'auth' }) {
   const cfg = CONFIG[tier]
-  const logo = useLogoTexture()
   useEffect(() => attachInput(), [])
   const rain = variant === 'auth' ? Math.ceil(cfg.rain / 2) : cfg.rain
   return (
@@ -361,20 +280,20 @@ export default function MatrixScene({ tier, variant = 'hero' }: { tier: Exclude<
       gl={{ antialias: tier === 'high', alpha: false, powerPreference: 'high-performance' }}
       style={{ position: 'absolute', inset: 0 }}
     >
-      <color attach="background" args={['#030504']} />
-      <fog attach="fog" args={['#030504', 10, 32]} />
+      <color attach="background" args={['#050506']} />
+      <fog attach="fog" args={['#050506', 10, 32]} />
       {cfg.env && (
         <Environment resolution={128} frames={1}>
-          <Lightformer form="rect" intensity={4} color="#00D9FF" position={[-5, 2, -2]} scale={[8, 3, 1]} />
-          <Lightformer form="rect" intensity={3} color="#00D9FF" position={[5, -1, -3]} scale={[8, 3, 1]} />
+          <Lightformer form="rect" intensity={4} color="#F4F4F5" position={[-5, 2, -2]} scale={[8, 3, 1]} />
+          <Lightformer form="rect" intensity={3} color="#F4F4F5" position={[5, -1, -3]} scale={[8, 3, 1]} />
           <Lightformer form="ring" intensity={2} color="#ffffff" position={[0, 5, 2]} scale={4} />
         </Environment>
       )}
       <Lights />
       <Rig variant={variant} />
-      <Stage variant={variant} cfg={cfg} logo={logo} />
+      <Stage variant={variant} cfg={cfg} />
       <gridHelper
-        args={[70, 70, '#0A3D24', '#0A0D0C']}
+        args={[70, 70, '#3A0B12', '#090909']}
         position={[0, -2.45, 0]}
         onUpdate={(o) => { const m = o.material as THREE.Material; m.transparent = true; m.opacity = 0.3 }}
       />

@@ -96,10 +96,10 @@ export default function AdminCheckins() {
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         <section className="admin-glass p-6">
           <p className="hud-label mb-4">Scanner</p>
-          <div id="qr-reader" className="mx-auto aspect-square w-full max-w-xs overflow-hidden rounded-xl border border-cyan-400/20 bg-black/40" />
+          <div id="qr-reader" className="mx-auto aspect-square w-full max-w-xs overflow-hidden rounded-xl border border-red-400/20 bg-black/40" />
           <div className="mt-4 flex gap-2">
             {!scanning
-              ? <button onClick={startScanner} className="flex-1 rounded-lg border border-emerald-400/30 px-3 py-2 font-mono text-xs uppercase text-emerald-300 hover:bg-emerald-400/10">Start Scanner</button>
+              ? <button onClick={startScanner} className="flex-1 rounded-lg border border-red-400/30 px-3 py-2 font-mono text-xs uppercase text-red-300 hover:bg-red-400/10">Start Scanner</button>
               : <button onClick={stopScanner} className="flex-1 rounded-lg border border-rose-400/30 px-3 py-2 font-mono text-xs uppercase text-rose-300 hover:bg-rose-400/10">Stop Scanner</button>}
           </div>
 
@@ -107,7 +107,7 @@ export default function AdminCheckins() {
           <div className="grid gap-2">
             <input className="field" placeholder="Team ID (e.g. MTX-10001)" value={manualId} onChange={(e) => setManualId(e.target.value)} />
             <input className="field" placeholder="Token (from QR URL ?t=...)" value={manualToken} onChange={(e) => setManualToken(e.target.value)} />
-            <button disabled={busy || !manualId || !manualToken} onClick={() => verify(manualId.trim(), manualToken.trim())} className="rounded-lg border border-cyan-400/30 px-3 py-2 font-mono text-xs uppercase text-cyan-200 hover:bg-cyan-400/10 disabled:opacity-40">Verify</button>
+            <button disabled={busy || !manualId || !manualToken} onClick={() => verify(manualId.trim(), manualToken.trim())} className="rounded-lg border border-red-400/30 px-3 py-2 font-mono text-xs uppercase text-red-200 hover:bg-red-400/10 disabled:opacity-40">Verify</button>
           </div>
         </section>
 
@@ -117,7 +117,7 @@ export default function AdminCheckins() {
           {!result && !err && <p className="text-sm text-slate-500">Scan a team QR or use manual lookup.</p>}
           {result && (
             <div>
-              <p className="font-mono text-xs uppercase tracking-widest text-cyan-300">MATRIX Vibe Coding 2.0</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-red-300">MATRIX Vibe Coding 2.0</p>
               <h2 className="mt-2 text-2xl font-bold text-white">{result.team.teamName}</h2>
               <dl className="mt-4 grid gap-2 text-sm">
                 {[['Team ID', result.team.teamId], ['College', result.team.college], ['Members', String((result.team.members ?? []).length + 1)], ['Verification', `✓ ${result.team.verificationStatus}`]].map(([k, v]) => (
@@ -127,7 +127,7 @@ export default function AdminCheckins() {
               {result.alreadyCheckedIn ? (
                 <p className="mt-5 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-center font-mono text-sm uppercase tracking-widest text-amber-300">Team already checked in</p>
               ) : (
-                <button disabled={busy} onClick={confirm} className="mt-5 w-full rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 font-mono text-sm uppercase tracking-widest text-emerald-300 hover:bg-emerald-400/20 disabled:opacity-40">Confirm Check-in</button>
+                <button disabled={busy} onClick={confirm} className="mt-5 w-full rounded-lg border border-red-400/40 bg-red-400/10 px-4 py-3 font-mono text-sm uppercase tracking-widest text-red-300 hover:bg-red-400/20 disabled:opacity-40">Confirm Check-in</button>
               )}
             </div>
           )}

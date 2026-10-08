@@ -99,7 +99,7 @@ export default function AdminAccounts() {
         <MagneticButton onClick={() => { setShowCreate(true); setFormErr('') }} variant="solid">+ Add Admin Account</MagneticButton>
       </div>
 
-      {toast && <p role={toast.kind === 'ok' ? 'status' : 'alert'} className={`mb-4 rounded-lg border px-4 py-2 text-sm ${toast.kind === 'ok' ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200' : 'border-rose-400/30 bg-rose-500/10 text-rose-200'}`}>{toast.text}</p>}
+      {toast && <p role={toast.kind === 'ok' ? 'status' : 'alert'} className={`mb-4 rounded-lg border px-4 py-2 text-sm ${toast.kind === 'ok' ? 'border-red-400/30 bg-red-500/10 text-red-200' : 'border-rose-400/30 bg-rose-500/10 text-rose-200'}`}>{toast.text}</p>}
 
       <div className="admin-glass overflow-x-auto">
         <table className="w-full min-w-[760px] text-left text-sm">
@@ -115,10 +115,10 @@ export default function AdminAccounts() {
               const isSelf = a.id === admin?.id
               return (
                 <tr key={a.id} className={`border-b border-white/5 ${a.active ? '' : 'opacity-60'}`}>
-                  <td className="px-4 py-3 text-white">{a.name}{isSelf && <span className="ml-2 font-mono text-[0.55rem] uppercase text-cyan-300">(you)</span>}</td>
+                  <td className="px-4 py-3 text-white">{a.name}{isSelf && <span className="ml-2 font-mono text-[0.55rem] uppercase text-red-300">(you)</span>}</td>
                   <td className="px-4 py-3 text-slate-300">{a.email}</td>
-                  <td className="px-4 py-3"><span className="rounded border border-cyan-400/30 px-2 py-0.5 font-mono text-[0.58rem] tracking-widest text-cyan-300">{a.role.replace('_', ' ')}</span></td>
-                  <td className="px-4 py-3"><span className={`rounded border px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest ${a.active ? 'border-emerald-400/30 text-emerald-300' : 'border-white/15 text-slate-400'}`}>{a.active ? 'Active' : 'Inactive'}</span></td>
+                  <td className="px-4 py-3"><span className="rounded border border-red-400/30 px-2 py-0.5 font-mono text-[0.58rem] tracking-widest text-red-300">{a.role.replace('_', ' ')}</span></td>
+                  <td className="px-4 py-3"><span className={`rounded border px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest ${a.active ? 'border-red-400/30 text-red-300' : 'border-white/15 text-slate-400'}`}>{a.active ? 'Active' : 'Inactive'}</span></td>
                   <td className="px-4 py-3 text-slate-300">{new Date(a.createdAt).toLocaleString()}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">

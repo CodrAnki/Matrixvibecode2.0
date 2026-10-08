@@ -29,7 +29,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <PageHeader kicker="Mission control" title="Team Dashboard" sub={`Welcome back, ${team.teamName}`} right={<div className="glass px-4 py-2 font-mono text-xs tracking-widest text-cyan-200">ID · {team.teamId}</div>} />
+      <PageHeader kicker="Mission control" title="Team Dashboard" sub={`Welcome back, ${team.teamName}`} right={<div className="glass px-4 py-2 font-mono text-xs tracking-widest text-red-200">ID · {team.teamId}</div>} />
 
       <section className="glass hud-corners relative p-6 md:p-8">
         <p className="hud-label mb-6">Progress pipeline</p>
@@ -41,7 +41,7 @@ export default function Dashboard() {
         <dl className="grid gap-4 text-sm sm:grid-cols-2">
           <div><dt className="text-slate-400">Team Name</dt><dd className="mt-1 text-lg font-bold text-white">{team.teamName}</dd></div>
           {team.teamYear && (
-            <div><dt className="text-slate-400">Team Year</dt><dd className="mt-1"><span className="inline-block rounded border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-cyan-200">{team.teamYear}</span></dd></div>
+            <div><dt className="text-slate-400">Team Year</dt><dd className="mt-1"><span className="inline-block rounded border border-[#F4F4F5]/40 bg-[#F4F4F5]/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-red-200">{team.teamYear}</span></dd></div>
           )}
         </dl>
       </section>
@@ -53,8 +53,8 @@ export default function Dashboard() {
         ].map((c) => (
           <TiltCard key={c.k} className="p-6">
             <p className="hud-label">{c.k}</p>
-            <p className="mt-4 text-xl font-bold tracking-wide text-white [text-shadow:0_0_20px_rgba(0,255,102,0.35)]">{c.v}</p>
-            <p className="mt-2 truncate text-sm text-sky-100/55">{c.s}</p>
+            <p className="mt-4 text-xl font-bold tracking-wide text-white [text-shadow:0_0_20px_rgba(196,69,82,0.2)]">{c.v}</p>
+            <p className="mt-2 truncate text-sm text-slate-100/55">{c.s}</p>
           </TiltCard>
         ))}
       </div>
@@ -63,19 +63,19 @@ export default function Dashboard() {
         <section className="glass p-6">
           <div className="mb-4 flex items-center justify-between">
             <p className="hud-label">Recent announcements</p>
-            <Link to="/dashboard/announcements" className="font-mono text-[0.65rem] uppercase tracking-widest text-cyan-300 hover:text-cyan-100">View all →</Link>
+            <Link to="/dashboard/announcements" className="font-mono text-[0.65rem] uppercase tracking-widest text-red-300 hover:text-red-100">View all →</Link>
           </div>
           {loading ? (
             <p className="text-sm text-slate-500">Loading…</p>
           ) : announcements.length === 0 ? (
             <p className="text-sm text-slate-500">No announcements yet.</p>
           ) : (
-            <ul className="divide-y divide-cyan-400/10">
+            <ul className="divide-y divide-red-400/10">
               {announcements.slice(0, 3).map((a) => (
                 <li key={a._id} className="py-4">
-                  <span className="rounded border border-cyan-400/30 px-2 py-0.5 font-mono text-[0.58rem] tracking-widest text-cyan-200">{a.type}</span>
+                  <span className="rounded border border-red-400/30 px-2 py-0.5 font-mono text-[0.58rem] tracking-widest text-red-200">{a.type}</span>
                   <p className="mt-2 font-semibold text-white">{a.title}</p>
-                  <p className="mt-1 text-sm text-sky-100/60">{a.message}</p>
+                  <p className="mt-1 text-sm text-slate-100/60">{a.message}</p>
                 </li>
               ))}
             </ul>

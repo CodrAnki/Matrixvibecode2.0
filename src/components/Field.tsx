@@ -7,7 +7,7 @@ export default function Field({ label, error, hint, as = 'input', ...rest }: {
   const cls = `field ${error ? 'invalid' : ''}`
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block font-mono text-[0.66rem] uppercase tracking-[0.22em] text-cyan-200/80">{label}</label>
+      <label htmlFor={id} className="mb-2 block font-mono text-[0.66rem] uppercase tracking-[0.22em] text-red-200/80">{label}</label>
       {as === 'textarea'
         ? <textarea id={id} className={cls} {...(rest as object)} />
         : <input id={id} className={cls} {...rest} />}

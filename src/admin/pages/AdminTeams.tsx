@@ -9,10 +9,10 @@ import Pager from '../Pager'
 import { useFlash } from '../../hooks/useFlash'
 
 const STATUS_TONE: Record<string, string> = {
-  VERIFIED: 'text-emerald-300 border-emerald-400/30 bg-emerald-400/10',
+  VERIFIED: 'text-red-300 border-red-400/30 bg-red-400/10',
   PENDING: 'text-amber-300 border-amber-400/30 bg-amber-400/10',
   REJECTED: 'text-rose-300 border-rose-400/30 bg-rose-400/10',
-  CHANGES_REQUIRED: 'text-cyan-300 border-cyan-400/30 bg-cyan-400/10',
+  CHANGES_REQUIRED: 'text-red-300 border-red-400/30 bg-red-400/10',
 }
 
 export default function AdminTeams() {
@@ -85,18 +85,18 @@ export default function AdminTeams() {
         <div className="flex flex-wrap items-center gap-2">
           <form onSubmit={(e) => { e.preventDefault(); setParams((p) => { p.set('q', q); return p }); setPage(1); setQuery(q.trim()) }} className="flex gap-2">
             <input className="field !w-56" placeholder="Search team / ID…" value={q} onChange={(e) => setQ(e.target.value)} />
-            <button className="rounded-lg border border-cyan-400/30 px-4 font-mono text-xs uppercase tracking-widest text-cyan-200">Search</button>
+            <button className="rounded-lg border border-red-400/30 px-4 font-mono text-xs uppercase tracking-widest text-red-200">Search</button>
           </form>
           <Link to="/admin/teams/deleted" className="rounded-lg border border-white/15 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-slate-300 hover:bg-white/5">Deleted Teams</Link>
           {isSuper && <button onClick={() => setConfirmTestCleanup(true)} className="rounded-lg border border-amber-400/30 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-amber-300 hover:bg-amber-400/10">Delete Test Teams</button>}
         </div>
       </div>
 
-      {toast && <p role="status" className="mb-4 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">{toast}</p>}
+      {toast && <p role="status" className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm text-red-200">{toast}</p>}
 
       <div className="mb-5 flex flex-wrap gap-2">
         {['', 'PENDING', 'VERIFIED', 'REJECTED', 'CHANGES_REQUIRED'].map((s) => (
-          <button key={s || 'all'} onClick={() => { setPage(1); setParams(s ? { status: s } : {}) }} className={`rounded-full border px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-widest transition-colors ${status === s ? 'border-cyan-400/50 bg-cyan-400/15 text-cyan-100' : 'border-white/10 text-slate-400 hover:text-slate-200'}`}>{s || 'All'}</button>
+          <button key={s || 'all'} onClick={() => { setPage(1); setParams(s ? { status: s } : {}) }} className={`rounded-full border px-3 py-1.5 font-mono text-[0.62rem] uppercase tracking-widest transition-colors ${status === s ? 'border-red-400/50 bg-red-400/15 text-red-100' : 'border-white/10 text-slate-400 hover:text-slate-200'}`}>{s || 'All'}</button>
         ))}
       </div>
 
@@ -113,9 +113,9 @@ export default function AdminTeams() {
             {!loading && teams.length === 0 && <tr><td colSpan={9} className="px-4 py-8 text-center text-slate-500">No teams found.</td></tr>}
             {teams.map((t) => (
               <tr key={t.teamId} className="border-b border-white/5 hover:bg-white/[0.02]">
-                <td className="px-4 py-3 font-mono text-cyan-300"><Link to={`/admin/teams/${t.teamId}`}>{t.teamId}</Link></td>
+                <td className="px-4 py-3 font-mono text-red-300"><Link to={`/admin/teams/${t.teamId}`}>{t.teamId}</Link></td>
                 <td className="px-4 py-3 text-white">{t.teamName}</td>
-                <td className="px-4 py-3">{t.teamYear ? <span className="rounded border border-[#00D9FF]/40 bg-[#00D9FF]/10 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-cyan-200">{t.teamYear}</span> : <span className="text-slate-500">Not specified</span>}</td>
+                <td className="px-4 py-3">{t.teamYear ? <span className="rounded border border-[#F4F4F5]/40 bg-[#F4F4F5]/10 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-red-200">{t.teamYear}</span> : <span className="text-slate-500">Not specified</span>}</td>
                 <td className="px-4 py-3 text-slate-300">{t.leader && typeof t.leader === 'object' ? (t.leader as { name: string }).name : '—'}</td>
                 <td className="px-4 py-3 text-slate-300">{t.college}</td>
                 <td className="px-4 py-3 text-slate-300">{(t.members ?? []).length + 1}</td>
@@ -124,7 +124,7 @@ export default function AdminTeams() {
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
                     {t.verificationStatus !== 'VERIFIED' && (
-                      <button disabled={busyId === t.teamId} onClick={() => act((id) => adminApi.verifyTeam(id), t.teamId)} className="rounded border border-emerald-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-emerald-300 hover:bg-emerald-400/10 disabled:opacity-40">Verify</button>
+                      <button disabled={busyId === t.teamId} onClick={() => act((id) => adminApi.verifyTeam(id), t.teamId)} className="rounded border border-red-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-red-300 hover:bg-red-400/10 disabled:opacity-40">Verify</button>
                     )}
                     {t.verificationStatus !== 'REJECTED' && (
                       <button disabled={busyId === t.teamId} onClick={() => act((id) => adminApi.rejectTeam(id), t.teamId)} className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10 disabled:opacity-40">Reject</button>

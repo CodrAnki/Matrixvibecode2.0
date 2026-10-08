@@ -48,7 +48,7 @@ export default function Countdown() {
   return (
     <div className="cd-panel" role="timer" aria-label={`${t.days} days, ${t.hours} hours, ${t.minutes} minutes, ${t.seconds} seconds until Vibe Coding 2.0`}>
       <p className="hud-label mb-4 flex items-center justify-center gap-3 text-center">
-        <span className="blink h-2 w-2 rounded-full bg-[#00FF66] shadow-[0_0_10px_#00FF66]" />
+        <span className="blink h-2 w-2 rounded-full bg-[#C44552] shadow-[0_0_10px_#C44552]" />
         Event starts 14 October 2026
       </p>
       <div className="flex items-start justify-center gap-1.5 sm:gap-3 md:gap-4">

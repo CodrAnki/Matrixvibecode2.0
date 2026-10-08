@@ -146,7 +146,7 @@ export default function AdminProblems() {
         <MagneticButton onClick={openCreate} variant="solid">+ Add Problem Statement</MagneticButton>
       </div>
 
-      {toast && <p role="status" className="mb-4 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">{toast}</p>}
+      {toast && <p role="status" className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm text-red-200">{toast}</p>}
       {loadError && <p role="alert" className="mb-4 rounded-lg border border-rose-400/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-200">{loadError}</p>}
 
       {problems === null && !loadError && <p className="text-sm text-slate-400">Loading…</p>}
@@ -191,15 +191,15 @@ export default function AdminProblems() {
                 <div key={p._id} className="admin-glass p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-mono text-[0.6rem] uppercase tracking-widest text-cyan-300">{p.problemId}</p>
+                      <p className="font-mono text-[0.6rem] uppercase tracking-widest text-red-300">{p.problemId}</p>
                       <p className="text-lg font-semibold text-white">{p.title}</p>
                       <p className="mt-1 text-xs text-slate-400">{p.category || 'Uncategorized'} · {p.difficulty}</p>
                     </div>
-                    <span className={`shrink-0 rounded border px-2 py-0.5 font-mono text-[0.58rem] uppercase ${p.isPublished ? 'border-emerald-400/30 text-emerald-300' : 'border-white/15 text-slate-400'}`}>
+                    <span className={`shrink-0 rounded border px-2 py-0.5 font-mono text-[0.58rem] uppercase ${p.isPublished ? 'border-red-400/30 text-red-300' : 'border-white/15 text-slate-400'}`}>
                       {p.isPublished ? 'Published' : 'Draft'}
                     </span>
                   </div>
-                  {p.shortDescription && <p className="mt-2 text-sm text-sky-100/60">{p.shortDescription}</p>}
+                  {p.shortDescription && <p className="mt-2 text-sm text-slate-100/60">{p.shortDescription}</p>}
                   {p.tags && p.tags.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {p.tags.map((t) => <span key={t} className="rounded-full border border-white/10 px-2 py-0.5 text-[0.62rem] text-slate-400">{t}</span>)}
@@ -210,7 +210,7 @@ export default function AdminProblems() {
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <button onClick={() => openEdit(p)} className="rounded border border-white/15 px-2 py-1 font-mono text-[0.58rem] uppercase text-slate-300 hover:bg-white/5">View / Edit</button>
-                    <button onClick={() => togglePublish(p)} className="rounded border border-cyan-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-cyan-300 hover:bg-cyan-400/10">
+                    <button onClick={() => togglePublish(p)} className="rounded border border-red-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-red-300 hover:bg-red-400/10">
                       {p.isPublished ? 'Unpublish' : 'Publish'}
                     </button>
                     <button onClick={() => setDeleteTarget(p)} className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10">Delete</button>

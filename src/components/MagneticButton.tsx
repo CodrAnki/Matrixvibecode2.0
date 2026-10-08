@@ -1,7 +1,7 @@
 import type * as React from 'react'
 import { useRef, type ReactNode } from 'react'
 import { Link, type To } from 'react-router-dom'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 
 interface Props {
   children: ReactNode
@@ -16,17 +16,19 @@ interface Props {
   strength?: number
 }
 
-export default function MagneticButton({ children, to, href, onClick, variant = 'ghost', size = 'md', type = 'button', disabled, className = '', strength = 0.3 }: Props) {
+export default function MagneticButton({ children, to, href, onClick, variant = 'ghost', size = 'md', type = 'button', disabled, className = '', strength = 0.06 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
+  const shouldReduceMotion = useReducedMotion()
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const sx = useSpring(x, { stiffness: 220, damping: 18, mass: 0.4 })
-  const sy = useSpring(y, { stiffness: 220, damping: 18, mass: 0.4 })
+  const sx = useSpring(x, { stiffness: 260, damping: 28, mass: 0.35 })
+  const sy = useSpring(y, { stiffness: 260, damping: 28, mass: 0.35 })
   const move = (e: React.PointerEvent) => {
-    if (e.pointerType === 'touch' || disabled || !ref.current) return
+    if (shouldReduceMotion || e.pointerType === 'touch' || disabled || !ref.current) return
     const r = ref.current.getBoundingClientRect()
-    x.set((e.clientX - (r.left + r.width / 2)) * strength)
-    y.set((e.clientY - (r.top + r.height / 2)) * strength)
+    const maxOffset = 4
+    x.set(Math.max(-maxOffset, Math.min(maxOffset, (e.clientX - (r.left + r.width / 2)) * strength)))
+    y.set(Math.max(-maxOffset, Math.min(maxOffset, (e.clientY - (r.top + r.height / 2)) * strength)))
   }
   const leave = () => { x.set(0); y.set(0) }
   const cls = `btn ${variant === 'solid' ? 'btn-solid' : ''} ${size === 'sm' ? 'btn-sm' : ''} ${className}`

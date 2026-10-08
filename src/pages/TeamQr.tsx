@@ -21,7 +21,7 @@ export default function TeamQr() {
 
   useEffect(() => {
     if (qr?.qr.url && canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, qr.qr.url, { width: 260, margin: 1, color: { dark: '#020611', light: '#F5FAFF' } }).catch(() => setError('Could not render QR code.'))
+      QRCode.toCanvas(canvasRef.current, qr.qr.url, { width: 260, margin: 1, color: { dark: '#050506', light: '#F5FAFF' } }).catch(() => setError('Could not render QR code.'))
     }
   }, [qr])
 
@@ -41,7 +41,7 @@ export default function TeamQr() {
       if (!ctx) return
       ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, out.width, out.height)
       ctx.drawImage(src, pad, pad)
-      ctx.fillStyle = '#020611'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+      ctx.fillStyle = '#050506'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
       ctx.fillText('1st Year', out.width / 2, src.height + pad + labelH / 2 + 4)
       href = out.toDataURL('image/png')
     } else {
@@ -60,7 +60,7 @@ export default function TeamQr() {
       <>
         <PageHeader kicker="Check-in" title="Team QR" sub="Issued once your team is verified." />
         <section className="glass hud-corners relative p-8 text-center">
-          <p className="text-sky-100/70">Your team status is <span className="text-amber-300">{team.verificationStatus}</span>. Your QR check-in code appears here once an admin verifies your team.</p>
+          <p className="text-slate-100/70">Your team status is <span className="text-amber-300">{team.verificationStatus}</span>. Your QR check-in code appears here once an admin verifies your team.</p>
         </section>
       </>
     )
@@ -73,12 +73,12 @@ export default function TeamQr() {
         {error && <p role="alert" className="mb-4 text-sm text-rose-300">{error}</p>}
         {qr ? (
           <>
-            <div className="mx-auto grid w-fit place-items-center rounded-2xl border border-cyan-400/20 bg-white p-4 shadow-[0_0_60px_-10px_rgba(0,217,255,0.4)]">
+            <div className="mx-auto grid w-fit place-items-center rounded-2xl border border-red-400/20 bg-white p-4 shadow-[0_0_60px_-10px_rgba(196,69,82,0.4)]">
               <canvas ref={canvasRef} />
-              {isFirstYear && <p className="mt-2 text-lg font-bold tracking-wide text-[#020611]">1st Year</p>}
+              {isFirstYear && <p className="mt-2 text-lg font-bold tracking-wide text-[#050506]">1st Year</p>}
             </div>
             <p className="mt-6 font-mono text-sm tracking-[0.3em] text-white">{team.teamId}</p>
-            <p className={`mt-2 font-mono text-xs uppercase tracking-widest ${qr.checkedIn ? 'text-emerald-300' : 'text-cyan-300'}`}>
+            <p className={`mt-2 font-mono text-xs uppercase tracking-widest ${qr.checkedIn ? 'text-red-300' : 'text-red-300'}`}>
               {qr.checkedIn ? '✓ Checked in' : 'Not checked in'}
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

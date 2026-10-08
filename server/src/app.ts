@@ -115,7 +115,7 @@ export function createApp() {
   app.use(helmet());
   app.use(
     cors({
-      origin: "https://matrixvibecode2-0.vercel.app",
+      origin: parseClientOrigins(process.env.CLIENT_URL),
       credentials: true,
     }),
   );

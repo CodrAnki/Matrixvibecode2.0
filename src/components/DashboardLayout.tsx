@@ -33,15 +33,15 @@ export default function DashboardLayout() {
       <p className="hud-label mb-3">Mission control</p>
       <nav className="grid gap-1" aria-label="Dashboard">
         {NAV.map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `relative rounded-lg px-4 py-3 font-mono text-[0.72rem] uppercase tracking-[0.2em] transition-all ${isActive ? 'bg-[#00FF66]/10 text-[#baffd4] shadow-[inset_2px_0_0_#00FF66,0_0_24px_-10px_#00FF66]' : 'text-slate-400 hover:bg-white/5 hover:text-[#baffd4]'}`}>
+          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `relative rounded-lg px-4 py-3 font-mono text-[0.72rem] uppercase tracking-[0.2em] transition-all ${isActive ? 'bg-[#C44552]/10 text-[#F2C9CC] shadow-[inset_2px_0_0_#C44552,0_0_24px_-10px_#C44552]' : 'text-slate-400 hover:bg-white/5 hover:text-[#F2C9CC]'}`}>
             {n.label}
           </NavLink>
         ))}
       </nav>
       <div className="mt-auto pt-8">
-        <div className="mb-3 rounded-lg border border-cyan-400/15 px-4 py-3">
+        <div className="mb-3 rounded-lg border border-red-400/15 px-4 py-3">
           <p className="truncate text-sm font-semibold text-white">{team.teamName}</p>
-          <p className="font-mono text-[0.62rem] tracking-widest text-cyan-300/70">{team.teamId}</p>
+          <p className="font-mono text-[0.62rem] tracking-widest text-red-300/70">{team.teamId}</p>
         </div>
         <button onClick={() => { logout(); nav('/login', { replace: true }) }} className="w-full rounded-lg border border-rose-400/30 px-4 py-3 font-mono text-[0.72rem] uppercase tracking-[0.2em] text-rose-300 transition-colors hover:bg-rose-500/10">Logout</button>
       </div>
@@ -52,13 +52,13 @@ export default function DashboardLayout() {
     <div className="relative min-h-[100svh]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute inset-0 grid-bg opacity-70" />
-        <div className="absolute -right-32 -top-32 h-[60vmin] w-[60vmin] rounded-full bg-[radial-gradient(circle,rgba(0,255,102,0.16),transparent_65%)]" />
-        <div className="absolute -bottom-40 left-1/3 h-[50vmin] w-[50vmin] rounded-full bg-[radial-gradient(circle,rgba(0,217,255,0.14),transparent_65%)]" />
+        <div className="absolute -right-32 -top-32 h-[60vmin] w-[60vmin] rounded-full bg-[radial-gradient(circle,rgba(196,69,82,0.16),transparent_65%)]" />
+        <div className="absolute -bottom-40 left-1/3 h-[50vmin] w-[50vmin] rounded-full bg-[radial-gradient(circle,rgba(196,69,82,0.14),transparent_65%)]" />
       </div>
       <aside className="glass fixed inset-y-0 left-0 z-30 hidden w-64 !rounded-none border-y-0 border-l-0 lg:block">{side}</aside>
       <header className="glass sticky top-0 z-30 flex items-center justify-between !rounded-none border-x-0 border-t-0 px-4 py-3 lg:hidden" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         <Logo className="h-8" />
-        <button onClick={() => setOpen(true)} aria-label="Open menu" className="rounded-lg border border-cyan-400/30 px-3 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-cyan-200">Menu</button>
+        <button onClick={() => setOpen(true)} aria-label="Open menu" className="rounded-lg border border-red-400/30 px-3 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-red-200">Menu</button>
       </header>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden">

@@ -22,7 +22,7 @@ export function StateMessage({ tone = 'neutral', title, children, action }: { to
   return (
     <div role={tone === 'error' ? 'alert' : 'status'} className={`glass hud-corners relative mx-auto max-w-xl p-8 text-center ${tone === 'error' ? '!border-rose-400/30' : ''}`}>
       <p className={`hud-label ${tone === 'error' ? '!text-rose-300' : ''}`}>{title}</p>
-      {children && <p className="mt-3 text-sm leading-relaxed text-sky-100/65">{children}</p>}
+      {children && <p className="mt-3 text-sm leading-relaxed text-slate-100/65">{children}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   )

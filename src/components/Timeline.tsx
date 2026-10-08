@@ -9,8 +9,8 @@ export default function Timeline() {
   useMotionValueEvent(scrollYProgress, 'change', (v) => setActive(Math.max(0, Math.min(WORKFLOW.length - 1, Math.floor(v * (WORKFLOW.length + 0.2))))))
   return (
     <div ref={ref} className="relative mx-auto max-w-4xl">
-      <div className="absolute bottom-4 left-[19px] top-4 w-px bg-[#151B19] md:left-1/2 md:-translate-x-1/2" />
-      <motion.div style={{ scaleY: scrollYProgress, originY: 0 }} className="absolute bottom-4 left-[19px] top-4 w-[2px] bg-gradient-to-b from-[#00FF66] to-[#00D9FF] shadow-[0_0_14px_#00FF66] md:left-1/2 md:-translate-x-1/2" />
+      <div className="absolute bottom-4 left-[19px] top-4 w-px bg-[#18181B] md:left-1/2 md:-translate-x-1/2" />
+      <motion.div style={{ scaleY: scrollYProgress, originY: 0 }} className="absolute bottom-4 left-[19px] top-4 w-[2px] bg-gradient-to-b from-[#38B878] to-[#F4F4F5] shadow-[0_0_10px_rgba(56,184,120,0.35)] md:left-1/2 md:-translate-x-1/2" />
       <ol className="space-y-10 md:space-y-14">
         {WORKFLOW.map((s, i) => {
           const on = i <= active
@@ -21,14 +21,14 @@ export default function Timeline() {
               <button
                 onClick={() => setActive(i)}
                 aria-label={`Step ${i + 1}: ${s.title}`}
-                className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-full border font-mono text-xs transition-all duration-500 md:absolute md:left-1/2 md:-translate-x-1/2 ${cur ? 'pulse-glow scale-125 border-[#6dffb0] bg-[#00FF66] text-void' : on ? 'border-[#00FF66]/70 bg-[#00FF66]/20 text-[#baffd4] shadow-[0_0_14px_#00FF6666]' : 'border-white/10 bg-deep text-[#4a544f]'}`}
+                className={`relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-full border font-mono text-xs transition-all duration-500 md:absolute md:left-1/2 md:-translate-x-1/2 ${cur ? 'pulse-glow scale-110 border-[#70D6A2] bg-[#38B878] text-[#07110B]' : on ? 'border-[#38B878]/70 bg-[#38B878]/20 text-[#A9E7C4] shadow-[0_0_10px_rgba(56,184,120,0.25)]' : 'border-white/10 bg-deep text-[#4a544f]'}`}
               >
                 {String(i + 1).padStart(2, '0')}
               </button>
               <div className={`md:w-1/2 ${left ? 'md:pr-16 md:text-right' : 'md:ml-auto md:pl-16'}`}>
-                <div className={`glass holo-card p-5 transition-all duration-500 ${cur ? 'border-[#00FF66]/70 shadow-[0_0_50px_-10px_rgba(0,255,102,0.7)]' : on ? '' : 'opacity-60'}`}>
-                  <h3 className={`font-mono text-sm tracking-[0.22em] ${cur ? 'text-glow' : on ? 'text-[#baffd4]' : 'text-slate-400'}`}>{s.title}</h3>
-                  <p className="mt-2 text-sm text-sky-200/70">{s.text}</p>
+                <div className={`glass holo-card p-5 transition-all duration-300 ${cur ? 'border-[#38B878]/50 shadow-[0_12px_36px_-24px_rgba(56,184,120,0.3),0_0_24px_-18px_rgba(56,184,120,0.16)]' : on ? '' : 'opacity-60'}`}>
+                  <h3 className="font-mono text-sm tracking-[0.22em] text-[#C44552]">{s.title}</h3>
+                  <p className="mt-2 text-sm text-slate-200/70">{s.text}</p>
                 </div>
               </div>
             </li>

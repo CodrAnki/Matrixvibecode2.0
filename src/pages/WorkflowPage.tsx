@@ -17,9 +17,9 @@ export default function WorkflowPage() {
         <p className="hud-label mb-5">Event roadmap</p>
         <ol className="grid gap-4 md:grid-cols-2">
           {WORKFLOW.map((w, i) => (
-            <li key={w.title} className="flex gap-4 rounded-xl border border-cyan-400/10 bg-white/[0.02] p-4">
-              <span className="font-mono text-sm text-cyan-300">{String(i + 1).padStart(2, '0')}</span>
-              <div><p className="font-mono text-xs tracking-[0.2em] text-white">{w.title}</p><p className="mt-1 text-sm text-sky-100/60">{w.text}</p></div>
+            <li key={w.title} className="flex gap-4 rounded-xl border border-red-400/10 bg-white/[0.02] p-4">
+              <span className="font-mono text-sm text-red-300">{String(i + 1).padStart(2, '0')}</span>
+              <div><p className="font-mono text-xs tracking-[0.2em] text-white">{w.title}</p><p className="mt-1 text-sm text-slate-100/60">{w.text}</p></div>
             </li>
           ))}
         </ol>

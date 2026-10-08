@@ -65,7 +65,7 @@ export default function AdminDeletedTeams() {
         <Link to="/admin/teams" className="rounded-lg border border-white/15 px-4 py-2 font-mono text-xs uppercase tracking-widest text-slate-300 hover:bg-white/5">← Active Teams</Link>
       </div>
 
-      {toast && <p role="status" className="mb-4 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">{toast}</p>}
+      {toast && <p role="status" className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm text-red-200">{toast}</p>}
       {err && <p role="alert" className="mb-4 text-sm text-rose-300">{err}</p>}
 
       {teams !== null && teams.length === 0 ? (
@@ -85,7 +85,7 @@ export default function AdminDeletedTeams() {
               const deletedBy = t.deletedBy as unknown as { name: string; email: string } | null | undefined
               return (
                 <tr key={t.teamId} className="border-b border-white/5">
-                  <td className="px-4 py-3 font-mono text-cyan-300">{t.teamId}</td>
+                  <td className="px-4 py-3 font-mono text-red-300">{t.teamId}</td>
                   <td className="px-4 py-3 text-white">{t.teamName}</td>
                   <td className="px-4 py-3 text-slate-300">{leader?.name ?? '—'}</td>
                   <td className="px-4 py-3 text-slate-300">{leader?.email ?? '—'}</td>
@@ -95,7 +95,7 @@ export default function AdminDeletedTeams() {
                   <td className="px-4 py-3 text-slate-300">{t.verificationStatus}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
-                      <button disabled={busyId === t.teamId} onClick={() => setRestoreTarget(t)} className="rounded border border-emerald-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-emerald-300 hover:bg-emerald-400/10 disabled:opacity-40">Restore</button>
+                      <button disabled={busyId === t.teamId} onClick={() => setRestoreTarget(t)} className="rounded border border-red-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-red-300 hover:bg-red-400/10 disabled:opacity-40">Restore</button>
                       {isSuper && <button disabled={busyId === t.teamId} onClick={() => openPermanent(t)} className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10 disabled:opacity-40">Permanently Delete</button>}
                     </div>
                   </td>

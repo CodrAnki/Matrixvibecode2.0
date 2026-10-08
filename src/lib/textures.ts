@@ -27,9 +27,9 @@ export function glyphTexture(text: string): THREE.CanvasTexture {
   x.font = 'bold 34px "JetBrains Mono", monospace'
   x.textAlign = 'center'
   x.textBaseline = 'middle'
-  x.shadowColor = '#00FF66'
+  x.shadowColor = '#C44552'
   x.shadowBlur = 12
-  x.fillStyle = '#8beeff'
+  x.fillStyle = '#F2C9CC'
   x.fillText(text, 64, 34)
   const t = new THREE.CanvasTexture(c)
   glyphs.set(text, t)

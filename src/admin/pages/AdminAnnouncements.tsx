@@ -20,7 +20,7 @@ const emptyForm = { title: '', message: '', type: 'GENERAL' as AnnouncementType,
 type FormState = typeof emptyForm
 
 const STATUS_CLS: Record<string, string> = {
-  PUBLISHED: 'border-emerald-400/30 text-emerald-300',
+  PUBLISHED: 'border-red-400/30 text-red-300',
   DRAFT: 'border-white/15 text-slate-400',
   UNPUBLISHED: 'border-amber-400/30 text-amber-300',
 }
@@ -104,7 +104,7 @@ export default function AdminAnnouncements() {
     <>
       <p className="hud-label mb-1">Comms</p>
       <h1 className="mb-6 text-3xl font-bold text-white">Announcements</h1>
-      {toast && <p role="status" className={`mb-4 rounded-lg border px-4 py-2 text-sm ${toast.bad ? 'border-rose-400/30 bg-rose-500/10 text-rose-200' : 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'}`}>{toast.text}</p>}
+      {toast && <p role="status" className={`mb-4 rounded-lg border px-4 py-2 text-sm ${toast.bad ? 'border-rose-400/30 bg-rose-500/10 text-rose-200' : 'border-red-400/30 bg-red-500/10 text-red-200'}`}>{toast.text}</p>}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <form ref={formRef} onSubmit={save} className="admin-glass grid h-fit gap-3 p-6">
@@ -172,11 +172,11 @@ export default function AdminAnnouncements() {
                   <p className="break-words font-semibold text-white">{a.title}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded border border-cyan-400/30 px-2 py-0.5 font-mono text-[0.58rem] uppercase text-cyan-200">{a.type}</span>
+                  <span className="rounded border border-red-400/30 px-2 py-0.5 font-mono text-[0.58rem] uppercase text-red-200">{a.type}</span>
                   <span className={`rounded border px-2 py-0.5 font-mono text-[0.58rem] uppercase ${STATUS_CLS[a.status]}`}>{scheduled(a) ? 'Scheduled' : a.status}</span>
                 </div>
               </div>
-              <p className="mt-2 whitespace-pre-line break-words text-sm text-sky-100/60">{a.message}</p>
+              <p className="mt-2 whitespace-pre-line break-words text-sm text-slate-100/60">{a.message}</p>
               <p className="mt-2 font-mono text-[0.58rem] uppercase tracking-widest text-slate-500">
                 Created {fmt(a.createdAt)} · Published {fmt(a.publishedAt)}{a.expiresAt && <> · Expires {fmt(a.expiresAt)}</>}
               </p>
@@ -184,7 +184,7 @@ export default function AdminAnnouncements() {
                 <button onClick={() => startEdit(a)} className="rounded border border-white/15 px-2 py-1 font-mono text-[0.58rem] uppercase text-slate-300 hover:bg-white/5">Edit</button>
                 {a.status === 'PUBLISHED'
                   ? <button onClick={() => act(() => adminApi.unpublishAnnouncement(a._id), 'Unpublished — removed from public site.')} className="rounded border border-amber-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-amber-300 hover:bg-amber-400/10">Unpublish</button>
-                  : <button onClick={() => act(() => adminApi.publishAnnouncement(a._id), 'Published — live on the public site.')} className="rounded border border-cyan-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-cyan-300 hover:bg-cyan-400/10">Publish</button>}
+                  : <button onClick={() => act(() => adminApi.publishAnnouncement(a._id), 'Published — live on the public site.')} className="rounded border border-red-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-red-300 hover:bg-red-400/10">Publish</button>}
                 <button onClick={() => remove(a)} className="rounded border border-rose-400/30 px-2 py-1 font-mono text-[0.58rem] uppercase text-rose-300 hover:bg-rose-400/10">Delete</button>
               </div>
             </div>

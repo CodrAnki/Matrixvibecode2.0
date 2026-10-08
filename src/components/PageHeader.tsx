@@ -6,7 +6,7 @@ export default function PageHeader({ kicker, title, sub, right }: { kicker: stri
       <div>
         <p className="hud-label">{kicker}</p>
         <h1 className="display mt-3 text-[clamp(2rem,4.5vw,3.4rem)] text-grad">{title}</h1>
-        {sub && <p className="mt-3 max-w-xl text-sky-100/65">{sub}</p>}
+        {sub && <p className="mt-3 max-w-xl text-slate-100/65">{sub}</p>}
       </div>
       {right}
     </div>

@@ -57,7 +57,7 @@ export default function Register() {
         <Field label="Phone" type="tel" value={f.phone} onChange={set('phone')} error={errs.phone} autoComplete="tel" placeholder="+91 98765 43210" />
         <Field label="College" value={f.college} onChange={set('college')} error={errs.college} />
         <div>
-          <label htmlFor="f-team-year" className="mb-2 block font-mono text-[0.66rem] uppercase tracking-[0.22em] text-cyan-200/80">Team Year (Optional)</label>
+          <label htmlFor="f-team-year" className="mb-2 block font-mono text-[0.66rem] uppercase tracking-[0.22em] text-red-200/80">Team Year (Optional)</label>
           <select id="f-team-year" className={`field ${errs.teamYear ? 'invalid' : ''}`} value={f.teamYear} onChange={set('teamYear')}>
             <option value="">Select Team Year</option>
             {TEAM_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
@@ -66,7 +66,7 @@ export default function Register() {
         </div>
         <Field label="Password" type="password" value={f.password} onChange={set('password')} error={errs.password} autoComplete="new-password" hint="Minimum 8 characters." />
         <div>
-          <p className="mb-2 font-mono text-[0.66rem] uppercase tracking-[0.22em] text-cyan-200/80">Team members ({members.length}/{MAX_REGISTRATION_MEMBERS})</p>
+          <p className="mb-2 font-mono text-[0.66rem] uppercase tracking-[0.22em] text-red-200/80">Team members ({members.length}/{MAX_REGISTRATION_MEMBERS})</p>
           <div className="grid gap-3">
             {members.map((m, i) => (
               <div key={i} className="grid grid-cols-[1fr_auto] gap-2">
@@ -78,11 +78,11 @@ export default function Register() {
               </div>
             ))}
           </div>
-          {members.length < MAX_REGISTRATION_MEMBERS && <button type="button" onClick={() => setMembers([...members, { name: '', email: '' }])} className="mt-3 font-mono text-[0.68rem] uppercase tracking-widest text-cyan-300 hover:text-cyan-100">+ Add member</button>}
+          {members.length < MAX_REGISTRATION_MEMBERS && <button type="button" onClick={() => setMembers([...members, { name: '', email: '' }])} className="mt-3 font-mono text-[0.68rem] uppercase tracking-widest text-red-300 hover:text-red-100">+ Add member</button>}
         </div>
         {top && <p role="alert" className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{top}</p>}
         <MagneticButton type="submit" variant="solid" disabled={busy} className="w-full">{busy ? 'Creating team…' : 'Create team'}</MagneticButton>
-        <p className="text-center text-sm text-slate-400">Already registered? <Link to="/login" className="text-cyan-300 hover:underline">Sign in</Link></p>
+        <p className="text-center text-sm text-slate-400">Already registered? <Link to="/login" className="text-red-300 hover:underline">Sign in</Link></p>
       </form>
     </AuthShell>
   )

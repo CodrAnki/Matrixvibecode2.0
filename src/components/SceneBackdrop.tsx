@@ -7,8 +7,8 @@ export function StaticBackdrop() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-void">
       <div className="absolute inset-0 grid-bg" />
-      <div className="absolute left-1/2 top-[38%] h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(0,255,102,0.22),rgba(0,217,255,0.1)_45%,transparent_70%)]" />
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-[#0A3D24]/25 to-transparent" />
+      <div className="absolute left-1/2 top-[38%] h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(196,69,82,0.22),rgba(196,69,82,0.1)_45%,transparent_70%)]" />
+      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-[#3A0B12]/25 to-transparent" />
     </div>
   )
 }

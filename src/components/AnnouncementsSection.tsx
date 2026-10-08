@@ -10,7 +10,7 @@ import { CardSkeletons, StateMessage } from './SectionStates'
 const isHot = (a: Announcement) => a.priority === 'URGENT' || a.type === 'IMPORTANT'
 
 const TYPE_STYLE: Record<Announcement['type'], { icon: string; label: string; cls: string }> = {
-  GENERAL: { icon: '📢', label: 'General', cls: 'border-cyan-400/30 text-cyan-200' },
+  GENERAL: { icon: '📢', label: 'General', cls: 'border-red-400/30 text-red-200' },
   IMPORTANT: { icon: '🔴', label: 'Important', cls: 'border-rose-400/50 text-rose-300' },
   DEADLINE: { icon: '⏰', label: 'Deadline', cls: 'border-amber-400/40 text-amber-300' },
   SYSTEM: { icon: '⚙️', label: 'System', cls: 'border-slate-400/30 text-slate-300' },
@@ -56,7 +56,7 @@ export default function AnnouncementsSection() {
         ) : (
           <>
             <div className="mb-6 flex items-center gap-3">
-              <span className="blink h-2 w-2 rounded-full bg-[#00FF66] shadow-[0_0_10px_#00FF66]" />
+              <span className="blink h-2 w-2 rounded-full bg-[#C44552] shadow-[0_0_10px_#C44552]" />
               <p className="hud-label">{items.length} live {items.length === 1 ? 'announcement' : 'announcements'}</p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" style={{ perspective: 1200 }}>

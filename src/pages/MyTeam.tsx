@@ -82,7 +82,7 @@ export default function MyTeam() {
           <p className="text-2xl font-bold text-white">{user?.name}</p>
           <dl className="mt-5 grid gap-3 text-sm">
             {[['Email', user?.email], ['Phone', team.phone], ['College', team.college], ...(team.teamYear ? [['Team Year', team.teamYear]] : []), ['Team ID', team.teamId], ['Status', team.verificationStatus]].map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-4 border-b border-cyan-400/10 pb-2"><dt className="text-slate-400">{k}</dt><dd className="break-all text-right text-white">{v}</dd></div>
+              <div key={k} className="flex justify-between gap-4 border-b border-red-400/10 pb-2"><dt className="text-slate-400">{k}</dt><dd className="break-all text-right text-white">{v}</dd></div>
             ))}
           </dl>
         </section>
@@ -92,13 +92,13 @@ export default function MyTeam() {
             <p className="hud-label">Members ({total}/{maxSize})</p>
             <button
               type="button" disabled={!canAdd} onClick={() => { setOpen((o) => !o); setErr('') }} aria-expanded={open}
-              className="rounded-lg border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-cyan-100 transition-colors hover:bg-cyan-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg border border-red-400/40 bg-red-400/10 px-4 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-red-100 transition-colors hover:bg-red-400/20 disabled:cursor-not-allowed disabled:opacity-40"
             >{open ? '× Close' : '+ Add Member'}</button>
           </div>
 
           {open && canAdd && (
-            <form onSubmit={addMember} noValidate className="mb-5 grid gap-3 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.03] p-4">
-              <p className="font-mono text-[0.65rem] uppercase tracking-widest text-cyan-300/80">New member</p>
+            <form onSubmit={addMember} noValidate className="mb-5 grid gap-3 rounded-xl border border-red-400/20 bg-red-400/[0.03] p-4">
+              <p className="font-mono text-[0.65rem] uppercase tracking-widest text-red-300/80">New member</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {fieldRow('name', 'Full name *', { autoComplete: 'off' })}
                 {fieldRow('email', 'Email *', { type: 'email', autoComplete: 'off' })}
@@ -109,20 +109,20 @@ export default function MyTeam() {
               </div>
               {err && <p role="alert" className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{err}</p>}
               <div className="flex gap-2">
-                <button type="submit" disabled={busy} className="rounded-lg border border-cyan-400/40 bg-cyan-400/15 px-4 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-cyan-100 hover:bg-cyan-400/25 disabled:opacity-40">{busy ? 'Adding…' : 'Add to team'}</button>
+                <button type="submit" disabled={busy} className="rounded-lg border border-red-400/40 bg-red-400/15 px-4 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-red-100 hover:bg-red-400/25 disabled:opacity-40">{busy ? 'Adding…' : 'Add to team'}</button>
                 <button type="button" onClick={() => { setOpen(false); setForm(EMPTY); setErrs({}); setErr('') }} className="rounded-lg border border-white/15 px-4 py-2 font-mono text-[0.68rem] uppercase tracking-widest text-slate-300 hover:bg-white/5">Cancel</button>
               </div>
             </form>
           )}
 
           <ul className="grid gap-3">
-            <li className="flex items-center justify-between gap-3 rounded-lg border border-cyan-400/10 bg-white/[0.02] p-3">
+            <li className="flex items-center justify-between gap-3 rounded-lg border border-red-400/10 bg-white/[0.02] p-3">
               <div className="min-w-0"><p className="truncate text-white">{user?.name}</p><p className="truncate text-xs text-slate-400">{user?.email}</p></div>
-              <span className="shrink-0 rounded border border-emerald-400/30 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-emerald-300">Leader</span>
+              <span className="shrink-0 rounded border border-red-400/30 px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-widest text-red-300">Leader</span>
             </li>
             {members.length === 0 && <li className="text-sm text-slate-400">No additional members yet.</li>}
             {members.map((m) => (
-              <li key={m.memberId} className="flex items-center justify-between gap-3 rounded-lg border border-cyan-400/10 bg-white/[0.02] p-3">
+              <li key={m.memberId} className="flex items-center justify-between gap-3 rounded-lg border border-red-400/10 bg-white/[0.02] p-3">
                 <div className="min-w-0">
                   <p className="truncate text-white">{m.name}</p>
                   <p className="truncate text-xs text-slate-400">{[m.email, m.phone].filter(Boolean).join(' · ')}</p>
@@ -136,7 +136,7 @@ export default function MyTeam() {
           {locked && <p className="mt-4 text-xs text-amber-300/80">Your team is verified — roster changes must go through an admin now.</p>}
           {atCapacity && !locked && <p className="mt-4 text-xs text-slate-400">Maximum team size reached ({maxSize}, including the leader).</p>}
           {!open && err && <p role="alert" className="mt-4 text-sm text-rose-300">{err}</p>}
-          {msg && <p role="status" className="mt-4 text-sm text-emerald-300">{msg}</p>}
+          {msg && <p role="status" className="mt-4 text-sm text-red-300">{msg}</p>}
         </section>
       </div>
     </>

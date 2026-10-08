@@ -22,7 +22,7 @@ export default class ErrorBoundary extends Component<Props, State> {
         <div className="glass max-w-md p-8 text-center">
           <p className="hud-label mb-3">Something went wrong</p>
           <p className="text-sm text-slate-300">This page ran into an unexpected problem. Your data is safe — please try again.</p>
-          <button onClick={() => window.location.reload()} className="mt-5 rounded-lg border border-cyan-400/40 bg-cyan-400/10 px-4 py-2 font-mono text-xs uppercase tracking-widest text-cyan-100 hover:bg-cyan-400/20">Reload page</button>
+          <button onClick={() => window.location.reload()} className="mt-5 rounded-lg border border-red-400/40 bg-red-400/10 px-4 py-2 font-mono text-xs uppercase tracking-widest text-red-100 hover:bg-red-400/20">Reload page</button>
         </div>
       </div>
     )

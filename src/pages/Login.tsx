@@ -37,11 +37,11 @@ export default function Login() {
         <Field label="Email" type="email" autoComplete="email" placeholder="leader@college.edu" value={email} onChange={(e) => setEmail(e.target.value)} />
         <div className="relative">
           <Field label="Password" type={show ? 'text' : 'password'} autoComplete="current-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <button type="button" onClick={() => setShow((s) => !s)} className="absolute bottom-3 right-3 font-mono text-[0.6rem] uppercase tracking-widest text-cyan-300/80 hover:text-cyan-100">{show ? 'Hide' : 'Show'}</button>
+          <button type="button" onClick={() => setShow((s) => !s)} className="absolute bottom-3 right-3 font-mono text-[0.6rem] uppercase tracking-widest text-red-300/80 hover:text-red-100">{show ? 'Hide' : 'Show'}</button>
         </div>
         {err && <p role="alert" className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{err}</p>}
         <MagneticButton type="submit" variant="solid" disabled={busy} className="w-full">{busy ? 'Authenticating…' : 'Sign in'}</MagneticButton>
-        <p className="text-center text-sm text-slate-400">New team? <Link to="/register" className="text-cyan-300 hover:underline">Register now</Link></p>
+        <p className="text-center text-sm text-slate-400">New team? <Link to="/register" className="text-red-300 hover:underline">Register now</Link></p>
       </form>
     </AuthShell>
   )
