@@ -16,7 +16,6 @@ export const EVENT = {
     socials: [
       { label: "Instagram", href: INSTAGRAM_URL },
       { label: "LinkedIn", href: LINKEDIN_URL },
-      { label: "GitHub", href: "https://github.com/" },
       { label: "X", href: "https://x.com/" },
     ],
     organizers: [
