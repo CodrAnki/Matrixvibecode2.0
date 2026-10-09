@@ -7,7 +7,11 @@ import { User, type UserDoc } from "../models/User.js";
 import { Team, TEAM_YEARS, type TeamDoc, type TeamYear } from "../models/Team.js";
 import { ApiError } from "../middleware/errorHandler.js";
 import { generateTeamId, generateMemberId } from "../utils/generateId.js";
-import { signToken, authCookieOptions } from "../utils/generateToken.js";
+import {
+  signToken,
+  authCookieOptions,
+  clearAuthCookieOptions,
+} from "../utils/generateToken.js";
 import {
   serializeTeam,
   getMaxTeamSize,
@@ -436,7 +440,7 @@ export const loginAdmin = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const logout = asyncHandler(async (_req: Request, res: Response) => {
-  res.clearCookie("token", { path: "/" });
+  res.clearCookie("token", clearAuthCookieOptions);
   res.json({ success: true });
 });
 

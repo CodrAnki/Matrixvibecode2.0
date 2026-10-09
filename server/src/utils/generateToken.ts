@@ -23,7 +23,15 @@ export function verifyToken(token: string): JwtPayload {
 export const authCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  // The deployed frontend (Vercel) and API use different origins. Lax cookies are
+  // omitted from cross-origin fetches, which breaks session restore after a reload.
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: '/',
+}
+
+export const clearAuthCookieOptions = {
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: authCookieOptions.sameSite,
   path: '/',
 }
