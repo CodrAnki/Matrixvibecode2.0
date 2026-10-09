@@ -137,8 +137,6 @@ function Hero() {
           className="relative mx-auto hidden aspect-square w-full max-w-md items-center justify-center lg:flex"
         >
           <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(196,69,82,0.22),rgba(196,69,82,0.08)_45%,transparent_70%)] blur-xl" />
-          <div className="pointer-events-none absolute inset-8 rounded-full border border-[#C44552]/15" />
-          <div className="pointer-events-none absolute inset-16 rounded-full border border-[#F4F4F5]/10" />
         </motion.div>
       </div>
 
