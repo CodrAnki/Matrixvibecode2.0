@@ -23,7 +23,7 @@ export default {
       },
       fontFamily: {
         sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        mono: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         card: '0 20px 50px rgba(0,0,0,0.45)',

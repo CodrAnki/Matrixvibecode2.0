@@ -16,6 +16,7 @@ import SpecialPrize from "../components/SpecialPrize";
 import WhatsAppContacts from "../components/WhatsAppContacts";
 import EventEvolution from "../components/EventEvolution";
 import EvolutionTransition from "../components/EvolutionTransition";
+import QuickGames from "../components/QuickGames";
 import Countdown from "../components/Countdown";
 import {
   ABOUT,
@@ -388,6 +389,7 @@ export default function Home() {
         <EventEvolution />
         <EvolutionTransition />
         <Events />
+        <QuickGames />
         <Workflow />
         <Prizes />
         <SpecialPrize />

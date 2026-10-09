@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import Logo from './Logo'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import Logo, { ORIGINAL_LOGO_SRC } from './Logo'
 import MagneticButton from './MagneticButton'
 import { useAuth } from '../context/AuthContext'
 
@@ -11,6 +11,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [spy, setSpy] = useState('home')
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const { team } = useAuth()
 
   useEffect(() => {
@@ -21,14 +22,43 @@ export default function Navbar() {
   }, [])
   useEffect(() => setOpen(false), [pathname])
   useEffect(() => {
-    if (pathname !== '/') return
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && setSpy(e.target.id)),
-      { rootMargin: '-45% 0px -50% 0px' },
-    )
-    LINKS.forEach((l) => { const el = document.getElementById(l.toLowerCase()); if (el) obs.observe(el) })
-    return () => obs.disconnect()
+    if (pathname !== '/') {
+      setSpy('')
+      return
+    }
+    const updateActiveSection = () => {
+      const marker = window.scrollY + window.innerHeight * 0.35
+      let active = 'home'
+      LINKS.forEach((link) => {
+        const section = document.getElementById(link.toLowerCase())
+        if (section && section.getBoundingClientRect().top + window.scrollY <= marker) {
+          active = section.id
+        }
+      })
+      setSpy(active)
+    }
+    updateActiveSection()
+    window.addEventListener('scroll', updateActiveSection, { passive: true })
+    window.addEventListener('resize', updateActiveSection)
+    return () => {
+      window.removeEventListener('scroll', updateActiveSection)
+      window.removeEventListener('resize', updateActiveSection)
+    }
   }, [pathname])
+
+  const navigateToSection = (link: string) => {
+    setOpen(false)
+    const sectionId = link.toLowerCase()
+    if (pathname !== '/') return
+
+    const section = document.getElementById(sectionId)
+    if (!section) return
+
+    navigate({ pathname: '/', hash: link === 'Home' ? '' : `#${sectionId}` })
+    window.requestAnimationFrame(() => {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 
   return (
     <header
@@ -38,7 +68,7 @@ export default function Navbar() {
       <div
         className={`mx-auto flex max-w-7xl items-center justify-between gap-4 border-b px-4 transition-all duration-500 md:px-6 ${scrolled ? 'border-transparent py-2.5' : 'border-transparent py-2'}`}
       >
-        <Link to="/" aria-label="MATRIX Vibe Coding 2.0 home"><Logo className={scrolled ? 'h-8' : 'h-10'} showImage /></Link>
+        <Link to="/" aria-label="MATRIX Vibe Coding 2.0 home"><Logo className={scrolled ? 'h-8' : 'h-10'} showImage imageSrc={ORIGINAL_LOGO_SRC} /></Link>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
           {LINKS.map((l) => {
             const active = pathname === '/' && spy === l.toLowerCase()
@@ -60,7 +90,7 @@ export default function Navbar() {
             <MagneticButton to="/register" variant="solid" size="sm">Team Register →</MagneticButton>
             {team && <MagneticButton to="/dashboard" variant="ghost" size="sm">Dashboard</MagneticButton>}
           </div>
-          <button className="grid h-10 w-10 place-items-center rounded-lg border border-[#C44552]/25 bg-[#111113] lg:hidden" onClick={() => setOpen((o) => !o)} aria-label="Toggle menu" aria-expanded={open}>
+          <button className="grid h-10 w-10 place-items-center rounded-lg border border-[#C44552]/25 bg-[#111113] lg:hidden" onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="mobile-navigation">
             <span className="relative block h-3 w-5">
               <span className={`absolute left-0 top-0 h-px w-5 bg-[#E08B93] transition-transform ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
               <span className={`absolute left-0 top-[6px] h-px w-5 bg-[#E08B93] transition-opacity ${open ? 'opacity-0' : ''}`} />
@@ -70,16 +100,19 @@ export default function Navbar() {
         </div>
       </div>
       {open && (
-        <div className="glass mx-4 mt-2 !rounded-2xl p-4 lg:hidden">
+        <nav id="mobile-navigation" aria-label="Mobile primary" className="glass mx-4 mt-2 !rounded-2xl p-4 lg:hidden">
           <div className="grid gap-1">
-            {LINKS.map((l) => (
-              <Link key={l} to={{ pathname: '/', hash: l === 'Home' ? '' : `#${l.toLowerCase()}` }} className="rounded-lg px-3 py-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-200 hover:bg-[#C44552]/10">{l}</Link>
-            ))}
-            {!team && <Link to="/login" className="rounded-lg px-3 py-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-200 hover:bg-[#C44552]/10">Login</Link>}
-            <Link to="/register" className="btn btn-solid mt-2">Team Register →</Link>
-            {team && <Link to="/dashboard" className="btn btn-ghost mt-2">Dashboard</Link>}
+            {LINKS.map((l) => {
+              const active = pathname === '/' && spy === l.toLowerCase()
+              return (
+                <Link key={l} to={{ pathname: '/', hash: l === 'Home' ? '' : `#${l.toLowerCase()}` }} onClick={() => navigateToSection(l)} aria-current={active ? 'location' : undefined} className={`rounded-lg px-3 py-3 font-mono text-xs uppercase tracking-[0.2em] transition-colors hover:bg-[#C44552]/10 ${active ? 'bg-[#C44552]/10 text-[#E08B93]' : 'text-slate-200'}`}>{l}</Link>
+              )
+            })}
+            {!team && <Link to="/login" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-200 hover:bg-[#C44552]/10">Login</Link>}
+            <Link to="/register" onClick={() => setOpen(false)} className="btn btn-solid mt-2">Team Register →</Link>
+            {team && <Link to="/dashboard" onClick={() => setOpen(false)} className="btn btn-ghost mt-2">Dashboard</Link>}
           </div>
-        </div>
+        </nav>
       )}
     </header>
   )

@@ -11,7 +11,7 @@ const NAV = [
 
 export default function Footer() {
   return (
-    <footer className="relative z-10 border-t border-white/[0.08] bg-[#080909] text-slate-300">
+    <footer className="relative z-10 border-t border-white/[0.08] bg-[#080909] font-sans text-slate-300">
       <section className="border-b border-white/[0.08] px-5 py-14 md:px-10 md:py-16">
         <div className="mx-auto max-w-7xl">
           <div className="mb-5 flex items-center justify-between border-t border-white/[0.12] pt-4 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-slate-500">
