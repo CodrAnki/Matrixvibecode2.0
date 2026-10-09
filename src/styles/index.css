@@ -84,6 +84,18 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     inset 0 0 40px rgba(196, 69, 82, 0.02);
 }
+@media (max-width: 1023px) {
+  .auth-card.glass {
+    background: linear-gradient(
+      160deg,
+      rgba(24, 24, 27, 0.88) 0%,
+      rgba(17, 17, 19, 0.9) 60%,
+      rgba(6, 6, 7, 0.93) 100%
+    );
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+}
 .glass *:not(.btn):not(.btn *),
 .admin-glass *:not(.btn):not(.btn *) {
   color: #ffffff !important;
@@ -376,6 +388,23 @@ body {
 }
 .field.invalid {
   border-color: var(--red);
+}
+.auth-register-form > * {
+  min-width: 0;
+}
+.auth-register-form .field {
+  padding: 0.62rem 0.75rem;
+  font-size: 0.9rem;
+}
+.auth-register-form label,
+.auth-register-form .team-members-label {
+  margin-bottom: 0.4rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+}
+.auth-register-form input::placeholder {
+  font-size: 0.72rem;
 }
 textarea.field {
   resize: vertical;
