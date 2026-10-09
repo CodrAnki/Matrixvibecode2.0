@@ -34,7 +34,7 @@ export default function MagneticButton({ children, to, href, onClick, variant = 
   const leave = () => { x.set(0); y.set(0) }
   const cls = `btn ${variant === 'solid' ? 'btn-solid' : ''} ${size === 'sm' ? 'btn-sm' : ''} ${className}`
   return (
-    <motion.div ref={ref} style={{ x: sx, y: sy, display: fullWidth ? 'block' : 'inline-block', width: fullWidth ? '100%' : undefined }} onPointerMove={move} onPointerLeave={leave}>
+    <motion.div ref={ref} style={{ x: sx, y: sy, display: fullWidth ? 'block' : 'inline-block', width: fullWidth ? '100%' : undefined, gridColumn: fullWidth ? '1 / -1' : undefined }} onPointerMove={move} onPointerLeave={leave}>
       {to !== undefined ? (
         <Link to={to} className={cls} onClick={onClick}>{children}</Link>
       ) : href ? (
