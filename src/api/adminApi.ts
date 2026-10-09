@@ -23,6 +23,8 @@ export const listTeams = (params: { status?: string; q?: string; page?: number }
   return apiFetch<{ teams: Team[]; total: number; page: number; pages: number }>(`/admin/teams${suffix}`)
 }
 export const getTeamDetail = (teamId: string) => apiFetch<{ team: Team & { leader?: unknown }; checkIn: unknown }>(`/admin/teams/${teamId}`)
+export const addTeamMember = (teamId: string, member: { name: string; email: string; phone?: string }) =>
+  apiFetch<{ team: Team }>(`/admin/teams/${teamId}/members`, { method: 'POST', body: member })
 export const verifyTeam = (teamId: string, note?: string) => apiFetch<{ team: Team; qr: { url: string } | null }>(`/admin/teams/${teamId}/verify`, { method: 'PATCH', body: { note } })
 export const rejectTeam = (teamId: string, note?: string) => apiFetch<{ team: Team }>(`/admin/teams/${teamId}/reject`, { method: 'PATCH', body: { note } })
 export const requestChanges = (teamId: string, note?: string) => apiFetch<{ team: Team }>(`/admin/teams/${teamId}/request-changes`, { method: 'PATCH', body: { note } })

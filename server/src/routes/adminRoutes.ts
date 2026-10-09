@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import {
-  listTeams, getTeamDetail, verifyTeam, rejectTeam, requestChanges, disableTeam,
+  listTeams, getTeamDetail, addTeamMember, verifyTeam, rejectTeam, requestChanges, disableTeam,
   deleteTeam, listDeletedTeams, restoreTeam, permanentDeleteTeam, deleteTestTeams,
   getDashboardStats, getSettings, updateSettings,
 } from '../controllers/adminController.js'
@@ -27,6 +27,7 @@ router.get('/teams', ...requireAdmin, listTeams)
 router.get('/teams/deleted', ...requireAdmin, listDeletedTeams)
 router.delete('/teams/test', requireAuth, requireSuperAdmin, deleteTestTeams)
 router.get('/teams/:teamId', ...requireAdmin, getTeamDetail)
+router.post('/teams/:teamId/members', ...requireAdmin, addTeamMember)
 router.patch('/teams/:teamId/verify', ...requireAdmin, verifyTeam)
 router.patch('/teams/:teamId/reject', ...requireAdmin, rejectTeam)
 router.patch('/teams/:teamId/request-changes', ...requireAdmin, requestChanges)

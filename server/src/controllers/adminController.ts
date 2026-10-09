@@ -9,8 +9,9 @@ import { Otp } from '../models/Otp.js'
 import { Announcement } from '../models/Announcement.js'
 import { EventSettings } from '../models/Event.js'
 import { ApiError } from '../middleware/errorHandler.js'
-import { serializeTeam, ACTIVE_TEAM_FILTER, escapeRegex } from '../services/teamService.js'
-import { resolveMaxTeamSize } from '../utils/memberValidation.js'
+import { serializeTeam, ACTIVE_TEAM_FILTER, escapeRegex, assertMembersAvailable, getMaxTeamSize } from '../services/teamService.js'
+import { assertNoDuplicate, parseMember, resolveMaxTeamSize } from '../utils/memberValidation.js'
+import { generateMemberId } from '../utils/generateId.js'
 import { ensureTeamQrToken } from '../services/qrService.js'
 import { parsePagination, queryText } from '../utils/pagination.js'
 
@@ -74,6 +75,57 @@ export const getTeamDetail = asyncHandler(async (req: Request, res: Response) =>
   if (!team) throw new ApiError(404, 'Team not found')
   const checkIn = await CheckIn.findOne({ team: team._id })
   res.json({ success: true, team: { ...serializeTeam(team), problemStatement: team.problemStatement }, checkIn })
+})
+
+/** POST /api/admin/teams/:teamId/members — add a member while a team is unverified. */
+export const addTeamMember = asyncHandler(async (req: Request, res: Response) => {
+  const team = await Team.findOne({ teamId: String(req.params.teamId), ...ACTIVE_TEAM_FILTER })
+  if (!team) throw new ApiError(404, 'Team not found')
+  if (team.disabled) throw new ApiError(400, 'Cannot add a member to a disabled team')
+  if (team.verificationStatus === 'VERIFIED') throw new ApiError(400, 'Verified teams cannot change their roster')
+
+  const maxTeamSize = await getMaxTeamSize()
+  const maxMembers = maxTeamSize - 1
+  if (team.members.length >= maxMembers) {
+    throw new ApiError(400, `Team size cannot exceed ${maxTeamSize} (including leader)`)
+  }
+
+  const member = parseMember(req.body, team.members.length, { requireEmail: true })
+  const leader = await User.findById(team.leader).select('email phone')
+  if (!leader) throw new ApiError(404, 'Team leader not found')
+  assertNoDuplicate(
+    member,
+    { email: leader.email, phone: team.phone ?? leader.phone },
+    team.members.map((existing) => ({ email: existing.email, phone: existing.phone })),
+    409,
+    'This person',
+  )
+  await assertMembersAvailable([member], { teamId: team._id, userId: team.leader })
+
+  const updated = await Team.findOneAndUpdate(
+    {
+      _id: team._id,
+      ...ACTIVE_TEAM_FILTER,
+      disabled: { $ne: true },
+      verificationStatus: { $ne: 'VERIFIED' },
+      'members.email': { $ne: member.email },
+      $expr: { $lt: [{ $size: { $ifNull: ['$members', []] } }, maxMembers] },
+    },
+    {
+      $push: {
+        members: {
+          memberId: generateMemberId(),
+          ...member,
+          college: member.college ?? team.college ?? undefined,
+          year: member.year ?? team.teamYear ?? undefined,
+          status: 'ACTIVE',
+        },
+      },
+    },
+    { new: true, runValidators: true },
+  )
+  if (!updated) throw new ApiError(409, 'Could not add this member — the team may be full, locked, or already include this email')
+  res.status(201).json({ success: true, team: serializeTeam(updated) })
 })
 
 const MAX_VERIFICATION_HISTORY = 100 // bounds the per-team history array; real teams have a handful of entries

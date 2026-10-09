@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useFlash } from '../../hooks/useFlash'
 import { Link, useParams } from 'react-router-dom'
 import QRCode from 'qrcode'
 import * as adminApi from '../../api/adminApi'
 import type { Team } from '../../lib/types'
 import { ApiError } from '../../lib/api'
+
+const EMPTY_MEMBER = { name: '', email: '', phone: '' }
+const MAX_TEAM_SIZE = 2
 
 function PersonCard({ name, email, phone, college, branch, year, leader, index }: {
   name?: string; email?: string; phone?: string; college?: string; branch?: string; year?: string; leader?: boolean; index?: number
@@ -33,6 +36,8 @@ export default function AdminTeamDetail() {
   const [msg, flash] = useFlash(3000)
   const [busy, setBusy] = useState(false)
   const [qrUrl, setQrUrl] = useState<string | null>(null)
+  const [memberFormOpen, setMemberFormOpen] = useState(false)
+  const [memberForm, setMemberForm] = useState(EMPTY_MEMBER)
 
   const load = () => adminApi.getTeamDetail(teamId).then(setDetail).catch(() => setErr('Could not load team.'))
   useEffect(() => { load() }, [teamId]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -55,9 +60,35 @@ export default function AdminTeamDetail() {
     finally { setBusy(false) }
   }
 
+  const addMember = async (e: FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    setErr('')
+    try {
+      await adminApi.addTeamMember(teamId, {
+        name: memberForm.name.trim(),
+        email: memberForm.email.trim().toLowerCase(),
+        ...(memberForm.phone.trim() && { phone: memberForm.phone.trim() }),
+      })
+      setMemberForm(EMPTY_MEMBER)
+      setMemberFormOpen(false)
+      flash('Member added to team.')
+      await load()
+    } catch (x) {
+      setErr(x instanceof ApiError ? x.message : 'Could not add member.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   if (err && !detail) return <p role="alert" className="text-sm text-rose-300">{err}</p>
   if (!detail) return <p className="text-sm text-slate-400">Loading…</p>
   const { team } = detail
+  const members = team.members ?? []
+  const canAddMember = !team.isDeleted
+    && !team.disabled
+    && team.verificationStatus !== 'VERIFIED'
+    && members.length + 1 < MAX_TEAM_SIZE
   const ps = team.problemStatement
   const teamInfo: [string, string | null | undefined][] = [
     ['Team name', team.teamName],
@@ -107,16 +138,85 @@ export default function AdminTeamDetail() {
             </dl>
           </section>
           <section className="admin-glass p-6">
-            <p className="hud-label mb-4">Team members ({(team.members ?? []).length + 1})</p>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="hud-label">Team members ({members.length + 1}/{MAX_TEAM_SIZE})</p>
+              {canAddMember && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => { setMemberFormOpen((value) => !value); setErr('') }}
+                  aria-expanded={memberFormOpen}
+                  className="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-2 font-mono text-[0.65rem] uppercase tracking-widest text-red-100 hover:bg-red-400/20 disabled:opacity-40"
+                >
+                  {memberFormOpen ? 'Cancel' : '+ Add Member'}
+                </button>
+              )}
+            </div>
+            {memberFormOpen && canAddMember && (
+              <form onSubmit={addMember} className="mb-5 grid gap-3 rounded-xl border border-red-400/20 bg-red-400/[0.03] p-4">
+                <p className="font-mono text-[0.62rem] uppercase tracking-widest text-red-300/80">Add team member</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input
+                    required
+                    minLength={2}
+                    className="field"
+                    placeholder="Full name"
+                    aria-label="Member full name"
+                    value={memberForm.name}
+                    onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
+                  />
+                  <input
+                    required
+                    type="email"
+                    className="field"
+                    placeholder="Email"
+                    aria-label="Member email"
+                    value={memberForm.email}
+                    onChange={(e) => setMemberForm({ ...memberForm, email: e.target.value })}
+                  />
+                  <input
+                    type="tel"
+                    className="field"
+                    placeholder="Phone (optional)"
+                    aria-label="Member phone"
+                    value={memberForm.phone}
+                    onChange={(e) => setMemberForm({ ...memberForm, phone: e.target.value })}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="rounded-lg border border-red-400/40 bg-red-400/15 px-4 py-2 font-mono text-[0.65rem] uppercase tracking-widest text-red-100 hover:bg-red-400/25 disabled:opacity-40"
+                  >
+                    {busy ? 'Adding…' : 'Add to team'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => { setMemberFormOpen(false); setMemberForm(EMPTY_MEMBER) }}
+                    className="rounded-lg border border-white/15 px-4 py-2 font-mono text-[0.65rem] uppercase tracking-widest text-slate-300 hover:bg-white/5 disabled:opacity-40"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+            {team.verificationStatus === 'VERIFIED' && (
+              <p className="mb-4 text-xs text-amber-300/80">Verified teams cannot change their roster.</p>
+            )}
+            {!team.isDeleted && !team.disabled && team.verificationStatus !== 'VERIFIED' && !canAddMember && (
+              <p className="mb-4 text-xs text-slate-400">Maximum team size reached ({MAX_TEAM_SIZE}, including the leader).</p>
+            )}
             <p className="mb-2 font-mono text-[0.6rem] uppercase tracking-widest text-red-300/80">Team leader</p>
             <PersonCard
               leader name={team.leader?.name} email={team.leader?.email} phone={team.leader?.phone ?? team.phone}
               college={team.college} branch={undefined} year={team.teamYear ?? undefined}
             />
-            <p className="mb-2 mt-6 font-mono text-[0.6rem] uppercase tracking-widest text-red-300/80">Other team members ({(team.members ?? []).length})</p>
-            {(team.members ?? []).length === 0 && <p className="text-sm text-slate-500">No additional members.</p>}
+            <p className="mb-2 mt-6 font-mono text-[0.6rem] uppercase tracking-widest text-red-300/80">Other team members ({members.length})</p>
+            {members.length === 0 && <p className="text-sm text-slate-500">No additional members.</p>}
             <div className="grid gap-3">
-              {(team.members ?? []).map((m, i) => (
+              {members.map((m, i) => (
                 <PersonCard key={m.memberId} index={i + 1} name={m.name} email={m.email} phone={m.phone} college={m.college ?? team.college} branch={m.branch} year={m.year} />
               ))}
             </div>
