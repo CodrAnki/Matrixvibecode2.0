@@ -252,7 +252,7 @@ async function withFreshTeamId<T>(
 export const registerTeam = asyncHandler(
   async (req: Request, res: Response) => {
     const f = parseRegistrationFields(req.body);
-    // The backend is the authority on team size (leader + members <= EventSettings.maxTeamSize, default 4).
+    // The backend is the authority on team size (leader + members <= EventSettings.maxTeamSize, default 2).
     const members = parseMembersPayload(f.rawMembers, {
       maxTeamSize: await getMaxTeamSize(),
       leaderEmail: f.email,

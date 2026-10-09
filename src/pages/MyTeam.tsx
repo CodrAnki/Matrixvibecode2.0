@@ -13,7 +13,7 @@ export default function MyTeam() {
   const { team, user, refresh } = useAuth()
   const [form, setForm] = useState<Form>(EMPTY)
   const [open, setOpen] = useState(false)
-  const [maxSize, setMaxSize] = useState(4)
+  const [maxSize, setMaxSize] = useState(2)
   const [errs, setErrs] = useState<Partial<Record<keyof Form, string>>>({})
   const [msg, flash] = useFlash(3000)
   const [err, setErr] = useState('')

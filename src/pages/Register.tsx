@@ -8,8 +8,8 @@ import { useAuth } from '../context/AuthContext'
 import { isEmail, isPhone } from '../lib/validate'
 import { TEAM_YEARS } from '../lib/types'
 
-// Leader + 3 members = the default max team size of 4. The server enforces the real (configurable) limit.
-const MAX_REGISTRATION_MEMBERS = 3
+// Team size includes the leader, so only one additional member may be registered.
+const MAX_REGISTRATION_MEMBERS = 1
 
 type MemberInput = { name: string; email: string }
 type Errors = Record<string, string>
@@ -49,7 +49,7 @@ export default function Register() {
     finally { inFlight.current = false; setBusy(false) }
   }
   return (
-    <AuthShell kicker="Team registration" title="Join the Matrix" sub="Create your team leader account. You can add up to 3 more members now or later.">
+    <AuthShell kicker="Team registration" title="Join the Matrix" sub="Create your team leader account. You can add one more member now or later.">
       <form onSubmit={submit} className="grid gap-4" noValidate>
         <Field label="Team name" value={f.teamName} onChange={set('teamName')} error={errs.teamName} placeholder="Team Neo" />
         <Field label="Leader name" value={f.leaderName} onChange={set('leaderName')} error={errs.leaderName} autoComplete="name" />

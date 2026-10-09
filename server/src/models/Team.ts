@@ -44,7 +44,7 @@ const teamSchema = new Schema(
     // Optional team year chosen at registration. Pre-existing teams without it keep working.
     teamYear: { type: String, enum: { values: [...TEAM_YEARS, null], message: 'teamYear must be "1st Year" or empty' }, required: false, default: null },
     phone: { type: String, trim: true },
-    // Bounded: the controllers enforce EventSettings.maxTeamSize (default 4 incl. leader); this is the schema-level backstop.
+    // Bounded: the controllers enforce EventSettings.maxTeamSize (maximum 2 incl. leader); this is the schema-level backstop.
     members: {
       type: [memberSchema],
       default: [],

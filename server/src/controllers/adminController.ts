@@ -10,13 +10,17 @@ import { Announcement } from '../models/Announcement.js'
 import { EventSettings } from '../models/Event.js'
 import { ApiError } from '../middleware/errorHandler.js'
 import { serializeTeam, ACTIVE_TEAM_FILTER, escapeRegex } from '../services/teamService.js'
+import { resolveMaxTeamSize } from '../utils/memberValidation.js'
 import { ensureTeamQrToken } from '../services/qrService.js'
 import { parsePagination, queryText } from '../utils/pagination.js'
 
 /** GET /api/admin/settings — current event-wide settings (visible to ADMIN + SUPER_ADMIN). */
 export const getSettings = asyncHandler(async (_req: Request, res: Response) => {
   const settings = (await EventSettings.findOne()) ?? (await EventSettings.create({}))
-  res.json({ success: true, settings })
+  res.json({
+    success: true,
+    settings: { ...settings.toObject(), maxTeamSize: resolveMaxTeamSize(settings.maxTeamSize) },
+  })
 })
 
 /** PATCH /api/admin/settings — SUPER_ADMIN only (route-gated). Never trusts arbitrary fields from the body. */
@@ -33,7 +37,7 @@ export const updateSettings = asyncHandler(async (req: Request, res: Response) =
   const settings = (await EventSettings.findOne()) ?? (await EventSettings.create({}))
   if (name !== undefined) settings.name = name.trim()
   if (maxTeamSize !== undefined) {
-    if (!Number.isInteger(maxTeamSize) || maxTeamSize < 1 || maxTeamSize > 20) throw new ApiError(400, 'maxTeamSize must be an integer between 1 and 20')
+    if (!Number.isInteger(maxTeamSize) || maxTeamSize < 1 || maxTeamSize > 2) throw new ApiError(400, 'maxTeamSize must be an integer between 1 and 2')
     settings.maxTeamSize = maxTeamSize
   }
   if (registrationOpen !== undefined) settings.registrationOpen = registrationOpen

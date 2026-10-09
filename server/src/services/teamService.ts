@@ -13,7 +13,7 @@ export function escapeRegex(input: string): string {
   return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-/** EventSettings.maxTeamSize (leader included). Falls back to 4 if the settings document is missing or invalid. */
+/** EventSettings.maxTeamSize (leader included). Falls back to 2 if the settings document is missing or invalid. */
 export async function getMaxTeamSize(): Promise<number> {
   const settings = await EventSettings.findOne().select('maxTeamSize').lean()
   return resolveMaxTeamSize(settings?.maxTeamSize)

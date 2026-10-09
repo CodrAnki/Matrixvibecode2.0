@@ -59,7 +59,7 @@ export default function AdminSettings() {
 
           <div>
             <label className="mb-1.5 block font-mono text-[0.62rem] uppercase tracking-[0.2em] text-red-200/70">Max team size</label>
-            <input disabled={!canEdit} type="number" min={1} max={20} className="field" value={settings.maxTeamSize} onChange={(e) => setSettings({ ...settings, maxTeamSize: Number(e.target.value) })} />
+            <input disabled={!canEdit} type="number" min={1} max={2} className="field" value={settings.maxTeamSize} onChange={(e) => setSettings({ ...settings, maxTeamSize: Number(e.target.value) })} />
           </div>
 
           <label className="flex items-center justify-between rounded-lg border border-white/10 px-4 py-3">

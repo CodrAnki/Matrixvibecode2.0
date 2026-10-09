@@ -2,14 +2,14 @@ import { ApiError } from '../middleware/errorHandler.js'
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 export const PHONE_RE = /^[+]?[\d\s-]{10,15}$/
-export const DEFAULT_MAX_TEAM_SIZE = 4
-/** Absolute ceiling (matches the admin Settings validation). Also bounds the Team.members array. */
-export const HARD_MAX_TEAM_SIZE = 20
+export const DEFAULT_MAX_TEAM_SIZE = 2
+/** Maximum team size including the leader; also bounds the Team.members array. */
+export const HARD_MAX_TEAM_SIZE = 2
 
 export interface CleanMember { name: string; email?: string; phone?: string; college?: string; branch?: string; year?: string }
 export interface PersonKeys { email?: string | null; phone?: string | null }
 
-/** EventSettings.maxTeamSize (leader INCLUDED) -> a sane integer; anything missing/invalid falls back to 4. */
+/** EventSettings.maxTeamSize (leader INCLUDED) -> a sane integer; anything missing/invalid falls back to 2. */
 export function resolveMaxTeamSize(raw: unknown): number {
   const n = typeof raw === 'number' ? raw : Number(raw)
   if (!Number.isInteger(n) || n < 1) return DEFAULT_MAX_TEAM_SIZE

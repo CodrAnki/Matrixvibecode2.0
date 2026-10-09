@@ -1,30 +1,31 @@
 import { describe, it, expect } from 'vitest'
 import { parseMembersPayload, parseMember, resolveMaxTeamSize, assertNoDuplicate } from './memberValidation.js'
 
-const leader = { maxTeamSize: 4, leaderEmail: 'lead@x.com', leaderPhone: '9876543210' }
+const leader = { maxTeamSize: 2, leaderEmail: 'lead@x.com', leaderPhone: '9876543210' }
 const m = (name: string, email?: string) => ({ name, ...(email ? { email } : {}) })
 
 describe('resolveMaxTeamSize', () => {
-  it('defaults to 4 and clamps to 20', () => {
-    expect(resolveMaxTeamSize(undefined)).toBe(4)
-    expect(resolveMaxTeamSize(null)).toBe(4)
-    expect(resolveMaxTeamSize('x')).toBe(4)
-    expect(resolveMaxTeamSize(0)).toBe(4)
-    expect(resolveMaxTeamSize(6)).toBe(6)
-    expect(resolveMaxTeamSize(500)).toBe(20)
+  it('defaults to 2 and clamps existing larger settings to 2', () => {
+    expect(resolveMaxTeamSize(undefined)).toBe(2)
+    expect(resolveMaxTeamSize(null)).toBe(2)
+    expect(resolveMaxTeamSize('x')).toBe(2)
+    expect(resolveMaxTeamSize(0)).toBe(2)
+    expect(resolveMaxTeamSize(2)).toBe(2)
+    expect(resolveMaxTeamSize(4)).toBe(2)
+    expect(resolveMaxTeamSize(500)).toBe(2)
   })
 })
 
 describe('parseMembersPayload — team size (leader + members <= maxTeamSize)', () => {
-  it('allows 3 members besides the leader (total 4)', () => {
-    expect(parseMembersPayload([m('Ann'), m('Bob'), m('Cy')], leader)).toHaveLength(3)
+  it('allows one member besides the leader (total 2)', () => {
+    expect(parseMembersPayload([m('Ann')], leader)).toHaveLength(1)
   })
-  it('rejects a 4th member (total 5)', () => {
-    expect(() => parseMembersPayload([m('Ann'), m('Bob'), m('Cy'), m('Di')], leader)).toThrow()
+  it('rejects a second member besides the leader (total 3)', () => {
+    expect(() => parseMembersPayload([m('Ann'), m('Bob')], leader)).toThrow()
   })
-  it('respects a configured maxTeamSize', () => {
-    expect(() => parseMembersPayload([m('Ann'), m('Bob')], { ...leader, maxTeamSize: 2 })).toThrow()
-    expect(parseMembersPayload([m('Ann')], { ...leader, maxTeamSize: 2 })).toHaveLength(1)
+  it('respects a configured maxTeamSize of one', () => {
+    expect(() => parseMembersPayload([m('Ann')], { ...leader, maxTeamSize: 1 })).toThrow()
+    expect(parseMembersPayload([], { ...leader, maxTeamSize: 1 })).toEqual([])
   })
   it('treats missing/null as no members', () => {
     expect(parseMembersPayload(undefined, leader)).toEqual([])
