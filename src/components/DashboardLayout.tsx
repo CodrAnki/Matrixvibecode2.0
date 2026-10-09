@@ -8,7 +8,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { motion } from "framer-motion";
-import Logo from "./Logo";
+import Logo, { ORIGINAL_LOGO_SRC } from "./Logo";
 import { useAuth } from "../context/AuthContext";
 
 const NAV = [
@@ -44,7 +44,7 @@ export default function DashboardLayout() {
   const side = (
     <div className="flex h-full flex-col p-5">
       <Link to="/" className="mb-8 block">
-        <Logo className="h-10" />
+        <Logo className="h-10" imageSrc={ORIGINAL_LOGO_SRC} />
       </Link>
 
       <p className="hud-label mb-3">Mission control</p>
@@ -110,7 +110,7 @@ export default function DashboardLayout() {
           paddingTop: "max(0.75rem, env(safe-area-inset-top))",
         }}
       >
-        <Logo className="h-8" />
+        <Logo className="h-8" imageSrc={ORIGINAL_LOGO_SRC} />
 
         <button
           onClick={() => setOpen(true)}
