@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Logo from "./Logo";
+import Logo, { ORIGINAL_LOGO_SRC } from "./Logo";
 import { EVENT } from "../data/event";
 
 const NAV = [
@@ -43,7 +43,12 @@ export default function Footer() {
 
       <section className="footer-grid border-b border-white/[0.08] px-5 py-7 md:px-10 md:py-9">
         <div className="mx-auto flex max-w-7xl items-center gap-5">
-          <Logo className="h-10 shrink-0" showImage showText={false} />
+          <Logo
+            className="h-10 shrink-0"
+            showImage
+            showText={false}
+            imageSrc={ORIGINAL_LOGO_SRC}
+          />
           <p className="max-w-xl text-sm leading-relaxed text-slate-400 md:text-base">
             <span className="text-slate-200">Organised by MATRIX,</span> the
             technical community of Jabalpur Engineering College.
@@ -54,7 +59,12 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:grid-cols-2 md:px-10 md:py-16 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
-            <Logo className="h-9" showImage showText={false} />
+            <Logo
+              className="h-9"
+              showImage
+              showText={false}
+              imageSrc={ORIGINAL_LOGO_SRC}
+            />
             <span className="font-bold tracking-wide text-white">
               MATRIX <span className="text-slate-500">/</span>{" "}
               <span className="font-mono text-xs font-normal tracking-[0.2em] text-slate-400">
