@@ -82,7 +82,7 @@ export default function Register() {
           {members.length < MAX_REGISTRATION_MEMBERS && <button type="button" onClick={() => setMembers([...members, { name: '', email: '' }])} className="mt-3 font-mono text-[0.68rem] uppercase tracking-widest text-red-300 hover:text-red-100">+ Add member</button>}
         </div>
         {top && <p role="alert" className="col-span-2 rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{top}</p>}
-        <MagneticButton type="submit" variant="solid" disabled={busy} className="col-span-2 w-full">{busy ? 'Creating team…' : 'Create team'}</MagneticButton>
+        <MagneticButton type="submit" variant="solid" disabled={busy} fullWidth className="col-span-2 w-full">{busy ? 'Creating team…' : 'Create team'}</MagneticButton>
         <p className="col-span-2 text-center text-sm text-slate-400">Already registered? <Link to="/login" className="text-red-300 hover:underline">Sign in</Link></p>
       </form>
     </AuthShell>

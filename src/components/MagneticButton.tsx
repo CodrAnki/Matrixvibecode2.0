@@ -14,9 +14,10 @@ interface Props {
   disabled?: boolean
   className?: string
   strength?: number
+  fullWidth?: boolean
 }
 
-export default function MagneticButton({ children, to, href, onClick, variant = 'ghost', size = 'md', type = 'button', disabled, className = '', strength = 0.06 }: Props) {
+export default function MagneticButton({ children, to, href, onClick, variant = 'ghost', size = 'md', type = 'button', disabled, className = '', strength = 0.06, fullWidth = false }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const shouldReduceMotion = useReducedMotion()
   const x = useMotionValue(0)
@@ -33,7 +34,7 @@ export default function MagneticButton({ children, to, href, onClick, variant = 
   const leave = () => { x.set(0); y.set(0) }
   const cls = `btn ${variant === 'solid' ? 'btn-solid' : ''} ${size === 'sm' ? 'btn-sm' : ''} ${className}`
   return (
-    <motion.div ref={ref} style={{ x: sx, y: sy, display: 'inline-block' }} onPointerMove={move} onPointerLeave={leave}>
+    <motion.div ref={ref} style={{ x: sx, y: sy, display: fullWidth ? 'block' : 'inline-block', width: fullWidth ? '100%' : undefined }} onPointerMove={move} onPointerLeave={leave}>
       {to !== undefined ? (
         <Link to={to} className={cls} onClick={onClick}>{children}</Link>
       ) : href ? (
