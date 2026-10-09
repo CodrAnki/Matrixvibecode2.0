@@ -7,6 +7,7 @@ import MagneticButton from '../components/MagneticButton'
 import { useAuth } from '../context/AuthContext'
 import { isEmail, isPhone } from '../lib/validate'
 import { TEAM_YEARS } from '../lib/types'
+import { ORIGINAL_LOGO_SRC } from '../components/Logo'
 
 // Team size includes the leader, so only one additional member may be registered.
 const MAX_REGISTRATION_MEMBERS = 1
@@ -49,7 +50,7 @@ export default function Register() {
     finally { inFlight.current = false; setBusy(false) }
   }
   return (
-    <AuthShell kicker="Team registration" title="Join the Matrix" sub="Create your team leader account. You can add one more member now or later.">
+    <AuthShell kicker="Team registration" title="Join the Matrix" sub="Create your team leader account. You can add one more member now or later." logoImageSrc={ORIGINAL_LOGO_SRC}>
       <form onSubmit={submit} className="grid gap-4" noValidate>
         <Field label="Team name" value={f.teamName} onChange={set('teamName')} error={errs.teamName} placeholder="Team Neo" />
         <Field label="Leader name" value={f.leaderName} onChange={set('leaderName')} error={errs.leaderName} autoComplete="name" />
