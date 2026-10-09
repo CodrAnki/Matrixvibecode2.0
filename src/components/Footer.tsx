@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Logo, { ORIGINAL_LOGO_SRC } from "./Logo";
-import { EVENT } from "../data/event";
+import { EVENT, WHATSAPP_CONTACTS } from "../data/event";
 
 const NAV = [
   { label: "Vibe Coding 2.0", hash: "#home" },
@@ -135,6 +135,32 @@ export default function Footer() {
             {EVENT.contact.location}
           </p>
         </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-5 pb-6 md:px-10">
+        <details className="group border-t border-white/[0.08] pt-5">
+          <summary className="w-fit cursor-pointer list-none font-mono text-xs uppercase tracking-[0.18em] text-slate-400 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+            Website developers <span aria-hidden className="ml-1 text-red-300 group-open:hidden">+</span>
+            <span aria-hidden className="ml-1 hidden text-red-300 group-open:inline">−</span>
+          </summary>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {WHATSAPP_CONTACTS
+              .filter(({ name }) => name === "Ankit Dubey" || name === "Garvit Dayal")
+              .map((person) => (
+                <div key={person.name} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-4">
+                  <p className="font-medium text-white">{person.name}</p>
+                  <a
+                    className="mt-2 inline-block text-sm text-red-300 transition-colors hover:text-red-100"
+                    href={person.name === "Ankit Dubey" ? "https://github.com/CodrAnki/" : "https://github.com/garvitdayal28"}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    GitHub
+                  </a>
+                </div>
+              ))}
+          </div>
+        </details>
       </div>
 
       <div className="border-t border-white/[0.08] px-5 py-5 text-center font-mono text-[0.62rem] uppercase tracking-[0.2em] text-slate-500 md:px-10">
