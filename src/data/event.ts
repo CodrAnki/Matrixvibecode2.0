@@ -142,4 +142,9 @@ export const WHATSAPP_CONTACTS = [
     phone: "+91 93434 10747",
     wa: "https://wa.me/919343410747",
   },
+  {
+    name: "Garvit Dayal",
+    phone: "+91 76920 79667",
+    wa: "https://wa.me/917692079667",
+  },
 ];
